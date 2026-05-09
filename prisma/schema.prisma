@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  FARMER
+  BEGINNER
+  GARDENER
+  STUDENT
+  OTHER
+}
+
+enum CropType {
+  MAIZE
+  TOMATO
+  CASSAVA
+  PLANTAIN
+  PEPPER
+  COCOA
+  // Add more crops here in future
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  password        String
+  role            UserRole @default(OTHER)
+  phoneNumber     String
+  isOnboarded     Boolean  @default(false)
+  isEmailVerified Boolean  @default(false)
+  language        String   @default("en") // For Twi support later
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  profile            Profile?
+  detections         Detection[]
+  // posts         Post[]     // Will be added later for community
+  userPreferredCrops UserPreferredCrop[]
+
+  @@index([email])
+  @@index([phoneNumber])
+  @@map("users")
+}
+
+// Profile model (one-to-one with User)
+model Profile {
+  id             String     @id @default(cuid())
+  userId         String     @unique
+  fullName       String
+  avatarUrl      String?
+  location       Json? // { latitude, longitude, address, accuracy? } - Auto-detected from frontend GPS
+  preferredCrops CropType[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// For future scalability (User <-> CropType)
+model UserPreferredCrop {
+  userId   String
+  cropType CropType
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, cropType])
+  @@map("user_preferred_crops")
+}
+
+model Detection {
+  id                String  @id @default(cuid())
+  imageUrl          String? // Optional: if you decide to save uploaded images to cloud later
+  cropType          String
+  rawResponse       Json // Store full AI response for debugging/auditing
+  diseaseName       String
+  confidence        Float   @default(0.0)
+  possibleDiseases  Json? // Array of possible diseases with scores
+  symptoms          String?
+  causes            String?
+  organicTreatments String?
+  chemicalOptions   String?
+  prevention        String?
+  localNotes        String? // Ghana/Twi specific recommendations
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@index([cropType])
+  @@index([createdAt])
+  @@map("detections")
+}
