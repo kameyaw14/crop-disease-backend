@@ -46,6 +46,7 @@ export type DetectionMinAggregateOutputType = {
   chemicalOptions: string | null
   prevention: string | null
   localNotes: string | null
+  aiProvider: string | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: string | null
@@ -63,6 +64,7 @@ export type DetectionMaxAggregateOutputType = {
   chemicalOptions: string | null
   prevention: string | null
   localNotes: string | null
+  aiProvider: string | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: string | null
@@ -82,6 +84,7 @@ export type DetectionCountAggregateOutputType = {
   chemicalOptions: number
   prevention: number
   localNotes: number
+  aiProvider: number
   createdAt: number
   updatedAt: number
   userId: number
@@ -109,6 +112,7 @@ export type DetectionMinAggregateInputType = {
   chemicalOptions?: true
   prevention?: true
   localNotes?: true
+  aiProvider?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -126,6 +130,7 @@ export type DetectionMaxAggregateInputType = {
   chemicalOptions?: true
   prevention?: true
   localNotes?: true
+  aiProvider?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -145,6 +150,7 @@ export type DetectionCountAggregateInputType = {
   chemicalOptions?: true
   prevention?: true
   localNotes?: true
+  aiProvider?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -251,6 +257,7 @@ export type DetectionGroupByOutputType = {
   chemicalOptions: string | null
   prevention: string | null
   localNotes: string | null
+  aiProvider: string | null
   createdAt: Date
   updatedAt: Date
   userId: string | null
@@ -293,6 +300,7 @@ export type DetectionWhereInput = {
   chemicalOptions?: Prisma.StringNullableFilter<"Detection"> | string | null
   prevention?: Prisma.StringNullableFilter<"Detection"> | string | null
   localNotes?: Prisma.StringNullableFilter<"Detection"> | string | null
+  aiProvider?: Prisma.StringNullableFilter<"Detection"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Detection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Detection"> | Date | string
   userId?: Prisma.StringNullableFilter<"Detection"> | string | null
@@ -313,6 +321,7 @@ export type DetectionOrderByWithRelationInput = {
   chemicalOptions?: Prisma.SortOrderInput | Prisma.SortOrder
   prevention?: Prisma.SortOrderInput | Prisma.SortOrder
   localNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  aiProvider?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -336,6 +345,7 @@ export type DetectionWhereUniqueInput = Prisma.AtLeast<{
   chemicalOptions?: Prisma.StringNullableFilter<"Detection"> | string | null
   prevention?: Prisma.StringNullableFilter<"Detection"> | string | null
   localNotes?: Prisma.StringNullableFilter<"Detection"> | string | null
+  aiProvider?: Prisma.StringNullableFilter<"Detection"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Detection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Detection"> | Date | string
   userId?: Prisma.StringNullableFilter<"Detection"> | string | null
@@ -356,6 +366,7 @@ export type DetectionOrderByWithAggregationInput = {
   chemicalOptions?: Prisma.SortOrderInput | Prisma.SortOrder
   prevention?: Prisma.SortOrderInput | Prisma.SortOrder
   localNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  aiProvider?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -383,6 +394,7 @@ export type DetectionScalarWhereWithAggregatesInput = {
   chemicalOptions?: Prisma.StringNullableWithAggregatesFilter<"Detection"> | string | null
   prevention?: Prisma.StringNullableWithAggregatesFilter<"Detection"> | string | null
   localNotes?: Prisma.StringNullableWithAggregatesFilter<"Detection"> | string | null
+  aiProvider?: Prisma.StringNullableWithAggregatesFilter<"Detection"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Detection"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Detection"> | Date | string
   userId?: Prisma.StringNullableWithAggregatesFilter<"Detection"> | string | null
@@ -402,6 +414,7 @@ export type DetectionCreateInput = {
   chemicalOptions?: string | null
   prevention?: string | null
   localNotes?: string | null
+  aiProvider?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutDetectionsInput
@@ -421,6 +434,7 @@ export type DetectionUncheckedCreateInput = {
   chemicalOptions?: string | null
   prevention?: string | null
   localNotes?: string | null
+  aiProvider?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userId?: string | null
@@ -440,6 +454,7 @@ export type DetectionUpdateInput = {
   chemicalOptions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prevention?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   localNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutDetectionsNestedInput
@@ -459,6 +474,7 @@ export type DetectionUncheckedUpdateInput = {
   chemicalOptions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prevention?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   localNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -478,6 +494,7 @@ export type DetectionCreateManyInput = {
   chemicalOptions?: string | null
   prevention?: string | null
   localNotes?: string | null
+  aiProvider?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userId?: string | null
@@ -497,6 +514,7 @@ export type DetectionUpdateManyMutationInput = {
   chemicalOptions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prevention?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   localNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -515,6 +533,7 @@ export type DetectionUncheckedUpdateManyInput = {
   chemicalOptions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prevention?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   localNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -544,6 +563,7 @@ export type DetectionCountOrderByAggregateInput = {
   chemicalOptions?: Prisma.SortOrder
   prevention?: Prisma.SortOrder
   localNotes?: Prisma.SortOrder
+  aiProvider?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -565,6 +585,7 @@ export type DetectionMaxOrderByAggregateInput = {
   chemicalOptions?: Prisma.SortOrder
   prevention?: Prisma.SortOrder
   localNotes?: Prisma.SortOrder
+  aiProvider?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -582,6 +603,7 @@ export type DetectionMinOrderByAggregateInput = {
   chemicalOptions?: Prisma.SortOrder
   prevention?: Prisma.SortOrder
   localNotes?: Prisma.SortOrder
+  aiProvider?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -655,6 +677,7 @@ export type DetectionCreateWithoutUserInput = {
   chemicalOptions?: string | null
   prevention?: string | null
   localNotes?: string | null
+  aiProvider?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -673,6 +696,7 @@ export type DetectionUncheckedCreateWithoutUserInput = {
   chemicalOptions?: string | null
   prevention?: string | null
   localNotes?: string | null
+  aiProvider?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -720,6 +744,7 @@ export type DetectionScalarWhereInput = {
   chemicalOptions?: Prisma.StringNullableFilter<"Detection"> | string | null
   prevention?: Prisma.StringNullableFilter<"Detection"> | string | null
   localNotes?: Prisma.StringNullableFilter<"Detection"> | string | null
+  aiProvider?: Prisma.StringNullableFilter<"Detection"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Detection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Detection"> | Date | string
   userId?: Prisma.StringNullableFilter<"Detection"> | string | null
@@ -739,6 +764,7 @@ export type DetectionCreateManyUserInput = {
   chemicalOptions?: string | null
   prevention?: string | null
   localNotes?: string | null
+  aiProvider?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -757,6 +783,7 @@ export type DetectionUpdateWithoutUserInput = {
   chemicalOptions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prevention?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   localNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -775,6 +802,7 @@ export type DetectionUncheckedUpdateWithoutUserInput = {
   chemicalOptions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prevention?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   localNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -793,6 +821,7 @@ export type DetectionUncheckedUpdateManyWithoutUserInput = {
   chemicalOptions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   prevention?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   localNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -813,6 +842,7 @@ export type DetectionSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   chemicalOptions?: boolean
   prevention?: boolean
   localNotes?: boolean
+  aiProvider?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -833,6 +863,7 @@ export type DetectionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   chemicalOptions?: boolean
   prevention?: boolean
   localNotes?: boolean
+  aiProvider?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -853,6 +884,7 @@ export type DetectionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   chemicalOptions?: boolean
   prevention?: boolean
   localNotes?: boolean
+  aiProvider?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -873,12 +905,13 @@ export type DetectionSelectScalar = {
   chemicalOptions?: boolean
   prevention?: boolean
   localNotes?: boolean
+  aiProvider?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
 }
 
-export type DetectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "imageUrl" | "cropType" | "rawResponse" | "diseaseName" | "confidence" | "possibleDiseases" | "symptoms" | "causes" | "organicTreatments" | "chemicalOptions" | "prevention" | "localNotes" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["detection"]>
+export type DetectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "imageUrl" | "cropType" | "rawResponse" | "diseaseName" | "confidence" | "possibleDiseases" | "symptoms" | "causes" | "organicTreatments" | "chemicalOptions" | "prevention" | "localNotes" | "aiProvider" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["detection"]>
 export type DetectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.Detection$userArgs<ExtArgs>
 }
@@ -908,6 +941,7 @@ export type $DetectionPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     chemicalOptions: string | null
     prevention: string | null
     localNotes: string | null
+    aiProvider: string | null
     createdAt: Date
     updatedAt: Date
     userId: string | null
@@ -1348,6 +1382,7 @@ export interface DetectionFieldRefs {
   readonly chemicalOptions: Prisma.FieldRef<"Detection", 'String'>
   readonly prevention: Prisma.FieldRef<"Detection", 'String'>
   readonly localNotes: Prisma.FieldRef<"Detection", 'String'>
+  readonly aiProvider: Prisma.FieldRef<"Detection", 'String'>
   readonly createdAt: Prisma.FieldRef<"Detection", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Detection", 'DateTime'>
   readonly userId: Prisma.FieldRef<"Detection", 'String'>

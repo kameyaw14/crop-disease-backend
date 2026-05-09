@@ -4,11 +4,13 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
+import http from "http";
 import detectionRouter from "./routes/detectionRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import authRouter from "./routes/authRoutes.js";
 import { env } from "./utils/env.js";
 import { checkRequiredEnv } from "./config/checkEnv.js";
+import connectCloudinary from "./config/connectCloudinary.js";
 
 checkRequiredEnv();
 
@@ -53,6 +55,8 @@ app.use(helmet());
 app.use(cors(corsOptions));
 app.use(express.json());
 
+const httpServer = http.createServer(app);
+
 app.use("/api/auth", authRouter);
 app.use("/api", detectionRouter);
 
@@ -76,7 +80,32 @@ app.use((req, res) => {
 // Error handling (always last)
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`✅ Node backend running on http://localhost:${PORT}`);
-  console.log(`📸 Test detection: POST /api/detect with image + cropType`);
+const startServer = async () => {
+  try {
+    try {
+      await connectCloudinary();
+    } catch (error) {
+      console.error("❌Error connecting to cloudinary", error);
+    }
+    httpServer.listen(PORT, () => {
+      console.log(`Server running in ${env.MODE || "dev"} mode`);
+      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log(`Allowed client URL: ${env.CLIENT_URL}`);
+    });
+  } catch (error) {
+    console.error("❌Failed to start server", error);
+    process.exit(1);
+  }
+};
+
+startServer();
+
+process.on("unhandledRejection", (err) => {
+  console.error("❌Unhandled Rejection:", err);
+  httpServer.close(() => process.exit(1));
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("❌Uncaught Exception:", err);
+  process.exit(1);
 });

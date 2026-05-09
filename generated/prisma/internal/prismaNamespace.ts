@@ -792,6 +792,7 @@ export const DetectionScalarFieldEnum = {
   chemicalOptions: 'chemicalOptions',
   prevention: 'prevention',
   localNotes: 'localNotes',
+  aiProvider: 'aiProvider',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'

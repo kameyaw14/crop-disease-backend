@@ -81,7 +81,7 @@ model UserPreferredCrop {
 
 model Detection {
   id                String  @id @default(cuid())
-  imageUrl          String? // Optional: if you decide to save uploaded images to cloud later
+  imageUrl          String?
   cropType          String
   rawResponse       Json // Store full AI response for debugging/auditing
   diseaseName       String
@@ -93,6 +93,7 @@ model Detection {
   chemicalOptions   String?
   prevention        String?
   localNotes        String? // Ghana/Twi specific recommendations
+  aiProvider        String? @default("gemini")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -101,5 +102,6 @@ model Detection {
 
   @@index([cropType])
   @@index([createdAt])
+  @@index([userId])
   @@map("detections")
 }
