@@ -15,3 +15,35 @@ export interface AuthResponse {
   user?: any;
   error?: string;
 }
+
+export interface DetectionResult {
+  id: string;
+  imageUrl: string;
+  diseaseName: string;
+  confidence: number;
+  possibleDiseases: Array<{ name: string; confidence: number }>;
+  symptoms: string;
+  causes: string;
+  organicTreatments: string;
+  chemicalOptions: string;
+  prevention: string;
+  localNotes: string;
+  timestamp: string;
+  isCorrectCrop?: boolean;
+  detectedCrop?: string;
+  cropVerificationReason?: string;
+}
+
+export type DetectionSuccess = DetectionResult & {
+  success: true;
+};
+
+export type DetectionError = {
+  success: false;
+  errorType: "CROP_MISMATCH" | "INVALID_IMAGE";
+  message: string;
+  detectedCrop?: string;
+  reason: string;
+};
+
+export type DetectionResponse = DetectionSuccess | DetectionError;

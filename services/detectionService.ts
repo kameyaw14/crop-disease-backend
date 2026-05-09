@@ -3,100 +3,33 @@ import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 import { env } from "../utils/env.js";
 import { prisma } from "../config/connectDb.js"; // NEW ADDITION: Prisma import
-import type { DetectInput } from "../schema/detectionSchema.js";
+import {
+  detectionResultSchema,
+  resultSchema,
+  type DetectInput,
+} from "../schema/detectionSchema.js";
 import { v2 as cloudinary } from "cloudinary";
+import type { DetectionResponse, DetectionResult } from "../types/index.js";
 
-// NEW ADDITION: TypeScript interface with explanation
-interface DetectionResult {
-  id: string;
-  imageUrl: string;
-  diseaseName: string;
-  confidence: number;
-  possibleDiseases: Array<{ name: string; confidence: number }>;
-  symptoms: string;
-  causes: string;
-  organicTreatments: string;
-  chemicalOptions: string;
-  prevention: string;
-  localNotes: string;
-  timestamp: string;
-}
-
-// NO CHANGES - Kept your original schema
-const detectionSchema = {
-  type: "object",
-  properties: {
-    diseaseName: { type: "string" },
-    confidence: { type: "number", minimum: 0, maximum: 1 },
-    possibleDiseases: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          name: { type: "string" },
-          confidence: { type: "number", minimum: 0, maximum: 1 },
-        },
-        required: ["name", "confidence"],
-      },
-    },
-    symptoms: { type: "string" },
-    causes: { type: "string" },
-    organicTreatments: { type: "string" },
-    chemicalOptions: { type: "string" },
-    prevention: { type: "string" },
-    localNotes: { type: "string" },
-  },
-  required: [
-    "diseaseName",
-    "confidence",
-    "possibleDiseases",
-    "symptoms",
-    "causes",
-    "organicTreatments",
-    "chemicalOptions",
-    "prevention",
-    "localNotes",
-  ],
-  additionalProperties: false,
-};
-
-// NO CHANGES - Kept your strong system prompt
 const SYSTEM_PROMPT = `You are a senior Ghanaian agronomist with 20+ years of field experience.
-Analyze the uploaded plant image very carefully. Think step by step.
-Focus especially on plant diseases common in Ghana.
-Be highly confident and consistent in your diagnosis.
-Return ONLY valid JSON object. Do not add any extra text.`;
+
+CRITICAL INSTRUCTIONS (follow strictly):
+1. First, determine if the image clearly shows the SELECTED crop type.
+2. If the image is NOT a plant, or shows wrong crop, or is unclear (hand, soil only, animal, building, etc.), set isCorrectCrop = false.
+3. Only if isCorrectCrop = true, provide full disease diagnosis.
+4. Be extremely strict with crop matching. Ghanaian farmers depend on accuracy.
+5. Return ONLY valid JSON. No extra text.`;
 
 const ai = new GoogleGenAI({
   apiKey: env.GEMINI_API_KEY,
-});
-
-// NEW ADDITION: Zod runtime validation schema
-const resultSchema = z.object({
-  diseaseName: z.string().min(1),
-  confidence: z.number().min(0).max(1),
-  possibleDiseases: z
-    .array(
-      z.object({
-        name: z.string(),
-        confidence: z.number().min(0).max(1),
-      }),
-    )
-    .default([]),
-  symptoms: z.string(),
-  causes: z.string(),
-  organicTreatments: z.string(),
-  chemicalOptions: z.string(),
-  prevention: z.string(),
-  localNotes: z.string(),
 });
 
 export async function detectDisease(
   file: Express.Multer.File,
   validatedBody: DetectInput,
   userId: string,
-): Promise<DetectionResult> {
-  // NEW ADDITION: Upload to Cloudinary with organized folder
+): Promise<DetectionResponse> {
+ 
   const cloudinaryUpload = await new Promise<any>((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
@@ -115,10 +48,10 @@ export async function detectDisease(
 
   const imageUrl = cloudinaryUpload.secure_url;
 
-  const userPrompt = `Crop Type: ${validatedBody.cropType.toUpperCase()}
-Analyze this image and provide detailed diagnosis. Include local recommendations suitable for Ghanaian farmers.`;
+  const userPrompt = `Selected Crop: ${validatedBody.cropType.toUpperCase()}
+Analyze this image carefully and follow the system instructions.`;
 
-  console.log("Calling gemini...");
+  console.log("Calling Gemini with crop verification...");
 
   const imagePart = {
     inlineData: {
@@ -127,13 +60,14 @@ Analyze this image and provide detailed diagnosis. Include local recommendations
     },
   };
 
+  // UPDATED: Using new structured schema + better config
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-2.5-flash", // Current stable model in 2026
     contents: [SYSTEM_PROMPT, userPrompt, imagePart],
     config: {
       responseMimeType: "application/json",
-      responseSchema: detectionSchema,
-      temperature: 0.1,
+      responseSchema: detectionResultSchema,
+      temperature: 0.0, //  Lower temp for consistency
     },
   });
 
@@ -142,10 +76,18 @@ Analyze this image and provide detailed diagnosis. Include local recommendations
 
   console.log("Result:", parsed);
 
-  // UPDATED: Proper validation
   const validatedResult = resultSchema.parse(parsed);
 
-  // NEW ADDITION: Save detection record using Prisma transaction
+  if (!validatedResult.isCorrectCrop) {
+    return {
+      success: false,
+      errorType: "CROP_MISMATCH",
+      message: `The uploaded image does not match the selected crop (${validatedBody.cropType}).`,
+      detectedCrop: validatedResult.detectedCrop,
+      reason: validatedResult.cropVerificationReason,
+    };
+  }
+
   const detection = await prisma.$transaction(async (tx) => {
     return await tx.detection.create({
       data: {
@@ -167,6 +109,7 @@ Analyze this image and provide detailed diagnosis. Include local recommendations
   });
 
   return {
+    success: true,
     id: detection.id,
     imageUrl,
     ...validatedResult,
