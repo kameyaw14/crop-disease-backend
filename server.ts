@@ -11,6 +11,7 @@ import authRouter from "./routes/authRoutes.js";
 import { env } from "./utils/env.js";
 import { checkRequiredEnv } from "./config/checkEnv.js";
 import connectCloudinary from "./config/connectCloudinary.js";
+// import { testTtsController } from "./contollers/testController.js";
 
 checkRequiredEnv();
 
@@ -57,6 +58,7 @@ app.use(express.json());
 
 const httpServer = http.createServer(app);
 
+// app.post("/api/test-tts", testTtsController.testTwiTTS);
 app.use("/api/auth", authRouter);
 app.use("/api", detectionRouter);
 
