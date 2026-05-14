@@ -9,5 +9,6 @@ const authRouter = express.Router();
 authRouter.post("/register", authController.register);
 authRouter.post("/login", authController.login);
 authRouter.get("/me", protect, authController.getMe);
+authRouter.put("/language", protect, authController.updateLanguage);
 
 export default authRouter;

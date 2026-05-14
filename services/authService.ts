@@ -1,12 +1,9 @@
 // services/authService.ts
-// NEW FILE
 
 import { prisma } from "../config/connectDb.js";
-import { registerSchema } from "../schema/authSchema.js";
+import { languageSchema, registerSchema } from "../schema/authSchema.js";
 import bcrypt from "bcrypt";
 import { jwtUtils } from "../utils/jwtUtils.js";
-
-
 
 export const authService = {
   async register(data: any) {
@@ -91,5 +88,25 @@ export const authService = {
       include: { profile: true },
       omit: { password: true },
     });
+  },
+
+  async updateLanguage(userId: string, data: any) {
+    const validated = languageSchema.parse(data);
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { language: validated.language },
+      select: {
+        id: true,
+        email: true,
+        language: true,
+      },
+    });
+
+    return {
+      success: true,
+      message: `Language updated successfully to ${validated.language === "tw" ? "Twi" : "English"}`,
+      language: user.language,
+    };
   },
 };

@@ -1,5 +1,4 @@
 // schemas/authSchema.ts
-// NEW FILE - Zod validation schemas
 import { z } from "zod";
 
 export const registerSchema = z.object({
@@ -16,6 +15,14 @@ export const registerSchema = z.object({
       address: z.string().optional(),
     })
     .optional(),
+});
+
+export const languageSchema = z.object({
+  language: z.enum(["en", "tw"], {
+    errorMap: () => ({
+      message: "Language must be either 'en' (English) or 'tw' (Twi)",
+    }),
+  }),
 });
 
 export const loginSchema = z.object({

@@ -46,4 +46,20 @@ export const authController = {
       res.status(500).json({ success: false, message: "Failed to fetch user" });
     }
   },
+
+  async updateLanguage(req: Request, res: Response) {
+    try {
+      // @ts-ignore - user attached by protect middleware
+      const result = await authService.updateLanguage(
+        req.user!.userId,
+        req.body,
+      );
+      res.status(200).json(result);
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to update language",
+      });
+    }
+  },
 };

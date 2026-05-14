@@ -68,3 +68,13 @@ export interface WeatherForecastResponse {
   message?: string;
   errorType?: string;
 }
+
+export interface LanguageUpdateRequest {
+  language: "en" | "tw";
+}
+
+export interface LanguageUpdateResponse {
+  success: boolean;
+  message: string;
+  language: "en" | "tw";
+}
