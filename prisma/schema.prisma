@@ -3,6 +3,7 @@
 
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
+// never use the migrate command. always do the db push 
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -30,6 +31,20 @@ enum CropType {
   // Add more crops here in future
 }
 
+enum NotificationType {
+  DAILY_SUMMARY
+  HIGH_RISK
+  CROP_SPECIFIC
+  FAVORABLE_CONDITION
+  GENERAL_ADVICE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 model User {
   id              String   @id @default(cuid())
   email           String   @unique
@@ -48,6 +63,8 @@ model User {
   detections         Detection[]
   // posts         Post[]     // Will be added later for community
   userPreferredCrops UserPreferredCrop[]
+  weatherRequests    WeatherRequest[]
+  notifications      Notification[]
 
   @@index([email])
   @@index([phoneNumber])
@@ -104,4 +121,45 @@ model Detection {
   @@index([createdAt])
   @@index([userId])
   @@map("detections")
+}
+
+model WeatherRequest {
+  id          String  @id @default(cuid())
+  userId      String?
+  latitude    Float
+  longitude   Float
+  cropType    String? // Optional specific crop being checked
+  rawData     Json // Full Open-Meteo response
+  riskSummary Json? // Computed disease risk insights
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("weather_requests")
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  type       NotificationType
+  title      String
+  message    String
+  priority   Priority         @default(MEDIUM)
+  isRead     Boolean          @default(false)
+  expiresAt  DateTime? // NEW: For auto-cleanup of old alerts
+  actionLink String? // NEW: e.g. "/weather" or deep link
+  metadata   Json? // Extra context (weather, crops, etc.)
+
+  sentAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([sentAt])
+  @@index([priority])
+  @@map("notifications")
 }

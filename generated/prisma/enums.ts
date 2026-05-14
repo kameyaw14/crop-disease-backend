@@ -30,3 +30,23 @@ export const CropType = {
 } as const
 
 export type CropType = (typeof CropType)[keyof typeof CropType]
+
+
+export const NotificationType = {
+  DAILY_SUMMARY: 'DAILY_SUMMARY',
+  HIGH_RISK: 'HIGH_RISK',
+  CROP_SPECIFIC: 'CROP_SPECIFIC',
+  FAVORABLE_CONDITION: 'FAVORABLE_CONDITION',
+  GENERAL_ADVICE: 'GENERAL_ADVICE'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const Priority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH'
+} as const
+
+export type Priority = (typeof Priority)[keyof typeof Priority]

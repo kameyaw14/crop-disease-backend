@@ -61,3 +61,13 @@ export type UserPreferredCrop = Prisma.UserPreferredCropModel
  * 
  */
 export type Detection = Prisma.DetectionModel
+/**
+ * Model WeatherRequest
+ * 
+ */
+export type WeatherRequest = Prisma.WeatherRequestModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel

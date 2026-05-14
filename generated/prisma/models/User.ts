@@ -225,6 +225,8 @@ export type UserWhereInput = {
   profile?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   detections?: Prisma.DetectionListRelationFilter
   userPreferredCrops?: Prisma.UserPreferredCropListRelationFilter
+  weatherRequests?: Prisma.WeatherRequestListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -241,6 +243,8 @@ export type UserOrderByWithRelationInput = {
   profile?: Prisma.ProfileOrderByWithRelationInput
   detections?: Prisma.DetectionOrderByRelationAggregateInput
   userPreferredCrops?: Prisma.UserPreferredCropOrderByRelationAggregateInput
+  weatherRequests?: Prisma.WeatherRequestOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -260,6 +264,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   profile?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
   detections?: Prisma.DetectionListRelationFilter
   userPreferredCrops?: Prisma.UserPreferredCropListRelationFilter
+  weatherRequests?: Prisma.WeatherRequestListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -308,6 +314,8 @@ export type UserCreateInput = {
   profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
   detections?: Prisma.DetectionCreateNestedManyWithoutUserInput
   userPreferredCrops?: Prisma.UserPreferredCropCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -324,6 +332,8 @@ export type UserUncheckedCreateInput = {
   profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
   detections?: Prisma.DetectionUncheckedCreateNestedManyWithoutUserInput
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -340,6 +350,8 @@ export type UserUpdateInput = {
   profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
   detections?: Prisma.DetectionUpdateManyWithoutUserNestedInput
   userPreferredCrops?: Prisma.UserPreferredCropUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -356,6 +368,8 @@ export type UserUncheckedUpdateInput = {
   profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
   detections?: Prisma.DetectionUncheckedUpdateManyWithoutUserNestedInput
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -506,6 +520,36 @@ export type UserUpdateOneWithoutDetectionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDetectionsInput, Prisma.UserUpdateWithoutDetectionsInput>, Prisma.UserUncheckedUpdateWithoutDetectionsInput>
 }
 
+export type UserCreateNestedOneWithoutWeatherRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWeatherRequestsInput, Prisma.UserUncheckedCreateWithoutWeatherRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWeatherRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutWeatherRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWeatherRequestsInput, Prisma.UserUncheckedCreateWithoutWeatherRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWeatherRequestsInput
+  upsert?: Prisma.UserUpsertWithoutWeatherRequestsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWeatherRequestsInput, Prisma.UserUpdateWithoutWeatherRequestsInput>, Prisma.UserUncheckedUpdateWithoutWeatherRequestsInput>
+}
+
+export type UserCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.UserUpsertWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
 export type UserCreateWithoutProfileInput = {
   id?: string
   email: string
@@ -519,6 +563,8 @@ export type UserCreateWithoutProfileInput = {
   updatedAt?: Date | string
   detections?: Prisma.DetectionCreateNestedManyWithoutUserInput
   userPreferredCrops?: Prisma.UserPreferredCropCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProfileInput = {
@@ -534,6 +580,8 @@ export type UserUncheckedCreateWithoutProfileInput = {
   updatedAt?: Date | string
   detections?: Prisma.DetectionUncheckedCreateNestedManyWithoutUserInput
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProfileInput = {
@@ -565,6 +613,8 @@ export type UserUpdateWithoutProfileInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   detections?: Prisma.DetectionUpdateManyWithoutUserNestedInput
   userPreferredCrops?: Prisma.UserPreferredCropUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProfileInput = {
@@ -580,6 +630,8 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   detections?: Prisma.DetectionUncheckedUpdateManyWithoutUserNestedInput
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserPreferredCropsInput = {
@@ -595,6 +647,8 @@ export type UserCreateWithoutUserPreferredCropsInput = {
   updatedAt?: Date | string
   profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
   detections?: Prisma.DetectionCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserPreferredCropsInput = {
@@ -610,6 +664,8 @@ export type UserUncheckedCreateWithoutUserPreferredCropsInput = {
   updatedAt?: Date | string
   profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
   detections?: Prisma.DetectionUncheckedCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserPreferredCropsInput = {
@@ -641,6 +697,8 @@ export type UserUpdateWithoutUserPreferredCropsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
   detections?: Prisma.DetectionUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserPreferredCropsInput = {
@@ -656,6 +714,8 @@ export type UserUncheckedUpdateWithoutUserPreferredCropsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
   detections?: Prisma.DetectionUncheckedUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDetectionsInput = {
@@ -671,6 +731,8 @@ export type UserCreateWithoutDetectionsInput = {
   updatedAt?: Date | string
   profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
   userPreferredCrops?: Prisma.UserPreferredCropCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDetectionsInput = {
@@ -686,6 +748,8 @@ export type UserUncheckedCreateWithoutDetectionsInput = {
   updatedAt?: Date | string
   profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDetectionsInput = {
@@ -717,6 +781,8 @@ export type UserUpdateWithoutDetectionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
   userPreferredCrops?: Prisma.UserPreferredCropUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDetectionsInput = {
@@ -732,6 +798,176 @@ export type UserUncheckedUpdateWithoutDetectionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutWeatherRequestsInput = {
+  id?: string
+  email: string
+  password: string
+  role?: $Enums.UserRole
+  phoneNumber: string
+  isOnboarded?: boolean
+  isEmailVerified?: boolean
+  language?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
+  detections?: Prisma.DetectionCreateNestedManyWithoutUserInput
+  userPreferredCrops?: Prisma.UserPreferredCropCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutWeatherRequestsInput = {
+  id?: string
+  email: string
+  password: string
+  role?: $Enums.UserRole
+  phoneNumber: string
+  isOnboarded?: boolean
+  isEmailVerified?: boolean
+  language?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
+  detections?: Prisma.DetectionUncheckedCreateNestedManyWithoutUserInput
+  userPreferredCrops?: Prisma.UserPreferredCropUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutWeatherRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutWeatherRequestsInput, Prisma.UserUncheckedCreateWithoutWeatherRequestsInput>
+}
+
+export type UserUpsertWithoutWeatherRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutWeatherRequestsInput, Prisma.UserUncheckedUpdateWithoutWeatherRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutWeatherRequestsInput, Prisma.UserUncheckedCreateWithoutWeatherRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutWeatherRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutWeatherRequestsInput, Prisma.UserUncheckedUpdateWithoutWeatherRequestsInput>
+}
+
+export type UserUpdateWithoutWeatherRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
+  detections?: Prisma.DetectionUpdateManyWithoutUserNestedInput
+  userPreferredCrops?: Prisma.UserPreferredCropUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutWeatherRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
+  detections?: Prisma.DetectionUncheckedUpdateManyWithoutUserNestedInput
+  userPreferredCrops?: Prisma.UserPreferredCropUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutNotificationsInput = {
+  id?: string
+  email: string
+  password: string
+  role?: $Enums.UserRole
+  phoneNumber: string
+  isOnboarded?: boolean
+  isEmailVerified?: boolean
+  language?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
+  detections?: Prisma.DetectionCreateNestedManyWithoutUserInput
+  userPreferredCrops?: Prisma.UserPreferredCropCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutNotificationsInput = {
+  id?: string
+  email: string
+  password: string
+  role?: $Enums.UserRole
+  phoneNumber: string
+  isOnboarded?: boolean
+  isEmailVerified?: boolean
+  language?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
+  detections?: Prisma.DetectionUncheckedCreateNestedManyWithoutUserInput
+  userPreferredCrops?: Prisma.UserPreferredCropUncheckedCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+}
+
+export type UserUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UserUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
+  detections?: Prisma.DetectionUpdateManyWithoutUserNestedInput
+  userPreferredCrops?: Prisma.UserPreferredCropUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
+  detections?: Prisma.DetectionUncheckedUpdateManyWithoutUserNestedInput
+  userPreferredCrops?: Prisma.UserPreferredCropUncheckedUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -742,11 +978,15 @@ export type UserUncheckedUpdateWithoutDetectionsInput = {
 export type UserCountOutputType = {
   detections: number
   userPreferredCrops: number
+  weatherRequests: number
+  notifications: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   detections?: boolean | UserCountOutputTypeCountDetectionsArgs
   userPreferredCrops?: boolean | UserCountOutputTypeCountUserPreferredCropsArgs
+  weatherRequests?: boolean | UserCountOutputTypeCountWeatherRequestsArgs
+  notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
 }
 
 /**
@@ -773,6 +1013,20 @@ export type UserCountOutputTypeCountUserPreferredCropsArgs<ExtArgs extends runti
   where?: Prisma.UserPreferredCropWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountWeatherRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WeatherRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -788,6 +1042,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   profile?: boolean | Prisma.User$profileArgs<ExtArgs>
   detections?: boolean | Prisma.User$detectionsArgs<ExtArgs>
   userPreferredCrops?: boolean | Prisma.User$userPreferredCropsArgs<ExtArgs>
+  weatherRequests?: boolean | Prisma.User$weatherRequestsArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -835,6 +1091,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   profile?: boolean | Prisma.User$profileArgs<ExtArgs>
   detections?: boolean | Prisma.User$detectionsArgs<ExtArgs>
   userPreferredCrops?: boolean | Prisma.User$userPreferredCropsArgs<ExtArgs>
+  weatherRequests?: boolean | Prisma.User$weatherRequestsArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -846,6 +1104,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     profile: Prisma.$ProfilePayload<ExtArgs> | null
     detections: Prisma.$DetectionPayload<ExtArgs>[]
     userPreferredCrops: Prisma.$UserPreferredCropPayload<ExtArgs>[]
+    weatherRequests: Prisma.$WeatherRequestPayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1255,6 +1515,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   profile<T extends Prisma.User$profileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$profileArgs<ExtArgs>>): Prisma.Prisma__ProfileClient<runtime.Types.Result.GetResult<Prisma.$ProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   detections<T extends Prisma.User$detectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$detectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DetectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userPreferredCrops<T extends Prisma.User$userPreferredCropsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userPreferredCropsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPreferredCropPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  weatherRequests<T extends Prisma.User$weatherRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$weatherRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WeatherRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1751,6 +2013,54 @@ export type User$userPreferredCropsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.UserPreferredCropScalarFieldEnum | Prisma.UserPreferredCropScalarFieldEnum[]
+}
+
+/**
+ * User.weatherRequests
+ */
+export type User$weatherRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WeatherRequest
+   */
+  select?: Prisma.WeatherRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WeatherRequest
+   */
+  omit?: Prisma.WeatherRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WeatherRequestInclude<ExtArgs> | null
+  where?: Prisma.WeatherRequestWhereInput
+  orderBy?: Prisma.WeatherRequestOrderByWithRelationInput | Prisma.WeatherRequestOrderByWithRelationInput[]
+  cursor?: Prisma.WeatherRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WeatherRequestScalarFieldEnum | Prisma.WeatherRequestScalarFieldEnum[]
+}
+
+/**
+ * User.notifications
+ */
+export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
 }
 
 /**

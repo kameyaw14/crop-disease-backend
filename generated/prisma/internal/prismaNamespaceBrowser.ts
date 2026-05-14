@@ -54,7 +54,9 @@ export const ModelName = {
   User: 'User',
   Profile: 'Profile',
   UserPreferredCrop: 'UserPreferredCrop',
-  Detection: 'Detection'
+  Detection: 'Detection',
+  WeatherRequest: 'WeatherRequest',
+  Notification: 'Notification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -130,6 +132,37 @@ export const DetectionScalarFieldEnum = {
 } as const
 
 export type DetectionScalarFieldEnum = (typeof DetectionScalarFieldEnum)[keyof typeof DetectionScalarFieldEnum]
+
+
+export const WeatherRequestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  cropType: 'cropType',
+  rawData: 'rawData',
+  riskSummary: 'riskSummary',
+  createdAt: 'createdAt'
+} as const
+
+export type WeatherRequestScalarFieldEnum = (typeof WeatherRequestScalarFieldEnum)[keyof typeof WeatherRequestScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  message: 'message',
+  priority: 'priority',
+  isRead: 'isRead',
+  expiresAt: 'expiresAt',
+  actionLink: 'actionLink',
+  metadata: 'metadata',
+  sentAt: 'sentAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
 export const SortOrder = {

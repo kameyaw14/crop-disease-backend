@@ -47,3 +47,24 @@ export type DetectionError = {
 };
 
 export type DetectionResponse = DetectionSuccess | DetectionError;
+
+export interface WeatherForecastResponse {
+  success: boolean;
+  data?: {
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+    current: any;
+    daily: any[];
+    riskInsights: Array<{
+      crop: string;
+      riskLevel: "Low" | "Medium" | "High";
+      message: string;
+      factors: string[];
+    }>;
+    overallSummary: any;
+  };
+  message?: string;
+  errorType?: string;
+}

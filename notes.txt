@@ -1,0 +1,54 @@
+Sure! Here's a breakdown of every field:
+
+---
+
+**`success`** — Just confirms the API call worked. `true` means the data was fetched successfully.
+
+---
+
+### 📍 `location`
+- **`latitude` / `longitude`** — The exact GPS coordinates the forecast is for (near KNUST, Kumasi).
+
+---
+
+### 🌤️ `current` (right now)
+- **`time`** — The timestamp of the current reading: May 14, 2026 at 4:00 PM.
+- **`interval`** — Data is updated every **900 seconds (15 minutes)**, so readings are fairly real-time.
+- **`temperature_2m`** — Actual air temperature at **2 metres above ground**: **25.6°C**.
+- **`relative_humidity_2m`** — How much moisture is in the air at 2m height: **89%** — very humid.
+- **`apparent_temperature`** — The **"feels like"** temperature accounting for humidity and wind: **29.7°C**. This is why it feels hotter than 25.6°C.
+- **`precipitation`** — Rain that has fallen in the current interval: **0.3mm** — light drizzle.
+- **`weather_code`** — A standard WMO numerical code for the weather condition. **55** = Dense Drizzle.
+- **`weatherDescription`** — Human-readable version of the weather code: **"Dense Drizzle"**.
+
+---
+
+### 📅 `daily` (7-day forecast, May 14–20)
+Each array index corresponds to a day in the `time` array — so index 0 = May 14, index 1 = May 15, and so on.
+
+- **`temperature_2m_max`** — The **highest temperature** expected each day (e.g. 32.5°C on Thursday).
+- **`temperature_2m_min`** — The **lowest temperature** expected each day (e.g. 24.2°C on Thursday, typically at night).
+- **`precipitation_sum`** — **Total rainfall** expected for the day in millimetres. Saturday (20.5mm) is the heaviest — that's significant rain.
+- **`precipitation_probability_max`** — The **peak chance of rain** during the day as a percentage. Thursday is at 100% — rain is essentially certain.
+- **`relative_humidity_2m_max`** — The **highest humidity** level expected that day. Most days are hitting 96–100% — extremely humid.
+- **`weather_code`** — WMO code for the day's expected condition (e.g. 95 = Thunderstorm, 81 = Rain Showers, 51 = Light Drizzle).
+- **`weatherDescriptions`** — Human-readable version of each day's weather code.
+
+---
+
+### 🌿 `riskInsights`
+This is your app's custom layer on top of the weather data — assessing farming risk per crop.
+
+- **`crop`** — The crop being assessed (Maize, Cassava, Plantain).
+- **`riskLevel`** — How risky current conditions are for that crop. All three are **High** right now.
+- **`message`** — A specific advisory for the farmer (e.g. spray for fungal disease on maize).
+- **`factors`** — The weather conditions driving the risk (high humidity + high rain probability).
+
+---
+
+### 📝 `overallSummary`
+A plain English summary of the whole response — good for displaying directly to farmers who don't need to read all the numbers.
+
+---
+
+This looks like a well-structured agricultural weather API! Is this something you're building?

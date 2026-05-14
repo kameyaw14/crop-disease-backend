@@ -2,7 +2,7 @@
 // NEW FILE
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
-import { authController } from "../contollers/authController.js";
+import { authController } from "../controllers/authController.js";
 
 const authRouter = express.Router();
 
