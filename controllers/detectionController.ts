@@ -7,7 +7,6 @@ import type { DetectionResponse } from "../types/index.js";
 export const detectionController = {
   async detect(req: Request, res: Response, next: NextFunction) {
     try {
-      // @ts-ignore - user attached by protect middleware
       const userId = req.user!.userId;
 
       if (!req.file) {

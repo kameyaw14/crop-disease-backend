@@ -39,7 +39,6 @@ export const authController = {
 
   async getMe(req: Request, res: Response) {
     try {
-      // @ts-ignore - user attached by middleware
       const user = await authService.getMe(req.user!.userId);
       res.json({ success: true, user });
     } catch (error: any) {

@@ -13,6 +13,7 @@ import { checkRequiredEnv } from "./config/checkEnv.js";
 import connectCloudinary from "./config/connectCloudinary.js";
 import weatherRouter from "./routes/weatherRoutes.js";
 import notificationRouter from "./routes/notificationRoutes.js";
+import cropRouter from "./controllers/cropRoutes.js";
 // import { testTtsController } from "./contollers/testController.js";
 
 checkRequiredEnv();
@@ -63,6 +64,7 @@ const httpServer = http.createServer(app);
 // app.post("/api/test-tts", testTtsController.testTwiTTS);
 app.use("/api/auth", authRouter);
 app.use("/api", detectionRouter);
+app.use("/api/crops", cropRouter);
 app.use("/api/weather", weatherRouter);
 app.use("/api/notifications", notificationRouter);
 
