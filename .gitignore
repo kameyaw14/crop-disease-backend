@@ -16,3 +16,4 @@ scripts
 invalidationFunctions.ts
 
 services/intronTtsService.ts
+controllers/testController.ts

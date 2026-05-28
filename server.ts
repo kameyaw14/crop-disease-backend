@@ -72,7 +72,7 @@ app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
     message: `${env.SYSTEM_NAME} server running!!`,
-    environment: env.MODE || "development",
+    environment: env.MODE || "dev",
     timestamp: new Date().toISOString(),
   });
 });
