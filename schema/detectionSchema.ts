@@ -1,7 +1,6 @@
 // schemas/detectionSchema.ts
 import { z } from "zod";
-
-// NEW ADDITION: Zod validation for detection endpoint
+ 
 export const detectSchema = z.object({
   cropType: z.enum([
     "maize",

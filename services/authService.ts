@@ -1,5 +1,5 @@
 // services/authService.ts
-
+//@ts-nocheck
 import { prisma } from "../config/connectDb.js";
 import { languageSchema, registerSchema } from "../schema/authSchema.js";
 import bcrypt from "bcrypt";

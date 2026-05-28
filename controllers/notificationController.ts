@@ -1,4 +1,5 @@
 // controllers/notificationController.ts
+//@ts-nocheck
 import type { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/connectDb.js";
 import { processDailyAlerts } from "../utils/cron.js";

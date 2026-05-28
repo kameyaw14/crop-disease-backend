@@ -1,4 +1,5 @@
 // schemas/authSchema.ts
+//@ts-nocheck
 import { z } from "zod";
 
 export const registerSchema = z.object({

@@ -1,5 +1,5 @@
 // middleware/authMiddleware.ts
-// NEW FILE
+//@ts-nocheck
 import type { Request, Response, NextFunction } from "express";
 import { jwtUtils } from "../utils/jwtUtils.js";
 

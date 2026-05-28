@@ -13,7 +13,7 @@ import { checkRequiredEnv } from "./config/checkEnv.js";
 import connectCloudinary from "./config/connectCloudinary.js";
 import weatherRouter from "./routes/weatherRoutes.js";
 import notificationRouter from "./routes/notificationRoutes.js";
-import cropRouter from "./controllers/cropRoutes.js";
+import cropRouter from "./routes/cropRoutes.js";
 // import { testTtsController } from "./contollers/testController.js";
 
 checkRequiredEnv();
