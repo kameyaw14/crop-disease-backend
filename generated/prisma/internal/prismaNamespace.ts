@@ -1034,6 +1034,9 @@ export const CachedDiagnosisScalarFieldEnum = {
   language: 'language',
   result: 'result',
   expiresAt: 'expiresAt',
+  imagePerceptualHash: 'imagePerceptualHash',
+  diseaseName: 'diseaseName',
+  confidence: 'confidence',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'

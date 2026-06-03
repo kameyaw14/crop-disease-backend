@@ -20,8 +20,18 @@ export type CachedDiagnosisModel = runtime.Types.Result.DefaultSelection<Prisma.
 
 export type AggregateCachedDiagnosis = {
   _count: CachedDiagnosisCountAggregateOutputType | null
+  _avg: CachedDiagnosisAvgAggregateOutputType | null
+  _sum: CachedDiagnosisSumAggregateOutputType | null
   _min: CachedDiagnosisMinAggregateOutputType | null
   _max: CachedDiagnosisMaxAggregateOutputType | null
+}
+
+export type CachedDiagnosisAvgAggregateOutputType = {
+  confidence: number | null
+}
+
+export type CachedDiagnosisSumAggregateOutputType = {
+  confidence: number | null
 }
 
 export type CachedDiagnosisMinAggregateOutputType = {
@@ -30,6 +40,9 @@ export type CachedDiagnosisMinAggregateOutputType = {
   cropType: string | null
   language: string | null
   expiresAt: Date | null
+  imagePerceptualHash: string | null
+  diseaseName: string | null
+  confidence: number | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: string | null
@@ -41,6 +54,9 @@ export type CachedDiagnosisMaxAggregateOutputType = {
   cropType: string | null
   language: string | null
   expiresAt: Date | null
+  imagePerceptualHash: string | null
+  diseaseName: string | null
+  confidence: number | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: string | null
@@ -53,6 +69,9 @@ export type CachedDiagnosisCountAggregateOutputType = {
   language: number
   result: number
   expiresAt: number
+  imagePerceptualHash: number
+  diseaseName: number
+  confidence: number
   createdAt: number
   updatedAt: number
   userId: number
@@ -60,12 +79,23 @@ export type CachedDiagnosisCountAggregateOutputType = {
 }
 
 
+export type CachedDiagnosisAvgAggregateInputType = {
+  confidence?: true
+}
+
+export type CachedDiagnosisSumAggregateInputType = {
+  confidence?: true
+}
+
 export type CachedDiagnosisMinAggregateInputType = {
   id?: true
   imageHash?: true
   cropType?: true
   language?: true
   expiresAt?: true
+  imagePerceptualHash?: true
+  diseaseName?: true
+  confidence?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -77,6 +107,9 @@ export type CachedDiagnosisMaxAggregateInputType = {
   cropType?: true
   language?: true
   expiresAt?: true
+  imagePerceptualHash?: true
+  diseaseName?: true
+  confidence?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -89,6 +122,9 @@ export type CachedDiagnosisCountAggregateInputType = {
   language?: true
   result?: true
   expiresAt?: true
+  imagePerceptualHash?: true
+  diseaseName?: true
+  confidence?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -133,6 +169,18 @@ export type CachedDiagnosisAggregateArgs<ExtArgs extends runtime.Types.Extension
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: CachedDiagnosisAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: CachedDiagnosisSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: CachedDiagnosisMinAggregateInputType
@@ -163,6 +211,8 @@ export type CachedDiagnosisGroupByArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   _count?: CachedDiagnosisCountAggregateInputType | true
+  _avg?: CachedDiagnosisAvgAggregateInputType
+  _sum?: CachedDiagnosisSumAggregateInputType
   _min?: CachedDiagnosisMinAggregateInputType
   _max?: CachedDiagnosisMaxAggregateInputType
 }
@@ -174,10 +224,15 @@ export type CachedDiagnosisGroupByOutputType = {
   language: string
   result: runtime.JsonValue
   expiresAt: Date
+  imagePerceptualHash: string | null
+  diseaseName: string | null
+  confidence: number | null
   createdAt: Date
   updatedAt: Date
   userId: string | null
   _count: CachedDiagnosisCountAggregateOutputType | null
+  _avg: CachedDiagnosisAvgAggregateOutputType | null
+  _sum: CachedDiagnosisSumAggregateOutputType | null
   _min: CachedDiagnosisMinAggregateOutputType | null
   _max: CachedDiagnosisMaxAggregateOutputType | null
 }
@@ -207,6 +262,9 @@ export type CachedDiagnosisWhereInput = {
   language?: Prisma.StringFilter<"CachedDiagnosis"> | string
   result?: Prisma.JsonFilter<"CachedDiagnosis">
   expiresAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
+  imagePerceptualHash?: Prisma.StringNullableFilter<"CachedDiagnosis"> | string | null
+  diseaseName?: Prisma.StringNullableFilter<"CachedDiagnosis"> | string | null
+  confidence?: Prisma.FloatNullableFilter<"CachedDiagnosis"> | number | null
   createdAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
   userId?: Prisma.StringNullableFilter<"CachedDiagnosis"> | string | null
@@ -221,6 +279,9 @@ export type CachedDiagnosisOrderByWithRelationInput = {
   language?: Prisma.SortOrder
   result?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  imagePerceptualHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  diseaseName?: Prisma.SortOrderInput | Prisma.SortOrder
+  confidence?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -238,6 +299,9 @@ export type CachedDiagnosisWhereUniqueInput = Prisma.AtLeast<{
   language?: Prisma.StringFilter<"CachedDiagnosis"> | string
   result?: Prisma.JsonFilter<"CachedDiagnosis">
   expiresAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
+  imagePerceptualHash?: Prisma.StringNullableFilter<"CachedDiagnosis"> | string | null
+  diseaseName?: Prisma.StringNullableFilter<"CachedDiagnosis"> | string | null
+  confidence?: Prisma.FloatNullableFilter<"CachedDiagnosis"> | number | null
   createdAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
   userId?: Prisma.StringNullableFilter<"CachedDiagnosis"> | string | null
@@ -252,12 +316,17 @@ export type CachedDiagnosisOrderByWithAggregationInput = {
   language?: Prisma.SortOrder
   result?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  imagePerceptualHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  diseaseName?: Prisma.SortOrderInput | Prisma.SortOrder
+  confidence?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.CachedDiagnosisCountOrderByAggregateInput
+  _avg?: Prisma.CachedDiagnosisAvgOrderByAggregateInput
   _max?: Prisma.CachedDiagnosisMaxOrderByAggregateInput
   _min?: Prisma.CachedDiagnosisMinOrderByAggregateInput
+  _sum?: Prisma.CachedDiagnosisSumOrderByAggregateInput
 }
 
 export type CachedDiagnosisScalarWhereWithAggregatesInput = {
@@ -270,6 +339,9 @@ export type CachedDiagnosisScalarWhereWithAggregatesInput = {
   language?: Prisma.StringWithAggregatesFilter<"CachedDiagnosis"> | string
   result?: Prisma.JsonWithAggregatesFilter<"CachedDiagnosis">
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"CachedDiagnosis"> | Date | string
+  imagePerceptualHash?: Prisma.StringNullableWithAggregatesFilter<"CachedDiagnosis"> | string | null
+  diseaseName?: Prisma.StringNullableWithAggregatesFilter<"CachedDiagnosis"> | string | null
+  confidence?: Prisma.FloatNullableWithAggregatesFilter<"CachedDiagnosis"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"CachedDiagnosis"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"CachedDiagnosis"> | Date | string
   userId?: Prisma.StringNullableWithAggregatesFilter<"CachedDiagnosis"> | string | null
@@ -282,6 +354,9 @@ export type CachedDiagnosisCreateInput = {
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
+  imagePerceptualHash?: string | null
+  diseaseName?: string | null
+  confidence?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutCachedDiagnosesInput
@@ -295,6 +370,9 @@ export type CachedDiagnosisUncheckedCreateInput = {
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
+  imagePerceptualHash?: string | null
+  diseaseName?: string | null
+  confidence?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userId?: string | null
@@ -308,6 +386,9 @@ export type CachedDiagnosisUpdateInput = {
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  imagePerceptualHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  diseaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutCachedDiagnosesNestedInput
@@ -321,6 +402,9 @@ export type CachedDiagnosisUncheckedUpdateInput = {
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  imagePerceptualHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  diseaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -334,6 +418,9 @@ export type CachedDiagnosisCreateManyInput = {
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
+  imagePerceptualHash?: string | null
+  diseaseName?: string | null
+  confidence?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userId?: string | null
@@ -346,6 +433,9 @@ export type CachedDiagnosisUpdateManyMutationInput = {
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  imagePerceptualHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  diseaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -357,6 +447,9 @@ export type CachedDiagnosisUncheckedUpdateManyInput = {
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  imagePerceptualHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  diseaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -384,9 +477,16 @@ export type CachedDiagnosisCountOrderByAggregateInput = {
   language?: Prisma.SortOrder
   result?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  imagePerceptualHash?: Prisma.SortOrder
+  diseaseName?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+}
+
+export type CachedDiagnosisAvgOrderByAggregateInput = {
+  confidence?: Prisma.SortOrder
 }
 
 export type CachedDiagnosisMaxOrderByAggregateInput = {
@@ -395,6 +495,9 @@ export type CachedDiagnosisMaxOrderByAggregateInput = {
   cropType?: Prisma.SortOrder
   language?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  imagePerceptualHash?: Prisma.SortOrder
+  diseaseName?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -406,9 +509,16 @@ export type CachedDiagnosisMinOrderByAggregateInput = {
   cropType?: Prisma.SortOrder
   language?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  imagePerceptualHash?: Prisma.SortOrder
+  diseaseName?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+}
+
+export type CachedDiagnosisSumOrderByAggregateInput = {
+  confidence?: Prisma.SortOrder
 }
 
 export type CachedDiagnosisCreateNestedManyWithoutUserInput = {
@@ -469,6 +579,14 @@ export type CachedDiagnosisUpdateOneWithoutDetectionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CachedDiagnosisUpdateToOneWithWhereWithoutDetectionsInput, Prisma.CachedDiagnosisUpdateWithoutDetectionsInput>, Prisma.CachedDiagnosisUncheckedUpdateWithoutDetectionsInput>
 }
 
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type CachedDiagnosisCreateWithoutUserInput = {
   id?: string
   imageHash: string
@@ -476,6 +594,9 @@ export type CachedDiagnosisCreateWithoutUserInput = {
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
+  imagePerceptualHash?: string | null
+  diseaseName?: string | null
+  confidence?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   detections?: Prisma.DetectionCreateNestedManyWithoutCachedDiagnosisInput
@@ -488,6 +609,9 @@ export type CachedDiagnosisUncheckedCreateWithoutUserInput = {
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
+  imagePerceptualHash?: string | null
+  diseaseName?: string | null
+  confidence?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   detections?: Prisma.DetectionUncheckedCreateNestedManyWithoutCachedDiagnosisInput
@@ -529,6 +653,9 @@ export type CachedDiagnosisScalarWhereInput = {
   language?: Prisma.StringFilter<"CachedDiagnosis"> | string
   result?: Prisma.JsonFilter<"CachedDiagnosis">
   expiresAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
+  imagePerceptualHash?: Prisma.StringNullableFilter<"CachedDiagnosis"> | string | null
+  diseaseName?: Prisma.StringNullableFilter<"CachedDiagnosis"> | string | null
+  confidence?: Prisma.FloatNullableFilter<"CachedDiagnosis"> | number | null
   createdAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
   userId?: Prisma.StringNullableFilter<"CachedDiagnosis"> | string | null
@@ -541,6 +668,9 @@ export type CachedDiagnosisCreateWithoutDetectionsInput = {
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
+  imagePerceptualHash?: string | null
+  diseaseName?: string | null
+  confidence?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutCachedDiagnosesInput
@@ -553,6 +683,9 @@ export type CachedDiagnosisUncheckedCreateWithoutDetectionsInput = {
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
+  imagePerceptualHash?: string | null
+  diseaseName?: string | null
+  confidence?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userId?: string | null
@@ -581,6 +714,9 @@ export type CachedDiagnosisUpdateWithoutDetectionsInput = {
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  imagePerceptualHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  diseaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutCachedDiagnosesNestedInput
@@ -593,6 +729,9 @@ export type CachedDiagnosisUncheckedUpdateWithoutDetectionsInput = {
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  imagePerceptualHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  diseaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -605,6 +744,9 @@ export type CachedDiagnosisCreateManyUserInput = {
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
+  imagePerceptualHash?: string | null
+  diseaseName?: string | null
+  confidence?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -616,6 +758,9 @@ export type CachedDiagnosisUpdateWithoutUserInput = {
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  imagePerceptualHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  diseaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   detections?: Prisma.DetectionUpdateManyWithoutCachedDiagnosisNestedInput
@@ -628,6 +773,9 @@ export type CachedDiagnosisUncheckedUpdateWithoutUserInput = {
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  imagePerceptualHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  diseaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   detections?: Prisma.DetectionUncheckedUpdateManyWithoutCachedDiagnosisNestedInput
@@ -640,6 +788,9 @@ export type CachedDiagnosisUncheckedUpdateManyWithoutUserInput = {
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  imagePerceptualHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  diseaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -682,6 +833,9 @@ export type CachedDiagnosisSelect<ExtArgs extends runtime.Types.Extensions.Inter
   language?: boolean
   result?: boolean
   expiresAt?: boolean
+  imagePerceptualHash?: boolean
+  diseaseName?: boolean
+  confidence?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -697,6 +851,9 @@ export type CachedDiagnosisSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   language?: boolean
   result?: boolean
   expiresAt?: boolean
+  imagePerceptualHash?: boolean
+  diseaseName?: boolean
+  confidence?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -710,6 +867,9 @@ export type CachedDiagnosisSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   language?: boolean
   result?: boolean
   expiresAt?: boolean
+  imagePerceptualHash?: boolean
+  diseaseName?: boolean
+  confidence?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -723,12 +883,15 @@ export type CachedDiagnosisSelectScalar = {
   language?: boolean
   result?: boolean
   expiresAt?: boolean
+  imagePerceptualHash?: boolean
+  diseaseName?: boolean
+  confidence?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
 }
 
-export type CachedDiagnosisOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "imageHash" | "cropType" | "language" | "result" | "expiresAt" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["cachedDiagnosis"]>
+export type CachedDiagnosisOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "imageHash" | "cropType" | "language" | "result" | "expiresAt" | "imagePerceptualHash" | "diseaseName" | "confidence" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["cachedDiagnosis"]>
 export type CachedDiagnosisInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.CachedDiagnosis$userArgs<ExtArgs>
   detections?: boolean | Prisma.CachedDiagnosis$detectionsArgs<ExtArgs>
@@ -754,6 +917,9 @@ export type $CachedDiagnosisPayload<ExtArgs extends runtime.Types.Extensions.Int
     language: string
     result: runtime.JsonValue
     expiresAt: Date
+    imagePerceptualHash: string | null
+    diseaseName: string | null
+    confidence: number | null
     createdAt: Date
     updatedAt: Date
     userId: string | null
@@ -1188,6 +1354,9 @@ export interface CachedDiagnosisFieldRefs {
   readonly language: Prisma.FieldRef<"CachedDiagnosis", 'String'>
   readonly result: Prisma.FieldRef<"CachedDiagnosis", 'Json'>
   readonly expiresAt: Prisma.FieldRef<"CachedDiagnosis", 'DateTime'>
+  readonly imagePerceptualHash: Prisma.FieldRef<"CachedDiagnosis", 'String'>
+  readonly diseaseName: Prisma.FieldRef<"CachedDiagnosis", 'String'>
+  readonly confidence: Prisma.FieldRef<"CachedDiagnosis", 'Float'>
   readonly createdAt: Prisma.FieldRef<"CachedDiagnosis", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"CachedDiagnosis", 'DateTime'>
   readonly userId: Prisma.FieldRef<"CachedDiagnosis", 'String'>

@@ -13,6 +13,11 @@ import { v2 as cloudinary } from "cloudinary";
 import type { DetectionResponse, DetectionResult } from "../types/index.js";
 import { getDetectionSystemPrompt } from "../utils/prompts.js";
 import crypto from "crypto";
+import {
+  computeHammingDistance,
+  computePerceptualHash,
+  PHASH_SIMILARITY_THRESHOLD,
+} from "../utils/pHash.js";
 
 //Helper to create SHA-256 hash
 function generateImageHash(buffer: Buffer): string {
@@ -60,6 +65,18 @@ export async function detectDisease(
   const imageUrl = cloudinaryUpload.secure_url;
 
   const imageHash = generateImageHash(file.buffer);
+
+  let imagePerceptualHash: string | null = null;
+
+  try {
+    imagePerceptualHash = await computePerceptualHash(file.buffer);
+    console.log("🔍 pHash computed:", imagePerceptualHash);
+  } catch (pHashError) {
+    console.warn(
+      "⚠️ pHash computation failed, continuing without it:",
+      pHashError,
+    );
+  }
 
   const userPrompt = `Selected Crop: ${validatedBody.cropType.toUpperCase()}
 Analyze this image carefully and follow the system instructions.`;
@@ -116,6 +133,116 @@ Analyze this image carefully and follow the system instructions.`;
     }
   }
 
+  if (!isDemoMode && imagePerceptualHash) {
+    console.log("🔎 Layer 1 missed. Checking Layer 2 (pHash similarity)...");
+
+    // Fetch candidate cache entries for this cropType + language that have pHashes stored.
+    // We filter by cropType + language to keep the candidate set small and relevant.
+    // We only fetch id, imagePerceptualHash, result, diseaseName to avoid loading full
+    // JSON blobs for every candidate unnecessarily.
+    // TypeScript: the return type of findMany is an array of the selected fields
+    const candidates = await prisma.cachedDiagnosis.findMany({
+      where: {
+        cropType: validatedBody.cropType,
+        language: userLanguage,
+        expiresAt: { gt: new Date() }, // Only non-expired entries
+        imagePerceptualHash: { not: null }, // Only entries that have a pHash stored
+      },
+      select: {
+        id: true,
+        imagePerceptualHash: true,
+        result: true,
+        diseaseName: true,
+        confidence: true,
+      },
+    });
+
+    console.log(
+      `🔎 Found ${candidates.length} pHash candidates for ${validatedBody.cropType}/${userLanguage}`,
+    );
+
+    // TypeScript: type the best match structure explicitly so TypeScript knows its shape
+    // null means no match found yet
+    let bestMatch: {
+      id: string;
+      result: any; // any because it's a Prisma Json field
+      diseaseName: string | null;
+      distance: number;
+    } | null = null;
+
+    for (const candidate of candidates) {
+      // TypeScript: candidate.imagePerceptualHash is string | null from the schema
+      // We skip null values (the { not: null } filter should prevent them but TypeScript
+      // doesn't know that without a runtime check)
+      if (!candidate.imagePerceptualHash) continue;
+
+      const distance = computeHammingDistance(
+        imagePerceptualHash,
+        candidate.imagePerceptualHash,
+      );
+
+      console.log(
+        `   Candidate ${candidate.id} (${candidate.diseaseName}): Hamming distance = ${distance}`,
+      );
+
+      // Track the closest match we've seen so far
+      if (
+        distance <= PHASH_SIMILARITY_THRESHOLD &&
+        (bestMatch === null || distance < bestMatch.distance)
+      ) {
+        bestMatch = {
+          id: candidate.id,
+          result: candidate.result,
+          diseaseName: candidate.diseaseName,
+          distance,
+        };
+      }
+    }
+
+    if (bestMatch) {
+      console.log(
+        `✅ Layer 2 cache hit (pHash match, Hamming distance: ${bestMatch.distance}):`,
+        bestMatch.id,
+      );
+
+      // Save a detection record linked to the matched cache entry
+      const detection = await prisma.detection.create({
+        data: {
+          imageUrl,
+          cropType: validatedBody.cropType,
+          rawResponse: bestMatch.result,
+          diseaseName: bestMatch.result.diseaseName,
+          confidence: bestMatch.result.confidence,
+          possibleDiseases: bestMatch.result.possibleDiseases,
+          symptoms: bestMatch.result.symptoms,
+          causes: bestMatch.result.causes,
+          organicTreatments: bestMatch.result.organicTreatments,
+          chemicalOptions: bestMatch.result.chemicalOptions,
+          prevention: bestMatch.result.prevention,
+          localNotes: bestMatch.result.localNotes,
+          userId,
+          cachedDiagnosisId: bestMatch.id,
+          // UPDATED: aiProvider label tells us this came from pHash similarity match
+          aiProvider: "gemini-phash-cached",
+        },
+      });
+
+      return {
+        success: true,
+        id: detection.id,
+        imageUrl,
+        ...bestMatch.result,
+        timestamp: new Date().toISOString(),
+        fromCache: true,
+        // NEW ADDITION: Surface the Hamming distance in the response for debugging/logging
+        // Remove this field later if you don't want it exposed to the frontend
+        pHashDistance: bestMatch.distance,
+      };
+    }
+
+    console.log("🔎 Layer 2 missed. Proceeding to Gemini...");
+  }
+
   if (isDemoMode) {
     console.log("🧪 Demo mode active - returning friendly message");
     return {
@@ -127,6 +254,7 @@ Analyze this image carefully and follow the system instructions.`;
     };
   }
 
+  // ─── LAYER 3: Gemini AI Call (with retry)
   let lastError: any;
 
   for (let attempt = 1; attempt <= 3; attempt++) {
@@ -162,16 +290,60 @@ Analyze this image carefully and follow the system instructions.`;
         };
       }
 
-      const cachedDiagnosis = await prisma.cachedDiagnosis.create({
-        data: {
-          imageHash,
+      // ─── LAYER 3a: Disease Label Deduplication
+      const existingDiseaseCache = await prisma.cachedDiagnosis.findFirst({
+        where: {
+          diseaseName: validatedResult.diseaseName,
           cropType: validatedBody.cropType,
           language: userLanguage,
-          result: validatedResult,
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-          userId,
+          expiresAt: { gt: new Date() },
         },
+        orderBy: { confidence: "desc" }, // Prefer the highest-confidence cached version
       });
+
+      let cachedDiagnosisId: string;
+
+      if (existingDiseaseCache) {
+        console.log(
+          `♻️  Reusing existing cache entry for disease: ${validatedResult.diseaseName}`,
+        );
+
+        cachedDiagnosisId = existingDiseaseCache.id;
+
+        // NEW ADDITION: Backfill pHash on the existing cache entry if it doesn't have one yet.
+        // This gradually enriches old cache entries over time without a migration script.
+        if (!existingDiseaseCache.imagePerceptualHash && imagePerceptualHash) {
+          await prisma.cachedDiagnosis.update({
+            where: { id: existingDiseaseCache.id },
+            data: { imagePerceptualHash },
+          });
+          console.log(
+            `🔄 Backfilled pHash on existing cache entry: ${existingDiseaseCache.id}`,
+          );
+        }
+      } else {
+        // NEW ADDITION: No existing entry for this disease - create a fresh cache entry.
+        // UPDATED: Now also stores imagePerceptualHash and diseaseName as dedicated fields
+        // (previously only result JSON was stored; diseaseName was buried inside it).
+        const cachedDiagnosis = await prisma.cachedDiagnosis.create({
+          data: {
+            imageHash,
+            cropType: validatedBody.cropType,
+            language: userLanguage,
+            result: validatedResult,
+            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+            userId,
+            imagePerceptualHash: imagePerceptualHash ?? undefined,
+            diseaseName: validatedResult.diseaseName,
+            confidence: validatedResult.confidence,
+          },
+        });
+
+        cachedDiagnosisId = cachedDiagnosis.id;
+        console.log(
+          `💾 New cache entry created for disease: ${validatedResult.diseaseName}`,
+        );
+      }
 
       const detection = await prisma.detection.create({
         data: {
@@ -188,7 +360,7 @@ Analyze this image carefully and follow the system instructions.`;
           prevention: validatedResult.prevention,
           localNotes: validatedResult.localNotes,
           userId,
-          cachedDiagnosisId: cachedDiagnosis.id,
+          cachedDiagnosisId,
           aiProvider: "gemini",
         },
       });

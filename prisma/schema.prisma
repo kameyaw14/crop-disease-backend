@@ -129,12 +129,15 @@ model Detection {
 }
 
 model CachedDiagnosis {
-  id        String   @id @default(cuid())
-  imageHash String   @unique
-  cropType  String
-  language  String   @default("en")
-  result    Json // Full structured diagnosis result
-  expiresAt DateTime
+  id                  String   @id @default(cuid())
+  imageHash           String   @unique
+  cropType            String
+  language            String   @default("en")
+  result              Json // Full structured diagnosis result
+  expiresAt           DateTime
+  imagePerceptualHash String?
+  diseaseName         String?
+  confidence          Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -147,6 +150,8 @@ model CachedDiagnosis {
   @@index([imageHash])
   @@index([cropType, language])
   @@index([expiresAt])
+  @@index([diseaseName, cropType, language])
+  @@index([imagePerceptualHash])
   @@map("cached_diagnoses")
 }
 
