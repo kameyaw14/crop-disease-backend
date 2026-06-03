@@ -55,6 +55,7 @@ export const ModelName = {
   Profile: 'Profile',
   UserPreferredCrop: 'UserPreferredCrop',
   Detection: 'Detection',
+  CachedDiagnosis: 'CachedDiagnosis',
   WeatherRequest: 'WeatherRequest',
   Notification: 'Notification'
 } as const
@@ -128,10 +129,26 @@ export const DetectionScalarFieldEnum = {
   aiProvider: 'aiProvider',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  userId: 'userId'
+  userId: 'userId',
+  cachedDiagnosisId: 'cachedDiagnosisId'
 } as const
 
 export type DetectionScalarFieldEnum = (typeof DetectionScalarFieldEnum)[keyof typeof DetectionScalarFieldEnum]
+
+
+export const CachedDiagnosisScalarFieldEnum = {
+  id: 'id',
+  imageHash: 'imageHash',
+  cropType: 'cropType',
+  language: 'language',
+  result: 'result',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+} as const
+
+export type CachedDiagnosisScalarFieldEnum = (typeof CachedDiagnosisScalarFieldEnum)[keyof typeof CachedDiagnosisScalarFieldEnum]
 
 
 export const WeatherRequestScalarFieldEnum = {

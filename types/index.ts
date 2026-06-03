@@ -40,7 +40,7 @@ export type DetectionSuccess = DetectionResult & {
 
 export type DetectionError = {
   success: false;
-  errorType: "CROP_MISMATCH" | "INVALID_IMAGE";
+  errorType: "CROP_MISMATCH" | "INVALID_IMAGE" | "DEMO_MODE" | "AI_UNAVAILABLE";
   message: string;
   detectedCrop?: string;
   reason: string;

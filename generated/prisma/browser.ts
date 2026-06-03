@@ -38,6 +38,11 @@ export type UserPreferredCrop = Prisma.UserPreferredCropModel
  */
 export type Detection = Prisma.DetectionModel
 /**
+ * Model CachedDiagnosis
+ * 
+ */
+export type CachedDiagnosis = Prisma.CachedDiagnosisModel
+/**
  * Model WeatherRequest
  * 
  */

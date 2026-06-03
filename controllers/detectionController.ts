@@ -18,10 +18,19 @@ export const detectionController = {
 
       const validatedBody: DetectInput = detectSchema.parse(req.body);
 
+      // NEW ADDITION: Check for demo mode from query parameter
+      const isDemoMode = req.query.demo === "true" || req.query.demo === true;
+
+      if (isDemoMode) {
+        console.log("🧪 Demo mode enabled for this request");
+      }
+
+      // UPDATED: Pass isDemoMode to the service
       const result: DetectionResponse = await detectDisease(
         req.file,
         validatedBody,
         userId,
+        isDemoMode, // NEW ADDITION
       );
 
       if (!result.success) {

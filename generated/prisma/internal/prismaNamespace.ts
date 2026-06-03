@@ -388,6 +388,7 @@ export const ModelName = {
   Profile: 'Profile',
   UserPreferredCrop: 'UserPreferredCrop',
   Detection: 'Detection',
+  CachedDiagnosis: 'CachedDiagnosis',
   WeatherRequest: 'WeatherRequest',
   Notification: 'Notification'
 } as const
@@ -405,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "profile" | "userPreferredCrop" | "detection" | "weatherRequest" | "notification"
+    modelProps: "user" | "profile" | "userPreferredCrop" | "detection" | "cachedDiagnosis" | "weatherRequest" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -705,6 +706,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CachedDiagnosis: {
+      payload: Prisma.$CachedDiagnosisPayload<ExtArgs>
+      fields: Prisma.CachedDiagnosisFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CachedDiagnosisFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CachedDiagnosisFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload>
+        }
+        findFirst: {
+          args: Prisma.CachedDiagnosisFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CachedDiagnosisFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload>
+        }
+        findMany: {
+          args: Prisma.CachedDiagnosisFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload>[]
+        }
+        create: {
+          args: Prisma.CachedDiagnosisCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload>
+        }
+        createMany: {
+          args: Prisma.CachedDiagnosisCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CachedDiagnosisCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload>[]
+        }
+        delete: {
+          args: Prisma.CachedDiagnosisDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload>
+        }
+        update: {
+          args: Prisma.CachedDiagnosisUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload>
+        }
+        deleteMany: {
+          args: Prisma.CachedDiagnosisDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CachedDiagnosisUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CachedDiagnosisUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload>[]
+        }
+        upsert: {
+          args: Prisma.CachedDiagnosisUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CachedDiagnosisPayload>
+        }
+        aggregate: {
+          args: Prisma.CachedDiagnosisAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCachedDiagnosis>
+        }
+        groupBy: {
+          args: Prisma.CachedDiagnosisGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CachedDiagnosisGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CachedDiagnosisCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CachedDiagnosisCountAggregateOutputType> | number
+        }
+      }
+    }
     WeatherRequest: {
       payload: Prisma.$WeatherRequestPayload<ExtArgs>
       fields: Prisma.WeatherRequestFieldRefs
@@ -945,10 +1020,26 @@ export const DetectionScalarFieldEnum = {
   aiProvider: 'aiProvider',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  userId: 'userId'
+  userId: 'userId',
+  cachedDiagnosisId: 'cachedDiagnosisId'
 } as const
 
 export type DetectionScalarFieldEnum = (typeof DetectionScalarFieldEnum)[keyof typeof DetectionScalarFieldEnum]
+
+
+export const CachedDiagnosisScalarFieldEnum = {
+  id: 'id',
+  imageHash: 'imageHash',
+  cropType: 'cropType',
+  language: 'language',
+  result: 'result',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+} as const
+
+export type CachedDiagnosisScalarFieldEnum = (typeof CachedDiagnosisScalarFieldEnum)[keyof typeof CachedDiagnosisScalarFieldEnum]
 
 
 export const WeatherRequestScalarFieldEnum = {
@@ -1282,6 +1373,7 @@ export type GlobalOmitConfig = {
   profile?: Prisma.ProfileOmit
   userPreferredCrop?: Prisma.UserPreferredCropOmit
   detection?: Prisma.DetectionOmit
+  cachedDiagnosis?: Prisma.CachedDiagnosisOmit
   weatherRequest?: Prisma.WeatherRequestOmit
   notification?: Prisma.NotificationOmit
 }

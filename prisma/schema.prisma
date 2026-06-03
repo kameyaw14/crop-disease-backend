@@ -66,6 +66,8 @@ model User {
   weatherRequests    WeatherRequest[]
   notifications      Notification[]
 
+  cachedDiagnoses CachedDiagnosis[]
+
   @@index([email])
   @@index([phoneNumber])
   @@map("users")
@@ -117,10 +119,35 @@ model Detection {
   user      User?    @relation(fields: [userId], references: [id])
   userId    String?
 
+  cachedDiagnosisId String?
+  cachedDiagnosis   CachedDiagnosis? @relation(fields: [cachedDiagnosisId], references: [id])
+
   @@index([cropType])
   @@index([createdAt])
   @@index([userId])
   @@map("detections")
+}
+
+model CachedDiagnosis {
+  id        String   @id @default(cuid())
+  imageHash String   @unique
+  cropType  String
+  language  String   @default("en")
+  result    Json // Full structured diagnosis result
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  userId     String?
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  detections Detection[]
+
+  @@index([imageHash])
+  @@index([cropType, language])
+  @@index([expiresAt])
+  @@map("cached_diagnoses")
 }
 
 model WeatherRequest {
