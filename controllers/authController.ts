@@ -13,6 +13,7 @@ export const authController = {
         ...result,
       });
     } catch (error: any) {
+      console.error("❗Error in register:", error.message || "register failed");
       res.status(400).json({
         success: false,
         message: error.message || "Registration failed",
@@ -30,6 +31,7 @@ export const authController = {
         ...result,
       });
     } catch (error: any) {
+      console.error("❗Error in login:", error.message || "Login failed");
       res.status(401).json({
         success: false,
         message: error.message || "Login failed",
@@ -42,6 +44,7 @@ export const authController = {
       const user = await authService.getMe(req.user!.userId);
       res.json({ success: true, user });
     } catch (error: any) {
+      console.error("❗Error in getMe:", error.message || "getMe failed");
       res.status(500).json({ success: false, message: "Failed to fetch user" });
     }
   },

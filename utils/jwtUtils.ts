@@ -15,7 +15,7 @@ export const jwtUtils = {
     email: string;
     role: string;
   }): string => {
-    return jwt.sign(payload, JWT_SECRET!, { expiresIn: "7d" }); // 15 minutes - security best practice
+    return jwt.sign(payload, JWT_SECRET!, { expiresIn: "30d" }); // 15 minutes - security best practice
   },
 
   // Verifies token
