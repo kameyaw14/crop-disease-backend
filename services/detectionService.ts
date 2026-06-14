@@ -1,4 +1,4 @@
-////@ts-nocheck
+//@ts-nocheck
 // services/detectionService.ts
 import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";

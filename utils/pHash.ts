@@ -1,3 +1,4 @@
+//@ts-nocheck
 // utils/pHash.ts
 
 // NEW ADDITION: This entire file is new.

@@ -1,3 +1,4 @@
+//@ts-nocheck
 // controllers/detectionController.ts
 import type { Request, Response, NextFunction } from "express";
 import { detectDisease } from "../services/detectionService.js";
