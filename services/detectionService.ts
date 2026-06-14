@@ -291,6 +291,8 @@ Analyze this image carefully and follow the system instructions.`;
       }
 
       // ─── LAYER 3a: Disease Label Deduplication
+      // TypeScript: We declare cachedDiagnosisId as string | undefined because 
+      // cache creation can fail gracefully without breaking the main diagnosis flow.
       const existingDiseaseCache = await prisma.cachedDiagnosis.findFirst({
         where: {
           diseaseName: validatedResult.diseaseName,
@@ -301,17 +303,16 @@ Analyze this image carefully and follow the system instructions.`;
         orderBy: { confidence: "desc" }, // Prefer the highest-confidence cached version
       });
 
-      let cachedDiagnosisId: string;
+      let cachedDiagnosisId: string | undefined; // TypeScript: we use undefined for fallback cases
 
       if (existingDiseaseCache) {
         console.log(
-          `♻️  Reusing existing cache entry for disease: ${validatedResult.diseaseName}`,
+          `♻️ Reusing existing cache entry for disease: ${validatedResult.diseaseName}`,
         );
 
         cachedDiagnosisId = existingDiseaseCache.id;
 
-        // NEW ADDITION: Backfill pHash on the existing cache entry if it doesn't have one yet.
-        // This gradually enriches old cache entries over time without a migration script.
+        // Backfill pHash if missing
         if (!existingDiseaseCache.imagePerceptualHash && imagePerceptualHash) {
           await prisma.cachedDiagnosis.update({
             where: { id: existingDiseaseCache.id },
@@ -322,29 +323,63 @@ Analyze this image carefully and follow the system instructions.`;
           );
         }
       } else {
-        // NEW ADDITION: No existing entry for this disease - create a fresh cache entry.
-        // UPDATED: Now also stores imagePerceptualHash and diseaseName as dedicated fields
-        // (previously only result JSON was stored; diseaseName was buried inside it).
-        const cachedDiagnosis = await prisma.cachedDiagnosis.create({
-          data: {
-            imageHash,
-            cropType: validatedBody.cropType,
-            language: userLanguage,
-            result: validatedResult,
-            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-            userId,
-            imagePerceptualHash: imagePerceptualHash ?? undefined,
-            diseaseName: validatedResult.diseaseName,
-            confidence: validatedResult.confidence,
-          },
-        });
-
-        cachedDiagnosisId = cachedDiagnosis.id;
+        // No existing cache → create new one
         console.log(
-          `💾 New cache entry created for disease: ${validatedResult.diseaseName}`,
+          `💾 Attempting to create new cache entry for disease: ${validatedResult.diseaseName} with userId: ${userId}`,
         );
+
+        try {
+          // Defensive check: verify user exists before linking (prevents FK violation)
+          const existingUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true },
+          });
+
+          if (!existingUser) {
+            console.warn(
+              `⚠️ User ${userId} not found - creating cache without user link`,
+            );
+            const cachedDiagnosis = await prisma.cachedDiagnosis.create({
+              data: {
+                imageHash,
+                cropType: validatedBody.cropType,
+                language: userLanguage,
+                result: validatedResult,
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+                imagePerceptualHash: imagePerceptualHash ?? undefined,
+                diseaseName: validatedResult.diseaseName,
+                confidence: validatedResult.confidence,
+                // userId omitted → Prisma sets null (allowed by schema)
+              },
+            });
+            cachedDiagnosisId = cachedDiagnosis.id;
+          } else {
+            const cachedDiagnosis = await prisma.cachedDiagnosis.create({
+              data: {
+                imageHash,
+                cropType: validatedBody.cropType,
+                language: userLanguage,
+                result: validatedResult,
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                userId, // safe because we checked user exists
+                imagePerceptualHash: imagePerceptualHash ?? undefined,
+                diseaseName: validatedResult.diseaseName,
+                confidence: validatedResult.confidence,
+              },
+            });
+            cachedDiagnosisId = cachedDiagnosis.id;
+          }
+
+          console.log(
+            `💾 New cache entry created successfully: ${cachedDiagnosisId}`,
+          );
+        } catch (cacheError: any) {
+          console.error("❌ Failed to create cache entry:", cacheError.message);
+          cachedDiagnosisId = undefined; // graceful fallback
+        }
       }
 
+      // Create detection record (always runs, even if cache failed)
       const detection = await prisma.detection.create({
         data: {
           imageUrl,
@@ -360,7 +395,7 @@ Analyze this image carefully and follow the system instructions.`;
           prevention: validatedResult.prevention,
           localNotes: validatedResult.localNotes,
           userId,
-          cachedDiagnosisId,
+          cachedDiagnosisId: cachedDiagnosisId ?? undefined, // safe link
           aiProvider: "gemini",
         },
       });
