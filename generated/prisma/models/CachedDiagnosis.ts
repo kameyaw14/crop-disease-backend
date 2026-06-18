@@ -291,10 +291,11 @@ export type CachedDiagnosisOrderByWithRelationInput = {
 
 export type CachedDiagnosisWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  imageHash?: string
+  imageHash_language?: Prisma.CachedDiagnosisImageHashLanguageCompoundUniqueInput
   AND?: Prisma.CachedDiagnosisWhereInput | Prisma.CachedDiagnosisWhereInput[]
   OR?: Prisma.CachedDiagnosisWhereInput[]
   NOT?: Prisma.CachedDiagnosisWhereInput | Prisma.CachedDiagnosisWhereInput[]
+  imageHash?: Prisma.StringFilter<"CachedDiagnosis"> | string
   cropType?: Prisma.StringFilter<"CachedDiagnosis"> | string
   language?: Prisma.StringFilter<"CachedDiagnosis"> | string
   result?: Prisma.JsonFilter<"CachedDiagnosis">
@@ -307,7 +308,7 @@ export type CachedDiagnosisWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringNullableFilter<"CachedDiagnosis"> | string | null
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   detections?: Prisma.DetectionListRelationFilter
-}, "id" | "imageHash">
+}, "id" | "imageHash_language">
 
 export type CachedDiagnosisOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -468,6 +469,11 @@ export type CachedDiagnosisOrderByRelationAggregateInput = {
 export type CachedDiagnosisNullableScalarRelationFilter = {
   is?: Prisma.CachedDiagnosisWhereInput | null
   isNot?: Prisma.CachedDiagnosisWhereInput | null
+}
+
+export type CachedDiagnosisImageHashLanguageCompoundUniqueInput = {
+  imageHash: string
+  language: string
 }
 
 export type CachedDiagnosisCountOrderByAggregateInput = {

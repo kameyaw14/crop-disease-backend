@@ -130,7 +130,7 @@ model Detection {
 
 model CachedDiagnosis {
   id                  String   @id @default(cuid())
-  imageHash           String   @unique
+  imageHash           String
   cropType            String
   language            String   @default("en")
   result              Json // Full structured diagnosis result
@@ -147,6 +147,7 @@ model CachedDiagnosis {
   user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   detections Detection[]
 
+  @@unique([imageHash, language])
   @@index([imageHash])
   @@index([cropType, language])
   @@index([expiresAt])
@@ -181,8 +182,8 @@ model Notification {
   message    String
   priority   Priority         @default(MEDIUM)
   isRead     Boolean          @default(false)
-  expiresAt  DateTime? // NEW: For auto-cleanup of old alerts
-  actionLink String? // NEW: e.g. "/weather" or deep link
+  expiresAt  DateTime? //  For auto-cleanup of old alerts
+  actionLink String? //  e.g. "/weather" or deep link
   metadata   Json? // Extra context (weather, crops, etc.)
 
   sentAt DateTime @default(now())

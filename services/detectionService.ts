@@ -33,7 +33,7 @@ const ai = new GoogleGenAI({
   apiKey: env.GEMINI_API_KEY,
 });
 
-// NEW ADDITION: Helper to safely create Detection record (prevents FK violations)
+//  Helper to safely create Detection record (prevents FK violations)
 async function createSafeDetection(data: any) {
   // TypeScript: 'any' used temporarily for flexibility during defensive creation
   try {
@@ -122,12 +122,17 @@ Analyze this image carefully and follow the system instructions.`;
 
   if (!isDemoMode) {
     const cached = await prisma.cachedDiagnosis.findUnique({
-      where: { imageHash },
+      where: {
+        imageHash_language: {
+          imageHash,
+          language: userLanguage,
+        },
+      },
     });
 
     if (cached && cached.expiresAt > new Date()) {
       console.log("✅ Cache hit for image hash:", imageHash);
-      // UPDATED: Use safe detection creation to prevent userId FK violation
+      //  Use safe detection creation to prevent userId FK violation
       const detection = await createSafeDetection({
         imageUrl,
         cropType: validatedBody.cropType,
@@ -218,7 +223,7 @@ Analyze this image carefully and follow the system instructions.`;
         bestMatch.id,
       );
 
-      // UPDATED: Use safe detection creation
+      //  Use safe detection creation
       const detection = await createSafeDetection({
         imageUrl,
         cropType: validatedBody.cropType,
@@ -335,45 +340,45 @@ Analyze this image carefully and follow the system instructions.`;
         );
 
         try {
-          const existingUser = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { id: true },
+          // NEW ADDITION: Use transaction for atomic cache + user check
+          const cachedDiagnosis = await prisma.$transaction(async (tx) => {
+            const existingUser = await tx.user.findUnique({
+              where: { id: userId },
+              select: { id: true },
+            });
+            if (!existingUser) {
+              console.warn(
+                `⚠️ User ${userId} not found - creating cache without user link`,
+              );
+              return await tx.cachedDiagnosis.create({
+                data: {
+                  imageHash,
+                  cropType: validatedBody.cropType,
+                  language: userLanguage,
+                  result: validatedResult,
+                  expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                  imagePerceptualHash: imagePerceptualHash ?? undefined,
+                  diseaseName: validatedResult.diseaseName,
+                  confidence: validatedResult.confidence,
+                },
+              });
+            } else {
+              return await tx.cachedDiagnosis.create({
+                data: {
+                  imageHash,
+                  cropType: validatedBody.cropType,
+                  language: userLanguage,
+                  result: validatedResult,
+                  expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                  userId,
+                  imagePerceptualHash: imagePerceptualHash ?? undefined,
+                  diseaseName: validatedResult.diseaseName,
+                  confidence: validatedResult.confidence,
+                },
+              });
+            }
           });
-
-          if (!existingUser) {
-            console.warn(
-              `⚠️ User ${userId} not found - creating cache without user link`,
-            );
-            const cachedDiagnosis = await prisma.cachedDiagnosis.create({
-              data: {
-                imageHash,
-                cropType: validatedBody.cropType,
-                language: userLanguage,
-                result: validatedResult,
-                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                imagePerceptualHash: imagePerceptualHash ?? undefined,
-                diseaseName: validatedResult.diseaseName,
-                confidence: validatedResult.confidence,
-              },
-            });
-            cachedDiagnosisId = cachedDiagnosis.id;
-          } else {
-            const cachedDiagnosis = await prisma.cachedDiagnosis.create({
-              data: {
-                imageHash,
-                cropType: validatedBody.cropType,
-                language: userLanguage,
-                result: validatedResult,
-                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                userId,
-                imagePerceptualHash: imagePerceptualHash ?? undefined,
-                diseaseName: validatedResult.diseaseName,
-                confidence: validatedResult.confidence,
-              },
-            });
-            cachedDiagnosisId = cachedDiagnosis.id;
-          }
-
+          cachedDiagnosisId = cachedDiagnosis.id;
           console.log(
             `💾 New cache entry created successfully: ${cachedDiagnosisId}`,
           );
@@ -383,7 +388,7 @@ Analyze this image carefully and follow the system instructions.`;
         }
       }
 
-      // UPDATED: Use safe detection creation
+      //  Use safe detection creation
       const detection = await createSafeDetection({
         imageUrl,
         cropType: validatedBody.cropType,
