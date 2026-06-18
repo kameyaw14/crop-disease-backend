@@ -14,6 +14,7 @@ import connectCloudinary from "./config/connectCloudinary.js";
 import weatherRouter from "./routes/weatherRoutes.js";
 import notificationRouter from "./routes/notificationRoutes.js";
 import cropRouter from "./routes/cropRoutes.js";
+import ttsRouter from "./routes/ttsRoutes.js";
 // import { testTtsController } from "./contollers/testController.js";
 
 checkRequiredEnv();
@@ -61,12 +62,12 @@ app.use(express.json());
 
 const httpServer = http.createServer(app);
 
-// app.post("/api/test-tts", testTtsController.testTwiTTS);
 app.use("/api/auth", authRouter);
 app.use("/api", detectionRouter);
 app.use("/api/crops", cropRouter);
 app.use("/api/weather", weatherRouter);
 app.use("/api/notifications", notificationRouter);
+app.use("/api/tts", ttsRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({

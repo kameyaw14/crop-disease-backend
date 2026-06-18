@@ -28,7 +28,8 @@ const requiredVars = [
   // "RESEND_API_KEY",
   // "EMAIL_FROM",
   // "MAGIC_LINK_EXPIRY_MINUTES",
-  "MAX_IMAGE_SIZE_MB"
+  "MAX_IMAGE_SIZE_MB",
+  "GHANANLP_API_KEY",
 ];
 
 export function checkRequiredEnv() {
