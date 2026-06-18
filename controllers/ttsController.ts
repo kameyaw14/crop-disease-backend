@@ -6,6 +6,7 @@ import axios from "axios";
 export const ttsController = {
   async generateTts(req: Request, res: Response, next: NextFunction) {
     try {
+      console.log("log 1");
       const { text, language = "tw" } = req.body;
 
       if (!text || typeof text !== "string" || text.trim().length === 0) {
@@ -36,6 +37,8 @@ export const ttsController = {
           responseType: "arraybuffer",
         },
       );
+
+      console.log("log 2");
 
       // Return as base64 for easy frontend consumption
       const audioBase64 = Buffer.from(response.data).toString("base64");
