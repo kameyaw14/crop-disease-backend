@@ -1,5 +1,5 @@
-////@ts-nocheck
 // services/detectionService.ts
+//@ts-nocheck
 import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 import { env } from "../utils/env.js";
