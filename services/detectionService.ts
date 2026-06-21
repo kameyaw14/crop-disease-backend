@@ -152,12 +152,31 @@ Analyze this image carefully and follow the system instructions.`;
         aiProvider: "gemini-cached",
       });
 
+      console.log(`🔃 checking if already in crops`);
+
+      const normalizedCropType = validatedBody.cropType.toUpperCase();
+      const isAlreadyInCrops = await cropService.isCropInPreferred(
+        userId,
+        normalizedCropType,
+      );
+
+      console.log(`✅ checked if already in crops`);
+
+      const suggestAddToMyCrops = {
+        suggested: !isAlreadyInCrops,
+        cropType: validatedBody.cropType,
+        message: !isAlreadyInCrops
+          ? `Would you like to add ${validatedBody.cropType} to My Crops for better tracking, history, and personalized insights?`
+          : `This crop is already in your My Crops. Great job tracking your farm!`,
+      };
+
       return {
         success: true,
         id: detection.id,
         imageUrl,
         ...cached.result,
         timestamp: new Date().toISOString(),
+        suggestAddToMyCrops,
         fromCache: true,
       };
     }
