@@ -2,13 +2,14 @@
 import { prisma } from "../config/connectDb.js";
 import {
   addPreferredCropSchema,
+  getCropHistorySchema,
   updatePreferredCropSchema,
   type AddPreferredCropInput,
+  type GetCropHistoryInput,
   type UpdatePreferredCropInput,
 } from "../schema/cropSchema.js";
 
 export const cropService = {
- 
   async getMyCrops(userId: string) {
     // Step 1: Get all preferred crops
     const preferredCrops = await prisma.userPreferredCrop.findMany({
@@ -154,6 +155,119 @@ export const cropService = {
     return {
       success: true,
       message: "Crop removed from your list.",
+    };
+  },
+
+  async isCropInPreferred(userId: string, cropType: string) {
+    const existing = await prisma.userPreferredCrop.findUnique({
+      where: { userId_cropType: { userId, cropType } },
+      select: { cropType: true },
+    });
+
+    return !!existing;
+  },
+
+  async getCropHistory(
+    userId: string,
+    cropType: string,
+    query: GetCropHistoryInput,
+  ) {
+    const validated = getCropHistorySchema.parse(query);
+
+    const preferredCrop = await prisma.userPreferredCrop.findUnique({
+      where: { userId_cropType: { userId, cropType } },
+    });
+
+    if (!preferredCrop) {
+      return {
+        success: false,
+        message:
+          "This crop is not in your preferred list. Please add it first.",
+      };
+    }
+
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 10, 50);
+    const skip = (page - 1) * limit;
+
+    // Build where clause with optional filters
+    const whereClause: any = {
+      userId,
+      cropType,
+    };
+
+    if (validated.startDate)
+      whereClause.createdAt = {
+        ...whereClause.createdAt,
+        gte: new Date(validated.startDate),
+      };
+    if (validated.endDate)
+      whereClause.createdAt = {
+        ...whereClause.createdAt,
+        lte: new Date(validated.endDate),
+      };
+    if (validated.minConfidence)
+      whereClause.confidence = { gte: validated.minConfidence };
+
+    // Main history query
+    const [history, total] = await Promise.all([
+      prisma.detection.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          imageUrl: true,
+          diseaseName: true,
+          confidence: true,
+          symptoms: true,
+          createdAt: true,
+          localNotes: true,
+          aiProvider: true,
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.detection.count({ where: whereClause }),
+    ]);
+
+    // Basic aggregates
+    const aggregates = await prisma.detection.aggregate({
+      where: whereClause,
+      _count: { id: true },
+      _avg: { confidence: true },
+    });
+
+    // Most common disease using groupBy
+    const diseaseGroups = await prisma.detection.groupBy({
+      by: ["diseaseName"],
+      where: whereClause,
+      _count: { diseaseName: true },
+      orderBy: { _count: { diseaseName: "desc" } },
+      take: 1,
+    });
+
+    const mostCommonDisease = diseaseGroups[0]?.diseaseName || null;
+
+    return {
+      success: true,
+      history,
+      aggregates: {
+        totalDetections: aggregates._count.id,
+        avgConfidence: aggregates._avg.confidence
+          ? Number(aggregates._avg.confidence.toFixed(2))
+          : 0,
+        mostCommonDisease,
+      },
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+      message:
+        history.length > 0
+          ? "Crop history loaded successfully. Learn from your past diagnoses!"
+          : "No diagnoses yet for this crop. Take a photo to start building your history.",
     };
   },
 };

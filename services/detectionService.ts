@@ -1,4 +1,4 @@
-//@ts-nocheck
+////@ts-nocheck
 // services/detectionService.ts
 import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
@@ -18,6 +18,7 @@ import {
   computePerceptualHash,
   PHASH_SIMILARITY_THRESHOLD,
 } from "../utils/pHash.js";
+import { cropService } from "./cropService.js";
 
 //Helper to create SHA-256 hash
 function generateImageHash(buffer: Buffer): string {
@@ -408,12 +409,30 @@ Analyze this image carefully and follow the system instructions.`;
       });
 
       console.log(`✅ Diagnosis successful on attempt ${attempt}`);
+
+      console.log(`🔃 checking if already in crops`);
+      const isAlreadyInCrops = await cropService.isCropInPreferred(
+        userId,
+        validatedBody.cropType,
+      );
+
+      console.log(`✅ checked if already in crops`);
+
+      const suggestAddToMyCrops = {
+        suggested: !isAlreadyInCrops,
+        cropType: validatedBody.cropType,
+        message: !isAlreadyInCrops
+          ? `Would you like to add ${validatedBody.cropType} to My Crops for better tracking, history, and personalized insights?`
+          : `This crop is already in your My Crops. Great job tracking your farm!`,
+      };
+
       return {
         success: true,
         id: detection.id,
         imageUrl,
         ...validatedResult,
         timestamp: new Date().toISOString(),
+        suggestAddToMyCrops,
       };
     } catch (error: any) {
       lastError = error;

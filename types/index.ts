@@ -34,8 +34,15 @@ export interface DetectionResult {
   cropVerificationReason?: string;
 }
 
+export interface SuggestAddToMyCrops {
+  suggested: boolean;
+  cropType: string;
+  message: string;
+}
+
 export type DetectionSuccess = DetectionResult & {
   success: true;
+  suggestAddToMyCrops?: SuggestAddToMyCrops;
 };
 
 export type DetectionError = {

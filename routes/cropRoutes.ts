@@ -6,11 +6,9 @@ import { cropController } from "../controllers/cropController.js";
 const cropRouter = express.Router();
 
 cropRouter.get("/my-crops", protect, cropController.getMyCrops);
-
 cropRouter.post("/my-crops", protect, cropController.addMyCrop);
-
 cropRouter.patch("/my-crops/:cropType", protect, cropController.updateMyCrop);
-
 cropRouter.delete("/my-crops/:cropType", protect, cropController.deleteMyCrop);
+cropRouter.get("/my-crops/:cropType/history", protect, cropController.getCropHistory);
 
 export default cropRouter;

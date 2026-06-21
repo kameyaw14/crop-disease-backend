@@ -32,3 +32,27 @@ export type AddPreferredCropInput = z.infer<typeof addPreferredCropSchema>;
 export type UpdatePreferredCropInput = z.infer<
   typeof updatePreferredCropSchema
 >;
+
+export const getCropHistorySchema = z.object({
+  page: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1))
+    .optional()
+    .default("1"),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1).max(50))
+    .optional()
+    .default("10"),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  minConfidence: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().min(0).max(1))
+    .optional(),
+});
+
+export type GetCropHistoryInput = z.infer<typeof getCropHistorySchema>;
