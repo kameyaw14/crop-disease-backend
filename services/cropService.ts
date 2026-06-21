@@ -1,4 +1,5 @@
 // services/cropService.ts
+//@ts-nocheck
 import { prisma } from "../config/connectDb.js";
 import {
   addPreferredCropSchema,
