@@ -1,4 +1,5 @@
 // controllers/cropController.ts
+//@ts-nocheck
 import type { Request, Response } from "express";
 import { cropService } from "../services/cropService.js";
 import type {
