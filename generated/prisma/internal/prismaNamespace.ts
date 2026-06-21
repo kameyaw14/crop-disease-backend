@@ -997,7 +997,15 @@ export type ProfileScalarFieldEnum = (typeof ProfileScalarFieldEnum)[keyof typeo
 
 export const UserPreferredCropScalarFieldEnum = {
   userId: 'userId',
-  cropType: 'cropType'
+  cropType: 'cropType',
+  customName: 'customName',
+  plantingDate: 'plantingDate',
+  expectedHarvestDate: 'expectedHarvestDate',
+  farmSize: 'farmSize',
+  farmSizeUnit: 'farmSizeUnit',
+  notes: 'notes',
+  status: 'status',
+  lastActivityDate: 'lastActivityDate'
 } as const
 
 export type UserPreferredCropScalarFieldEnum = (typeof UserPreferredCropScalarFieldEnum)[keyof typeof UserPreferredCropScalarFieldEnum]
@@ -1204,6 +1212,34 @@ export type ListEnumCropTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
  * Reference to a field of type 'CropType'
  */
 export type EnumCropTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CropType'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CropStatus'
+ */
+export type EnumCropStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CropStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'CropStatus[]'
+ */
+export type ListEnumCropStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CropStatus[]'>
     
 
 

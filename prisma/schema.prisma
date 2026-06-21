@@ -31,6 +31,13 @@ enum CropType {
   // Add more crops here in future
 }
 
+enum CropStatus {
+  HEALTHY
+  MONITORING
+  AT_RISK
+  HARVEST_READY
+}
+
 enum NotificationType {
   DAILY_SUMMARY
   HIGH_RISK
@@ -89,8 +96,18 @@ model Profile {
 
 // For future scalability (User <-> CropType)
 model UserPreferredCrop {
-  userId   String
-  cropType CropType
+  userId              String
+  cropType            CropType
+  // Custom name for ownership feeling (e.g., "My Backyard Maize")
+  customName          String?
+  plantingDate        DateTime?
+  expectedHarvestDate DateTime?
+  farmSize            Decimal?
+  farmSizeUnit        String?    @default("acres")
+  notes               String?
+  status              CropStatus @default(HEALTHY)
+  // For easy sorting of recently active crops
+  lastActivityDate    DateTime?  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

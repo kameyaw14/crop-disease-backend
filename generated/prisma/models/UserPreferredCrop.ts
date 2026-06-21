@@ -20,40 +20,106 @@ export type UserPreferredCropModel = runtime.Types.Result.DefaultSelection<Prism
 
 export type AggregateUserPreferredCrop = {
   _count: UserPreferredCropCountAggregateOutputType | null
+  _avg: UserPreferredCropAvgAggregateOutputType | null
+  _sum: UserPreferredCropSumAggregateOutputType | null
   _min: UserPreferredCropMinAggregateOutputType | null
   _max: UserPreferredCropMaxAggregateOutputType | null
+}
+
+export type UserPreferredCropAvgAggregateOutputType = {
+  farmSize: runtime.Decimal | null
+}
+
+export type UserPreferredCropSumAggregateOutputType = {
+  farmSize: runtime.Decimal | null
 }
 
 export type UserPreferredCropMinAggregateOutputType = {
   userId: string | null
   cropType: $Enums.CropType | null
+  customName: string | null
+  plantingDate: Date | null
+  expectedHarvestDate: Date | null
+  farmSize: runtime.Decimal | null
+  farmSizeUnit: string | null
+  notes: string | null
+  status: $Enums.CropStatus | null
+  lastActivityDate: Date | null
 }
 
 export type UserPreferredCropMaxAggregateOutputType = {
   userId: string | null
   cropType: $Enums.CropType | null
+  customName: string | null
+  plantingDate: Date | null
+  expectedHarvestDate: Date | null
+  farmSize: runtime.Decimal | null
+  farmSizeUnit: string | null
+  notes: string | null
+  status: $Enums.CropStatus | null
+  lastActivityDate: Date | null
 }
 
 export type UserPreferredCropCountAggregateOutputType = {
   userId: number
   cropType: number
+  customName: number
+  plantingDate: number
+  expectedHarvestDate: number
+  farmSize: number
+  farmSizeUnit: number
+  notes: number
+  status: number
+  lastActivityDate: number
   _all: number
 }
 
 
+export type UserPreferredCropAvgAggregateInputType = {
+  farmSize?: true
+}
+
+export type UserPreferredCropSumAggregateInputType = {
+  farmSize?: true
+}
+
 export type UserPreferredCropMinAggregateInputType = {
   userId?: true
   cropType?: true
+  customName?: true
+  plantingDate?: true
+  expectedHarvestDate?: true
+  farmSize?: true
+  farmSizeUnit?: true
+  notes?: true
+  status?: true
+  lastActivityDate?: true
 }
 
 export type UserPreferredCropMaxAggregateInputType = {
   userId?: true
   cropType?: true
+  customName?: true
+  plantingDate?: true
+  expectedHarvestDate?: true
+  farmSize?: true
+  farmSizeUnit?: true
+  notes?: true
+  status?: true
+  lastActivityDate?: true
 }
 
 export type UserPreferredCropCountAggregateInputType = {
   userId?: true
   cropType?: true
+  customName?: true
+  plantingDate?: true
+  expectedHarvestDate?: true
+  farmSize?: true
+  farmSizeUnit?: true
+  notes?: true
+  status?: true
+  lastActivityDate?: true
   _all?: true
 }
 
@@ -95,6 +161,18 @@ export type UserPreferredCropAggregateArgs<ExtArgs extends runtime.Types.Extensi
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserPreferredCropAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserPreferredCropSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserPreferredCropMinAggregateInputType
@@ -125,6 +203,8 @@ export type UserPreferredCropGroupByArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   _count?: UserPreferredCropCountAggregateInputType | true
+  _avg?: UserPreferredCropAvgAggregateInputType
+  _sum?: UserPreferredCropSumAggregateInputType
   _min?: UserPreferredCropMinAggregateInputType
   _max?: UserPreferredCropMaxAggregateInputType
 }
@@ -132,7 +212,17 @@ export type UserPreferredCropGroupByArgs<ExtArgs extends runtime.Types.Extension
 export type UserPreferredCropGroupByOutputType = {
   userId: string
   cropType: $Enums.CropType
+  customName: string | null
+  plantingDate: Date | null
+  expectedHarvestDate: Date | null
+  farmSize: runtime.Decimal | null
+  farmSizeUnit: string | null
+  notes: string | null
+  status: $Enums.CropStatus
+  lastActivityDate: Date | null
   _count: UserPreferredCropCountAggregateOutputType | null
+  _avg: UserPreferredCropAvgAggregateOutputType | null
+  _sum: UserPreferredCropSumAggregateOutputType | null
   _min: UserPreferredCropMinAggregateOutputType | null
   _max: UserPreferredCropMaxAggregateOutputType | null
 }
@@ -158,12 +248,28 @@ export type UserPreferredCropWhereInput = {
   NOT?: Prisma.UserPreferredCropWhereInput | Prisma.UserPreferredCropWhereInput[]
   userId?: Prisma.StringFilter<"UserPreferredCrop"> | string
   cropType?: Prisma.EnumCropTypeFilter<"UserPreferredCrop"> | $Enums.CropType
+  customName?: Prisma.StringNullableFilter<"UserPreferredCrop"> | string | null
+  plantingDate?: Prisma.DateTimeNullableFilter<"UserPreferredCrop"> | Date | string | null
+  expectedHarvestDate?: Prisma.DateTimeNullableFilter<"UserPreferredCrop"> | Date | string | null
+  farmSize?: Prisma.DecimalNullableFilter<"UserPreferredCrop"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.StringNullableFilter<"UserPreferredCrop"> | string | null
+  notes?: Prisma.StringNullableFilter<"UserPreferredCrop"> | string | null
+  status?: Prisma.EnumCropStatusFilter<"UserPreferredCrop"> | $Enums.CropStatus
+  lastActivityDate?: Prisma.DateTimeNullableFilter<"UserPreferredCrop"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type UserPreferredCropOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   cropType?: Prisma.SortOrder
+  customName?: Prisma.SortOrderInput | Prisma.SortOrder
+  plantingDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedHarvestDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  farmSize?: Prisma.SortOrderInput | Prisma.SortOrder
+  farmSizeUnit?: Prisma.SortOrderInput | Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrder
+  lastActivityDate?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -174,15 +280,33 @@ export type UserPreferredCropWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UserPreferredCropWhereInput | Prisma.UserPreferredCropWhereInput[]
   userId?: Prisma.StringFilter<"UserPreferredCrop"> | string
   cropType?: Prisma.EnumCropTypeFilter<"UserPreferredCrop"> | $Enums.CropType
+  customName?: Prisma.StringNullableFilter<"UserPreferredCrop"> | string | null
+  plantingDate?: Prisma.DateTimeNullableFilter<"UserPreferredCrop"> | Date | string | null
+  expectedHarvestDate?: Prisma.DateTimeNullableFilter<"UserPreferredCrop"> | Date | string | null
+  farmSize?: Prisma.DecimalNullableFilter<"UserPreferredCrop"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.StringNullableFilter<"UserPreferredCrop"> | string | null
+  notes?: Prisma.StringNullableFilter<"UserPreferredCrop"> | string | null
+  status?: Prisma.EnumCropStatusFilter<"UserPreferredCrop"> | $Enums.CropStatus
+  lastActivityDate?: Prisma.DateTimeNullableFilter<"UserPreferredCrop"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "userId_cropType">
 
 export type UserPreferredCropOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   cropType?: Prisma.SortOrder
+  customName?: Prisma.SortOrderInput | Prisma.SortOrder
+  plantingDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedHarvestDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  farmSize?: Prisma.SortOrderInput | Prisma.SortOrder
+  farmSizeUnit?: Prisma.SortOrderInput | Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrder
+  lastActivityDate?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserPreferredCropCountOrderByAggregateInput
+  _avg?: Prisma.UserPreferredCropAvgOrderByAggregateInput
   _max?: Prisma.UserPreferredCropMaxOrderByAggregateInput
   _min?: Prisma.UserPreferredCropMinOrderByAggregateInput
+  _sum?: Prisma.UserPreferredCropSumOrderByAggregateInput
 }
 
 export type UserPreferredCropScalarWhereWithAggregatesInput = {
@@ -191,40 +315,104 @@ export type UserPreferredCropScalarWhereWithAggregatesInput = {
   NOT?: Prisma.UserPreferredCropScalarWhereWithAggregatesInput | Prisma.UserPreferredCropScalarWhereWithAggregatesInput[]
   userId?: Prisma.StringWithAggregatesFilter<"UserPreferredCrop"> | string
   cropType?: Prisma.EnumCropTypeWithAggregatesFilter<"UserPreferredCrop"> | $Enums.CropType
+  customName?: Prisma.StringNullableWithAggregatesFilter<"UserPreferredCrop"> | string | null
+  plantingDate?: Prisma.DateTimeNullableWithAggregatesFilter<"UserPreferredCrop"> | Date | string | null
+  expectedHarvestDate?: Prisma.DateTimeNullableWithAggregatesFilter<"UserPreferredCrop"> | Date | string | null
+  farmSize?: Prisma.DecimalNullableWithAggregatesFilter<"UserPreferredCrop"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.StringNullableWithAggregatesFilter<"UserPreferredCrop"> | string | null
+  notes?: Prisma.StringNullableWithAggregatesFilter<"UserPreferredCrop"> | string | null
+  status?: Prisma.EnumCropStatusWithAggregatesFilter<"UserPreferredCrop"> | $Enums.CropStatus
+  lastActivityDate?: Prisma.DateTimeNullableWithAggregatesFilter<"UserPreferredCrop"> | Date | string | null
 }
 
 export type UserPreferredCropCreateInput = {
   cropType: $Enums.CropType
+  customName?: string | null
+  plantingDate?: Date | string | null
+  expectedHarvestDate?: Date | string | null
+  farmSize?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: string | null
+  notes?: string | null
+  status?: $Enums.CropStatus
+  lastActivityDate?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutUserPreferredCropsInput
 }
 
 export type UserPreferredCropUncheckedCreateInput = {
   userId: string
   cropType: $Enums.CropType
+  customName?: string | null
+  plantingDate?: Date | string | null
+  expectedHarvestDate?: Date | string | null
+  farmSize?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: string | null
+  notes?: string | null
+  status?: $Enums.CropStatus
+  lastActivityDate?: Date | string | null
 }
 
 export type UserPreferredCropUpdateInput = {
   cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
+  customName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plantingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedHarvestDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  farmSize?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCropStatusFieldUpdateOperationsInput | $Enums.CropStatus
+  lastActivityDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutUserPreferredCropsNestedInput
 }
 
 export type UserPreferredCropUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
+  customName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plantingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedHarvestDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  farmSize?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCropStatusFieldUpdateOperationsInput | $Enums.CropStatus
+  lastActivityDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserPreferredCropCreateManyInput = {
   userId: string
   cropType: $Enums.CropType
+  customName?: string | null
+  plantingDate?: Date | string | null
+  expectedHarvestDate?: Date | string | null
+  farmSize?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: string | null
+  notes?: string | null
+  status?: $Enums.CropStatus
+  lastActivityDate?: Date | string | null
 }
 
 export type UserPreferredCropUpdateManyMutationInput = {
   cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
+  customName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plantingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedHarvestDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  farmSize?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCropStatusFieldUpdateOperationsInput | $Enums.CropStatus
+  lastActivityDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserPreferredCropUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
+  customName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plantingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedHarvestDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  farmSize?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCropStatusFieldUpdateOperationsInput | $Enums.CropStatus
+  lastActivityDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserPreferredCropListRelationFilter = {
@@ -245,16 +433,48 @@ export type UserPreferredCropUserIdCropTypeCompoundUniqueInput = {
 export type UserPreferredCropCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   cropType?: Prisma.SortOrder
+  customName?: Prisma.SortOrder
+  plantingDate?: Prisma.SortOrder
+  expectedHarvestDate?: Prisma.SortOrder
+  farmSize?: Prisma.SortOrder
+  farmSizeUnit?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  lastActivityDate?: Prisma.SortOrder
+}
+
+export type UserPreferredCropAvgOrderByAggregateInput = {
+  farmSize?: Prisma.SortOrder
 }
 
 export type UserPreferredCropMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   cropType?: Prisma.SortOrder
+  customName?: Prisma.SortOrder
+  plantingDate?: Prisma.SortOrder
+  expectedHarvestDate?: Prisma.SortOrder
+  farmSize?: Prisma.SortOrder
+  farmSizeUnit?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  lastActivityDate?: Prisma.SortOrder
 }
 
 export type UserPreferredCropMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   cropType?: Prisma.SortOrder
+  customName?: Prisma.SortOrder
+  plantingDate?: Prisma.SortOrder
+  expectedHarvestDate?: Prisma.SortOrder
+  farmSize?: Prisma.SortOrder
+  farmSizeUnit?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  lastActivityDate?: Prisma.SortOrder
+}
+
+export type UserPreferredCropSumOrderByAggregateInput = {
+  farmSize?: Prisma.SortOrder
 }
 
 export type UserPreferredCropCreateNestedManyWithoutUserInput = {
@@ -303,12 +523,44 @@ export type EnumCropTypeFieldUpdateOperationsInput = {
   set?: $Enums.CropType
 }
 
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type EnumCropStatusFieldUpdateOperationsInput = {
+  set?: $Enums.CropStatus
+}
+
 export type UserPreferredCropCreateWithoutUserInput = {
   cropType: $Enums.CropType
+  customName?: string | null
+  plantingDate?: Date | string | null
+  expectedHarvestDate?: Date | string | null
+  farmSize?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: string | null
+  notes?: string | null
+  status?: $Enums.CropStatus
+  lastActivityDate?: Date | string | null
 }
 
 export type UserPreferredCropUncheckedCreateWithoutUserInput = {
   cropType: $Enums.CropType
+  customName?: string | null
+  plantingDate?: Date | string | null
+  expectedHarvestDate?: Date | string | null
+  farmSize?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: string | null
+  notes?: string | null
+  status?: $Enums.CropStatus
+  lastActivityDate?: Date | string | null
 }
 
 export type UserPreferredCropCreateOrConnectWithoutUserInput = {
@@ -343,22 +595,62 @@ export type UserPreferredCropScalarWhereInput = {
   NOT?: Prisma.UserPreferredCropScalarWhereInput | Prisma.UserPreferredCropScalarWhereInput[]
   userId?: Prisma.StringFilter<"UserPreferredCrop"> | string
   cropType?: Prisma.EnumCropTypeFilter<"UserPreferredCrop"> | $Enums.CropType
+  customName?: Prisma.StringNullableFilter<"UserPreferredCrop"> | string | null
+  plantingDate?: Prisma.DateTimeNullableFilter<"UserPreferredCrop"> | Date | string | null
+  expectedHarvestDate?: Prisma.DateTimeNullableFilter<"UserPreferredCrop"> | Date | string | null
+  farmSize?: Prisma.DecimalNullableFilter<"UserPreferredCrop"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.StringNullableFilter<"UserPreferredCrop"> | string | null
+  notes?: Prisma.StringNullableFilter<"UserPreferredCrop"> | string | null
+  status?: Prisma.EnumCropStatusFilter<"UserPreferredCrop"> | $Enums.CropStatus
+  lastActivityDate?: Prisma.DateTimeNullableFilter<"UserPreferredCrop"> | Date | string | null
 }
 
 export type UserPreferredCropCreateManyUserInput = {
   cropType: $Enums.CropType
+  customName?: string | null
+  plantingDate?: Date | string | null
+  expectedHarvestDate?: Date | string | null
+  farmSize?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: string | null
+  notes?: string | null
+  status?: $Enums.CropStatus
+  lastActivityDate?: Date | string | null
 }
 
 export type UserPreferredCropUpdateWithoutUserInput = {
   cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
+  customName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plantingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedHarvestDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  farmSize?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCropStatusFieldUpdateOperationsInput | $Enums.CropStatus
+  lastActivityDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserPreferredCropUncheckedUpdateWithoutUserInput = {
   cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
+  customName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plantingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedHarvestDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  farmSize?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCropStatusFieldUpdateOperationsInput | $Enums.CropStatus
+  lastActivityDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserPreferredCropUncheckedUpdateManyWithoutUserInput = {
   cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
+  customName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plantingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedHarvestDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  farmSize?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  farmSizeUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCropStatusFieldUpdateOperationsInput | $Enums.CropStatus
+  lastActivityDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -366,27 +658,59 @@ export type UserPreferredCropUncheckedUpdateManyWithoutUserInput = {
 export type UserPreferredCropSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   userId?: boolean
   cropType?: boolean
+  customName?: boolean
+  plantingDate?: boolean
+  expectedHarvestDate?: boolean
+  farmSize?: boolean
+  farmSizeUnit?: boolean
+  notes?: boolean
+  status?: boolean
+  lastActivityDate?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userPreferredCrop"]>
 
 export type UserPreferredCropSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   userId?: boolean
   cropType?: boolean
+  customName?: boolean
+  plantingDate?: boolean
+  expectedHarvestDate?: boolean
+  farmSize?: boolean
+  farmSizeUnit?: boolean
+  notes?: boolean
+  status?: boolean
+  lastActivityDate?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userPreferredCrop"]>
 
 export type UserPreferredCropSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   userId?: boolean
   cropType?: boolean
+  customName?: boolean
+  plantingDate?: boolean
+  expectedHarvestDate?: boolean
+  farmSize?: boolean
+  farmSizeUnit?: boolean
+  notes?: boolean
+  status?: boolean
+  lastActivityDate?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userPreferredCrop"]>
 
 export type UserPreferredCropSelectScalar = {
   userId?: boolean
   cropType?: boolean
+  customName?: boolean
+  plantingDate?: boolean
+  expectedHarvestDate?: boolean
+  farmSize?: boolean
+  farmSizeUnit?: boolean
+  notes?: boolean
+  status?: boolean
+  lastActivityDate?: boolean
 }
 
-export type UserPreferredCropOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "cropType", ExtArgs["result"]["userPreferredCrop"]>
+export type UserPreferredCropOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "cropType" | "customName" | "plantingDate" | "expectedHarvestDate" | "farmSize" | "farmSizeUnit" | "notes" | "status" | "lastActivityDate", ExtArgs["result"]["userPreferredCrop"]>
 export type UserPreferredCropInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -405,6 +729,14 @@ export type $UserPreferredCropPayload<ExtArgs extends runtime.Types.Extensions.I
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     userId: string
     cropType: $Enums.CropType
+    customName: string | null
+    plantingDate: Date | null
+    expectedHarvestDate: Date | null
+    farmSize: runtime.Decimal | null
+    farmSizeUnit: string | null
+    notes: string | null
+    status: $Enums.CropStatus
+    lastActivityDate: Date | null
   }, ExtArgs["result"]["userPreferredCrop"]>
   composites: {}
 }
@@ -831,6 +1163,14 @@ export interface Prisma__UserPreferredCropClient<T, Null = never, ExtArgs extend
 export interface UserPreferredCropFieldRefs {
   readonly userId: Prisma.FieldRef<"UserPreferredCrop", 'String'>
   readonly cropType: Prisma.FieldRef<"UserPreferredCrop", 'CropType'>
+  readonly customName: Prisma.FieldRef<"UserPreferredCrop", 'String'>
+  readonly plantingDate: Prisma.FieldRef<"UserPreferredCrop", 'DateTime'>
+  readonly expectedHarvestDate: Prisma.FieldRef<"UserPreferredCrop", 'DateTime'>
+  readonly farmSize: Prisma.FieldRef<"UserPreferredCrop", 'Decimal'>
+  readonly farmSizeUnit: Prisma.FieldRef<"UserPreferredCrop", 'String'>
+  readonly notes: Prisma.FieldRef<"UserPreferredCrop", 'String'>
+  readonly status: Prisma.FieldRef<"UserPreferredCrop", 'CropStatus'>
+  readonly lastActivityDate: Prisma.FieldRef<"UserPreferredCrop", 'DateTime'>
 }
     
 

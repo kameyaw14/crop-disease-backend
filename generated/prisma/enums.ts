@@ -32,6 +32,16 @@ export const CropType = {
 export type CropType = (typeof CropType)[keyof typeof CropType]
 
 
+export const CropStatus = {
+  HEALTHY: 'HEALTHY',
+  MONITORING: 'MONITORING',
+  AT_RISK: 'AT_RISK',
+  HARVEST_READY: 'HARVEST_READY'
+} as const
+
+export type CropStatus = (typeof CropStatus)[keyof typeof CropStatus]
+
+
 export const NotificationType = {
   DAILY_SUMMARY: 'DAILY_SUMMARY',
   HIGH_RISK: 'HIGH_RISK',

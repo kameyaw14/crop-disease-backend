@@ -106,7 +106,15 @@ export type ProfileScalarFieldEnum = (typeof ProfileScalarFieldEnum)[keyof typeo
 
 export const UserPreferredCropScalarFieldEnum = {
   userId: 'userId',
-  cropType: 'cropType'
+  cropType: 'cropType',
+  customName: 'customName',
+  plantingDate: 'plantingDate',
+  expectedHarvestDate: 'expectedHarvestDate',
+  farmSize: 'farmSize',
+  farmSizeUnit: 'farmSizeUnit',
+  notes: 'notes',
+  status: 'status',
+  lastActivityDate: 'lastActivityDate'
 } as const
 
 export type UserPreferredCropScalarFieldEnum = (typeof UserPreferredCropScalarFieldEnum)[keyof typeof UserPreferredCropScalarFieldEnum]
