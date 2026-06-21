@@ -116,12 +116,12 @@ model UserPreferredCrop {
 }
 
 model Detection {
-  id                String  @id @default(cuid())
+  id                String   @id @default(cuid())
   imageUrl          String?
-  cropType          String
+  cropType          CropType
   rawResponse       Json // Store full AI response for debugging/auditing
   diseaseName       String
-  confidence        Float   @default(0.0)
+  confidence        Float    @default(0.0)
   possibleDiseases  Json? // Array of possible diseases with scores
   symptoms          String?
   causes            String?
@@ -129,7 +129,7 @@ model Detection {
   chemicalOptions   String?
   prevention        String?
   localNotes        String? // Ghana/Twi specific recommendations
-  aiProvider        String? @default("gemini")
+  aiProvider        String?  @default("gemini")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -148,7 +148,7 @@ model Detection {
 model CachedDiagnosis {
   id                  String   @id @default(cuid())
   imageHash           String
-  cropType            String
+  cropType            CropType
   language            String   @default("en")
   result              Json // Full structured diagnosis result
   expiresAt           DateTime

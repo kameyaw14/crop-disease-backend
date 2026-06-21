@@ -18,6 +18,10 @@ export const cropService = {
     });
 
     // Step 2: Get latest detection for each crop (more reliable than complex include)
+    //  Detection.cropType is now the CropType enum, same as
+    // UserPreferredCrop.cropType, so no case conversion is needed anymore.
+    // Both columns are guaranteed by Postgres to only ever contain the exact
+    // same set of uppercase values (e.g. "MAIZE").
     const cropTypes = preferredCrops.map((c) => c.cropType);
     let latestDetections: any[] = [];
 
@@ -39,6 +43,9 @@ export const cropService = {
     }
 
     const crops = preferredCrops.map((item) => {
+      //  removed the .toLowerCase() conversion, both sides of this
+      // comparison are now the same CropType enum value, so a direct
+      // comparison works correctly.
       const lastDetection = latestDetections.find(
         (d) => d.cropType === item.cropType,
       );
@@ -126,8 +133,17 @@ export const cropService = {
   ) {
     const validated = updatePreferredCropSchema.parse(input);
 
+    //  cropType arrives from the URL param (req.params.cropType) as
+    // whatever case the client sent. UserPreferredCrop.cropType is the Prisma
+    // CropType enum, which only accepts uppercase values (e.g. "MAIZE"), so we
+    // normalize here before it touches any UserPreferredCrop query. Without
+    // this, a lowercase or mixed-case param would throw the same
+    // "Invalid value for argument cropType. Expected CropType." error we fixed
+    // earlier in isCropInPreferred.
+    const normalizedCropType = cropType.toUpperCase();
+
     const updated = await prisma.userPreferredCrop.update({
-      where: { userId_cropType: { userId, cropType } },
+      where: { userId_cropType: { userId, cropType: normalizedCropType } },
       data: {
         ...validated,
         plantingDate: validated.plantingDate
@@ -148,8 +164,12 @@ export const cropService = {
 
   //  Remove preferred crop
   async deletePreferredCrop(userId: string, cropType: string) {
+    //  same enum-casing fix as updatePreferredCrop above, applied
+    // before the value is used in a UserPreferredCrop query.
+    const normalizedCropType = cropType.toUpperCase();
+
     await prisma.userPreferredCrop.delete({
-      where: { userId_cropType: { userId, cropType } },
+      where: { userId_cropType: { userId, cropType: normalizedCropType } },
     });
 
     return {
@@ -159,8 +179,15 @@ export const cropService = {
   },
 
   async isCropInPreferred(userId: string, cropType: string) {
+    //  normalizing here too, so this function is safe to call with
+    // any casing. Previously this relied on the caller (detectionService.ts)
+    // remembering to uppercase the value first, which is exactly what caused
+    // the original "Expected CropType" crash. Defensive normalization at the
+    // boundary of the function is more reliable than trusting every call site.
+    const normalizedCropType = cropType.toUpperCase();
+
     const existing = await prisma.userPreferredCrop.findUnique({
-      where: { userId_cropType: { userId, cropType } },
+      where: { userId_cropType: { userId, cropType: normalizedCropType } },
       select: { cropType: true },
     });
 
@@ -174,8 +201,16 @@ export const cropService = {
   ) {
     const validated = getCropHistorySchema.parse(query);
 
+    //  Detection.cropType and UserPreferredCrop.cropType are both
+    // the CropType enum now, so only one normalized form is needed instead
+    // of the previous upper/lower split. We still uppercase here because the
+    // value comes from a raw URL param (e.g. /my-crops/maize/history), and a
+    // client could send any casing in the URL, so we normalize it to match
+    // what the enum expects rather than rejecting the request outright.
+    const normalizedCropType = cropType.toUpperCase();
+
     const preferredCrop = await prisma.userPreferredCrop.findUnique({
-      where: { userId_cropType: { userId, cropType } },
+      where: { userId_cropType: { userId, cropType: normalizedCropType } },
     });
 
     if (!preferredCrop) {
@@ -193,7 +228,10 @@ export const cropService = {
     // Build where clause with optional filters
     const whereClause: any = {
       userId,
-      cropType,
+      //  was lowerCropType (a separate normalized variant), now uses
+      // the same normalizedCropType used for the UserPreferredCrop check
+      // above, since both tables agree on casing now.
+      cropType: normalizedCropType,
     };
 
     if (validated.startDate)

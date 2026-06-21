@@ -1,14 +1,14 @@
 // schemas/detectionSchema.ts
 import { z } from "zod";
- 
+
 export const detectSchema = z.object({
   cropType: z.enum([
-    "maize",
-    "cassava",
-    "cocoa",
-    "plantain",
-    "tomato",
-    "pepper",
+    "MAIZE",
+    "CASSAVA",
+    "COCOA",
+    "PLANTAIN",
+    "TOMATO",
+    "PEPPER",
   ]),
   notes: z.string().optional(), // Future user notes
 });

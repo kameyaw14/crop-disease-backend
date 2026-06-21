@@ -37,7 +37,7 @@ export type CachedDiagnosisSumAggregateOutputType = {
 export type CachedDiagnosisMinAggregateOutputType = {
   id: string | null
   imageHash: string | null
-  cropType: string | null
+  cropType: $Enums.CropType | null
   language: string | null
   expiresAt: Date | null
   imagePerceptualHash: string | null
@@ -51,7 +51,7 @@ export type CachedDiagnosisMinAggregateOutputType = {
 export type CachedDiagnosisMaxAggregateOutputType = {
   id: string | null
   imageHash: string | null
-  cropType: string | null
+  cropType: $Enums.CropType | null
   language: string | null
   expiresAt: Date | null
   imagePerceptualHash: string | null
@@ -220,7 +220,7 @@ export type CachedDiagnosisGroupByArgs<ExtArgs extends runtime.Types.Extensions.
 export type CachedDiagnosisGroupByOutputType = {
   id: string
   imageHash: string
-  cropType: string
+  cropType: $Enums.CropType
   language: string
   result: runtime.JsonValue
   expiresAt: Date
@@ -258,7 +258,7 @@ export type CachedDiagnosisWhereInput = {
   NOT?: Prisma.CachedDiagnosisWhereInput | Prisma.CachedDiagnosisWhereInput[]
   id?: Prisma.StringFilter<"CachedDiagnosis"> | string
   imageHash?: Prisma.StringFilter<"CachedDiagnosis"> | string
-  cropType?: Prisma.StringFilter<"CachedDiagnosis"> | string
+  cropType?: Prisma.EnumCropTypeFilter<"CachedDiagnosis"> | $Enums.CropType
   language?: Prisma.StringFilter<"CachedDiagnosis"> | string
   result?: Prisma.JsonFilter<"CachedDiagnosis">
   expiresAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
@@ -296,7 +296,7 @@ export type CachedDiagnosisWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.CachedDiagnosisWhereInput[]
   NOT?: Prisma.CachedDiagnosisWhereInput | Prisma.CachedDiagnosisWhereInput[]
   imageHash?: Prisma.StringFilter<"CachedDiagnosis"> | string
-  cropType?: Prisma.StringFilter<"CachedDiagnosis"> | string
+  cropType?: Prisma.EnumCropTypeFilter<"CachedDiagnosis"> | $Enums.CropType
   language?: Prisma.StringFilter<"CachedDiagnosis"> | string
   result?: Prisma.JsonFilter<"CachedDiagnosis">
   expiresAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
@@ -336,7 +336,7 @@ export type CachedDiagnosisScalarWhereWithAggregatesInput = {
   NOT?: Prisma.CachedDiagnosisScalarWhereWithAggregatesInput | Prisma.CachedDiagnosisScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"CachedDiagnosis"> | string
   imageHash?: Prisma.StringWithAggregatesFilter<"CachedDiagnosis"> | string
-  cropType?: Prisma.StringWithAggregatesFilter<"CachedDiagnosis"> | string
+  cropType?: Prisma.EnumCropTypeWithAggregatesFilter<"CachedDiagnosis"> | $Enums.CropType
   language?: Prisma.StringWithAggregatesFilter<"CachedDiagnosis"> | string
   result?: Prisma.JsonWithAggregatesFilter<"CachedDiagnosis">
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"CachedDiagnosis"> | Date | string
@@ -351,7 +351,7 @@ export type CachedDiagnosisScalarWhereWithAggregatesInput = {
 export type CachedDiagnosisCreateInput = {
   id?: string
   imageHash: string
-  cropType: string
+  cropType: $Enums.CropType
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
@@ -367,7 +367,7 @@ export type CachedDiagnosisCreateInput = {
 export type CachedDiagnosisUncheckedCreateInput = {
   id?: string
   imageHash: string
-  cropType: string
+  cropType: $Enums.CropType
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
@@ -383,7 +383,7 @@ export type CachedDiagnosisUncheckedCreateInput = {
 export type CachedDiagnosisUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageHash?: Prisma.StringFieldUpdateOperationsInput | string
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -399,7 +399,7 @@ export type CachedDiagnosisUpdateInput = {
 export type CachedDiagnosisUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageHash?: Prisma.StringFieldUpdateOperationsInput | string
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -415,7 +415,7 @@ export type CachedDiagnosisUncheckedUpdateInput = {
 export type CachedDiagnosisCreateManyInput = {
   id?: string
   imageHash: string
-  cropType: string
+  cropType: $Enums.CropType
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
@@ -430,7 +430,7 @@ export type CachedDiagnosisCreateManyInput = {
 export type CachedDiagnosisUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageHash?: Prisma.StringFieldUpdateOperationsInput | string
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -444,7 +444,7 @@ export type CachedDiagnosisUpdateManyMutationInput = {
 export type CachedDiagnosisUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageHash?: Prisma.StringFieldUpdateOperationsInput | string
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -596,7 +596,7 @@ export type NullableFloatFieldUpdateOperationsInput = {
 export type CachedDiagnosisCreateWithoutUserInput = {
   id?: string
   imageHash: string
-  cropType: string
+  cropType: $Enums.CropType
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
@@ -611,7 +611,7 @@ export type CachedDiagnosisCreateWithoutUserInput = {
 export type CachedDiagnosisUncheckedCreateWithoutUserInput = {
   id?: string
   imageHash: string
-  cropType: string
+  cropType: $Enums.CropType
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
@@ -655,7 +655,7 @@ export type CachedDiagnosisScalarWhereInput = {
   NOT?: Prisma.CachedDiagnosisScalarWhereInput | Prisma.CachedDiagnosisScalarWhereInput[]
   id?: Prisma.StringFilter<"CachedDiagnosis"> | string
   imageHash?: Prisma.StringFilter<"CachedDiagnosis"> | string
-  cropType?: Prisma.StringFilter<"CachedDiagnosis"> | string
+  cropType?: Prisma.EnumCropTypeFilter<"CachedDiagnosis"> | $Enums.CropType
   language?: Prisma.StringFilter<"CachedDiagnosis"> | string
   result?: Prisma.JsonFilter<"CachedDiagnosis">
   expiresAt?: Prisma.DateTimeFilter<"CachedDiagnosis"> | Date | string
@@ -670,7 +670,7 @@ export type CachedDiagnosisScalarWhereInput = {
 export type CachedDiagnosisCreateWithoutDetectionsInput = {
   id?: string
   imageHash: string
-  cropType: string
+  cropType: $Enums.CropType
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
@@ -685,7 +685,7 @@ export type CachedDiagnosisCreateWithoutDetectionsInput = {
 export type CachedDiagnosisUncheckedCreateWithoutDetectionsInput = {
   id?: string
   imageHash: string
-  cropType: string
+  cropType: $Enums.CropType
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
@@ -716,7 +716,7 @@ export type CachedDiagnosisUpdateToOneWithWhereWithoutDetectionsInput = {
 export type CachedDiagnosisUpdateWithoutDetectionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageHash?: Prisma.StringFieldUpdateOperationsInput | string
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -731,7 +731,7 @@ export type CachedDiagnosisUpdateWithoutDetectionsInput = {
 export type CachedDiagnosisUncheckedUpdateWithoutDetectionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageHash?: Prisma.StringFieldUpdateOperationsInput | string
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -746,7 +746,7 @@ export type CachedDiagnosisUncheckedUpdateWithoutDetectionsInput = {
 export type CachedDiagnosisCreateManyUserInput = {
   id?: string
   imageHash: string
-  cropType: string
+  cropType: $Enums.CropType
   language?: string
   result: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt: Date | string
@@ -760,7 +760,7 @@ export type CachedDiagnosisCreateManyUserInput = {
 export type CachedDiagnosisUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageHash?: Prisma.StringFieldUpdateOperationsInput | string
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -775,7 +775,7 @@ export type CachedDiagnosisUpdateWithoutUserInput = {
 export type CachedDiagnosisUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageHash?: Prisma.StringFieldUpdateOperationsInput | string
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -790,7 +790,7 @@ export type CachedDiagnosisUncheckedUpdateWithoutUserInput = {
 export type CachedDiagnosisUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageHash?: Prisma.StringFieldUpdateOperationsInput | string
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   language?: Prisma.StringFieldUpdateOperationsInput | string
   result?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -919,7 +919,7 @@ export type $CachedDiagnosisPayload<ExtArgs extends runtime.Types.Extensions.Int
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     imageHash: string
-    cropType: string
+    cropType: $Enums.CropType
     language: string
     result: runtime.JsonValue
     expiresAt: Date
@@ -1356,7 +1356,7 @@ export interface Prisma__CachedDiagnosisClient<T, Null = never, ExtArgs extends 
 export interface CachedDiagnosisFieldRefs {
   readonly id: Prisma.FieldRef<"CachedDiagnosis", 'String'>
   readonly imageHash: Prisma.FieldRef<"CachedDiagnosis", 'String'>
-  readonly cropType: Prisma.FieldRef<"CachedDiagnosis", 'String'>
+  readonly cropType: Prisma.FieldRef<"CachedDiagnosis", 'CropType'>
   readonly language: Prisma.FieldRef<"CachedDiagnosis", 'String'>
   readonly result: Prisma.FieldRef<"CachedDiagnosis", 'Json'>
   readonly expiresAt: Prisma.FieldRef<"CachedDiagnosis", 'DateTime'>

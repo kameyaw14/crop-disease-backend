@@ -37,7 +37,7 @@ export type DetectionSumAggregateOutputType = {
 export type DetectionMinAggregateOutputType = {
   id: string | null
   imageUrl: string | null
-  cropType: string | null
+  cropType: $Enums.CropType | null
   diseaseName: string | null
   confidence: number | null
   symptoms: string | null
@@ -56,7 +56,7 @@ export type DetectionMinAggregateOutputType = {
 export type DetectionMaxAggregateOutputType = {
   id: string | null
   imageUrl: string | null
-  cropType: string | null
+  cropType: $Enums.CropType | null
   diseaseName: string | null
   confidence: number | null
   symptoms: string | null
@@ -252,7 +252,7 @@ export type DetectionGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 export type DetectionGroupByOutputType = {
   id: string
   imageUrl: string | null
-  cropType: string
+  cropType: $Enums.CropType
   rawResponse: runtime.JsonValue
   diseaseName: string
   confidence: number
@@ -296,7 +296,7 @@ export type DetectionWhereInput = {
   NOT?: Prisma.DetectionWhereInput | Prisma.DetectionWhereInput[]
   id?: Prisma.StringFilter<"Detection"> | string
   imageUrl?: Prisma.StringNullableFilter<"Detection"> | string | null
-  cropType?: Prisma.StringFilter<"Detection"> | string
+  cropType?: Prisma.EnumCropTypeFilter<"Detection"> | $Enums.CropType
   rawResponse?: Prisma.JsonFilter<"Detection">
   diseaseName?: Prisma.StringFilter<"Detection"> | string
   confidence?: Prisma.FloatFilter<"Detection"> | number
@@ -345,7 +345,7 @@ export type DetectionWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.DetectionWhereInput[]
   NOT?: Prisma.DetectionWhereInput | Prisma.DetectionWhereInput[]
   imageUrl?: Prisma.StringNullableFilter<"Detection"> | string | null
-  cropType?: Prisma.StringFilter<"Detection"> | string
+  cropType?: Prisma.EnumCropTypeFilter<"Detection"> | $Enums.CropType
   rawResponse?: Prisma.JsonFilter<"Detection">
   diseaseName?: Prisma.StringFilter<"Detection"> | string
   confidence?: Prisma.FloatFilter<"Detection"> | number
@@ -397,7 +397,7 @@ export type DetectionScalarWhereWithAggregatesInput = {
   NOT?: Prisma.DetectionScalarWhereWithAggregatesInput | Prisma.DetectionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Detection"> | string
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Detection"> | string | null
-  cropType?: Prisma.StringWithAggregatesFilter<"Detection"> | string
+  cropType?: Prisma.EnumCropTypeWithAggregatesFilter<"Detection"> | $Enums.CropType
   rawResponse?: Prisma.JsonWithAggregatesFilter<"Detection">
   diseaseName?: Prisma.StringWithAggregatesFilter<"Detection"> | string
   confidence?: Prisma.FloatWithAggregatesFilter<"Detection"> | number
@@ -418,7 +418,7 @@ export type DetectionScalarWhereWithAggregatesInput = {
 export type DetectionCreateInput = {
   id?: string
   imageUrl?: string | null
-  cropType: string
+  cropType: $Enums.CropType
   rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName: string
   confidence?: number
@@ -439,7 +439,7 @@ export type DetectionCreateInput = {
 export type DetectionUncheckedCreateInput = {
   id?: string
   imageUrl?: string | null
-  cropType: string
+  cropType: $Enums.CropType
   rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName: string
   confidence?: number
@@ -460,7 +460,7 @@ export type DetectionUncheckedCreateInput = {
 export type DetectionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -481,7 +481,7 @@ export type DetectionUpdateInput = {
 export type DetectionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -502,7 +502,7 @@ export type DetectionUncheckedUpdateInput = {
 export type DetectionCreateManyInput = {
   id?: string
   imageUrl?: string | null
-  cropType: string
+  cropType: $Enums.CropType
   rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName: string
   confidence?: number
@@ -523,7 +523,7 @@ export type DetectionCreateManyInput = {
 export type DetectionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -542,7 +542,7 @@ export type DetectionUpdateManyMutationInput = {
 export type DetectionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -732,7 +732,7 @@ export type DetectionUncheckedUpdateManyWithoutCachedDiagnosisNestedInput = {
 export type DetectionCreateWithoutUserInput = {
   id?: string
   imageUrl?: string | null
-  cropType: string
+  cropType: $Enums.CropType
   rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName: string
   confidence?: number
@@ -752,7 +752,7 @@ export type DetectionCreateWithoutUserInput = {
 export type DetectionUncheckedCreateWithoutUserInput = {
   id?: string
   imageUrl?: string | null
-  cropType: string
+  cropType: $Enums.CropType
   rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName: string
   confidence?: number
@@ -801,7 +801,7 @@ export type DetectionScalarWhereInput = {
   NOT?: Prisma.DetectionScalarWhereInput | Prisma.DetectionScalarWhereInput[]
   id?: Prisma.StringFilter<"Detection"> | string
   imageUrl?: Prisma.StringNullableFilter<"Detection"> | string | null
-  cropType?: Prisma.StringFilter<"Detection"> | string
+  cropType?: Prisma.EnumCropTypeFilter<"Detection"> | $Enums.CropType
   rawResponse?: Prisma.JsonFilter<"Detection">
   diseaseName?: Prisma.StringFilter<"Detection"> | string
   confidence?: Prisma.FloatFilter<"Detection"> | number
@@ -822,7 +822,7 @@ export type DetectionScalarWhereInput = {
 export type DetectionCreateWithoutCachedDiagnosisInput = {
   id?: string
   imageUrl?: string | null
-  cropType: string
+  cropType: $Enums.CropType
   rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName: string
   confidence?: number
@@ -842,7 +842,7 @@ export type DetectionCreateWithoutCachedDiagnosisInput = {
 export type DetectionUncheckedCreateWithoutCachedDiagnosisInput = {
   id?: string
   imageUrl?: string | null
-  cropType: string
+  cropType: $Enums.CropType
   rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName: string
   confidence?: number
@@ -888,7 +888,7 @@ export type DetectionUpdateManyWithWhereWithoutCachedDiagnosisInput = {
 export type DetectionCreateManyUserInput = {
   id?: string
   imageUrl?: string | null
-  cropType: string
+  cropType: $Enums.CropType
   rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName: string
   confidence?: number
@@ -908,7 +908,7 @@ export type DetectionCreateManyUserInput = {
 export type DetectionUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -928,7 +928,7 @@ export type DetectionUpdateWithoutUserInput = {
 export type DetectionUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -948,7 +948,7 @@ export type DetectionUncheckedUpdateWithoutUserInput = {
 export type DetectionUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -968,7 +968,7 @@ export type DetectionUncheckedUpdateManyWithoutUserInput = {
 export type DetectionCreateManyCachedDiagnosisInput = {
   id?: string
   imageUrl?: string | null
-  cropType: string
+  cropType: $Enums.CropType
   rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName: string
   confidence?: number
@@ -988,7 +988,7 @@ export type DetectionCreateManyCachedDiagnosisInput = {
 export type DetectionUpdateWithoutCachedDiagnosisInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1008,7 +1008,7 @@ export type DetectionUpdateWithoutCachedDiagnosisInput = {
 export type DetectionUncheckedUpdateWithoutCachedDiagnosisInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1028,7 +1028,7 @@ export type DetectionUncheckedUpdateWithoutCachedDiagnosisInput = {
 export type DetectionUncheckedUpdateManyWithoutCachedDiagnosisInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cropType?: Prisma.StringFieldUpdateOperationsInput | string
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
   rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -1160,7 +1160,7 @@ export type $DetectionPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     imageUrl: string | null
-    cropType: string
+    cropType: $Enums.CropType
     rawResponse: runtime.JsonValue
     diseaseName: string
     confidence: number
@@ -1603,7 +1603,7 @@ export interface Prisma__DetectionClient<T, Null = never, ExtArgs extends runtim
 export interface DetectionFieldRefs {
   readonly id: Prisma.FieldRef<"Detection", 'String'>
   readonly imageUrl: Prisma.FieldRef<"Detection", 'String'>
-  readonly cropType: Prisma.FieldRef<"Detection", 'String'>
+  readonly cropType: Prisma.FieldRef<"Detection", 'CropType'>
   readonly rawResponse: Prisma.FieldRef<"Detection", 'Json'>
   readonly diseaseName: Prisma.FieldRef<"Detection", 'String'>
   readonly confidence: Prisma.FieldRef<"Detection", 'Float'>
