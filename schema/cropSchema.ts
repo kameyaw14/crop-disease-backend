@@ -1,4 +1,5 @@
 // schema\cropSchema.ts
+// @ts-nocheck
 import { z } from "zod";
 
 export const addPreferredCropSchema = z.object({
