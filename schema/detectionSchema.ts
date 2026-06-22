@@ -9,6 +9,10 @@ export const detectSchema = z.object({
     "PLANTAIN",
     "TOMATO",
     "PEPPER",
+    "RICE",
+    "YAM",
+    "GROUNDNUT",
+    "ONION",
   ]),
   notes: z.string().optional(), // Future user notes
 });

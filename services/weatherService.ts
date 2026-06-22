@@ -38,7 +38,7 @@ export const weatherService = {
       let latitude = lat;
       let longitude = lon;
 
-      // UPDATED: Get user profile with preferredCrops and location
+      //  Get user profile with preferredCrops and location
       const profile = await prisma.profile.findUnique({
         where: { userId },
         select: {
@@ -77,12 +77,8 @@ export const weatherService = {
       );
       const rawData = response.data;
 
-      // UPDATED: Use preferredCrops from profile
-      const userCrops = profile?.preferredCrops || [
-        "MAIZE",
-        "CASSAVA",
-        "COCOA",
-      ];
+      //  Use preferredCrops from profile
+      const userCrops = profile?.preferredCrops || [];
 
       const riskInsights = generateDiseaseRiskInsights(rawData, userCrops);
       const overallSummary = generateOverallSummary(rawData, riskInsights);

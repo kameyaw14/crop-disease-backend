@@ -28,7 +28,10 @@ enum CropType {
   PLANTAIN
   PEPPER
   COCOA
-  // Add more crops here in future
+  RICE
+  YAM
+  GROUNDNUT
+  ONION
 }
 
 enum CropStatus {

@@ -10,6 +10,10 @@ export const addPreferredCropSchema = z.object({
     "PLANTAIN",
     "PEPPER",
     "COCOA",
+    "RICE",
+    "YAM",
+    "GROUNDNUT",
+    "ONION",
   ]),
   customName: z.string().max(100).optional(),
   plantingDate: z.string().datetime().optional(), // ISO string from frontend
