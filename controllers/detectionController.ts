@@ -1,5 +1,5 @@
-//@ts-nocheck
 // controllers/detectionController.ts
+//@ts-nocheck
 import type { Request, Response, NextFunction } from "express";
 import { detectDisease } from "../services/detectionService.js";
 import { detectSchema, type DetectInput } from "../schema/detectionSchema.js";
@@ -19,19 +19,25 @@ export const detectionController = {
 
       const validatedBody: DetectInput = detectSchema.parse(req.body);
 
-      // NEW ADDITION: Check for demo mode from query parameter
+      // Check for demo mode from query parameter
       const isDemoMode = req.query.demo === "true" || req.query.demo === true;
 
       if (isDemoMode) {
         console.log("🧪 Demo mode enabled for this request");
       }
 
-      // UPDATED: Pass isDemoMode to the service
+      const isFreeScan = validatedBody.cropType === "FREE";
+
+      if (isFreeScan) {
+        console.log("🔍 Free scan mode — Gemini will auto-identify the crop");
+      }
+
       const result: DetectionResponse = await detectDisease(
         req.file,
         validatedBody,
         userId,
-        isDemoMode, // NEW ADDITION
+        isDemoMode,
+        isFreeScan,
       );
 
       if (!result.success) {

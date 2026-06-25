@@ -1,6 +1,7 @@
 // schemas/detectionSchema.ts
 import { z } from "zod";
 
+// SELF NOTE (VERY IMPORTANT): whenever an enum is added, it should also be added to the "detectedCropEnum" field in the detectionResultSchema
 export const detectSchema = z.object({
   cropType: z.enum([
     "MAIZE",
@@ -13,6 +14,7 @@ export const detectSchema = z.object({
     "YAM",
     "GROUNDNUT",
     "ONION",
+    "FREE",
   ]),
   notes: z.string().optional(), // Future user notes
 });
@@ -25,12 +27,17 @@ export const detectionResultSchema = {
     isCorrectCrop: {
       type: "boolean",
       description:
-        "Whether the uploaded image matches the selected crop type. Must be false for non-plant images.",
+        "For normal scans: whether the image matches the selected crop type. For FREE scans: whether a recognizable plant is visible at all. Set false for non-plant images, blurry images, or images where no crop can be confidently identified.",
     },
     detectedCrop: {
       type: "string",
       description:
-        "The actual crop the model believes is in the image (if different). Return the selected crop only if confident match.",
+        "The actual crop the model believes is in the image (if different). Return the selected crop only if confident match. For FREE scans, always populate this with the identified crop name.",
+    },
+    detectedCropEnum: {
+      type: "string",
+      description:
+        "For FREE scans: the detected crop mapped to one of these exact values if possible: MAIZE, CASSAVA, COCOA, PLANTAIN, TOMATO, PEPPER, RICE, YAM, GROUNDNUT, ONION. Return UNKNOWN if the crop does not match any of these. For normal scans, return the same value as the cropType that was submitted.",
     },
     cropVerificationReason: {
       type: "string",
@@ -60,6 +67,7 @@ export const detectionResultSchema = {
   required: [
     "isCorrectCrop",
     "detectedCrop",
+    "detectedCropEnum",
     "cropVerificationReason",
     "diseaseName",
     "confidence",
@@ -77,6 +85,7 @@ export const detectionResultSchema = {
 export const resultSchema = z.object({
   isCorrectCrop: z.boolean(),
   detectedCrop: z.string(),
+  detectedCropEnum: z.string(),
   cropVerificationReason: z.string().max(150),
   diseaseName: z.string().min(1),
   confidence: z.number().min(0).max(1),

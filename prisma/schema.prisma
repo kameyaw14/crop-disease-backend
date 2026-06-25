@@ -21,6 +21,7 @@ enum UserRole {
   OTHER
 }
 
+// SELF NOTE (VERY IMPORTANT): whenever an enum is added, it should also be added to the "detectedCropEnum" field in the detectionResultSchema
 enum CropType {
   MAIZE
   TOMATO
@@ -32,6 +33,7 @@ enum CropType {
   YAM
   GROUNDNUT
   ONION
+  FREE
 }
 
 enum CropStatus {

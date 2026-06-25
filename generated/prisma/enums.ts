@@ -26,7 +26,12 @@ export const CropType = {
   CASSAVA: 'CASSAVA',
   PLANTAIN: 'PLANTAIN',
   PEPPER: 'PEPPER',
-  COCOA: 'COCOA'
+  COCOA: 'COCOA',
+  RICE: 'RICE',
+  YAM: 'YAM',
+  GROUNDNUT: 'GROUNDNUT',
+  ONION: 'ONION',
+  FREE: 'FREE'
 } as const
 
 export type CropType = (typeof CropType)[keyof typeof CropType]

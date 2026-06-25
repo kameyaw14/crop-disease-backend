@@ -11,7 +11,10 @@ import {
 } from "../schema/detectionSchema.js";
 import { v2 as cloudinary } from "cloudinary";
 import type { DetectionResponse, DetectionResult } from "../types/index.js";
-import { getDetectionSystemPrompt } from "../utils/prompts.js";
+import {
+  getDetectionSystemPrompt,
+  getFreeScanSystemPrompt,
+} from "../utils/prompts.js";
 import crypto from "crypto";
 import {
   computeHammingDistance,
@@ -60,11 +63,38 @@ async function createSafeDetection(data: any) {
   }
 }
 
+const SUPPORTED_CROP_ENUMS = [
+  "MAIZE",
+  "CASSAVA",
+  "COCOA",
+  "PLANTAIN",
+  "TOMATO",
+  "PEPPER",
+  "RICE",
+  "YAM",
+  "GROUNDNUT",
+  "ONION",
+] as const;
+
+type SupportedCropEnum = (typeof SUPPORTED_CROP_ENUMS)[number];
+
+function mapDetectedCropToEnum(
+  detectedCropEnum: string,
+): SupportedCropEnum | null {
+  const upper = detectedCropEnum?.toUpperCase?.() ?? "";
+
+  if ((SUPPORTED_CROP_ENUMS as readonly string[]).includes(upper)) {
+    return upper as SupportedCropEnum;
+  }
+  return null; // "UNKNOWN" or any unsupported crop
+}
+
 export async function detectDisease(
   file: Express.Multer.File,
   validatedBody: DetectInput,
   userId: string,
   isDemoMode: boolean = false,
+  isFreeScan: boolean = false,
 ): Promise<DetectionResponse> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -105,8 +135,9 @@ export async function detectDisease(
     );
   }
 
-  const userPrompt = `Selected Crop: ${validatedBody.cropType.toUpperCase()}
-Analyze this image carefully and follow the system instructions.`;
+  const userPrompt = isFreeScan
+    ? `The user does not know what crop this is. Please identify the crop and diagnose any disease present. Analyze this image carefully and follow the system instructions.`
+    : `Selected Crop: ${validatedBody.cropType.toUpperCase()}\nAnalyze this image carefully and follow the system instructions.`;
 
   console.log(
     `Calling Gemini with language: ${userLanguage} for crop: ${validatedBody.cropType}`,
@@ -119,8 +150,11 @@ Analyze this image carefully and follow the system instructions.`;
     },
   };
 
-  const systemPrompt = getDetectionSystemPrompt(userLanguage);
+  const systemPrompt = isFreeScan
+    ? getFreeScanSystemPrompt(userLanguage)
+    : getDetectionSystemPrompt(userLanguage);
 
+  // ─── LAYER 1: SHA-256 Exact Hash Cache (runs for both normal and FREE scans)
   if (!isDemoMode) {
     const cached = await prisma.cachedDiagnosis.findUnique({
       where: {
@@ -136,7 +170,9 @@ Analyze this image carefully and follow the system instructions.`;
       //  Use safe detection creation to prevent userId FK violation
       const detection = await createSafeDetection({
         imageUrl,
-        cropType: validatedBody.cropType,
+        cropType: isFreeScan
+          ? (cached.cropType ?? "FREE")
+          : validatedBody.cropType,
         rawResponse: cached.result,
         diseaseName: cached.result.diseaseName,
         confidence: cached.result.confidence,
@@ -152,23 +188,47 @@ Analyze this image carefully and follow the system instructions.`;
         aiProvider: "gemini-cached",
       });
 
-      console.log(`🔃 checking if already in crops`);
+      let suggestAddToMyCrops;
 
-      const normalizedCropType = validatedBody.cropType.toUpperCase();
-      const isAlreadyInCrops = await cropService.isCropInPreferred(
-        userId,
-        normalizedCropType,
-      );
+      if (isFreeScan) {
+        //  FREE scan path for cache hit suggestion logic
+        const enumCandidate = mapDetectedCropToEnum(
+          cached.result.detectedCropEnum ?? "",
+        );
+        if (enumCandidate) {
+          const isAlreadyInCrops = await cropService.isCropInPreferred(
+            userId,
+            enumCandidate,
+          );
+          suggestAddToMyCrops = {
+            suggested: !isAlreadyInCrops,
+            cropType: enumCandidate,
+            message: !isAlreadyInCrops
+              ? `Would you like to add ${enumCandidate} to My Crops for better tracking, history, and personalized insights?`
+              : `This crop is already in your My Crops. Great job tracking your farm!`,
+          };
+        }
+        // If enumCandidate is null (unsupported crop), suggestAddToMyCrops stays
+        // undefined and is simply omitted from the response — no suggestion shown.
+      } else {
+        console.log(`🔃 checking if already in crops`);
 
-      console.log(`✅ checked if already in crops`);
+        const normalizedCropType = validatedBody.cropType.toUpperCase();
+        const isAlreadyInCrops = await cropService.isCropInPreferred(
+          userId,
+          normalizedCropType,
+        );
 
-      const suggestAddToMyCrops = {
-        suggested: !isAlreadyInCrops,
-        cropType: validatedBody.cropType,
-        message: !isAlreadyInCrops
-          ? `Would you like to add ${validatedBody.cropType} to My Crops for better tracking, history, and personalized insights?`
-          : `This crop is already in your My Crops. Great job tracking your farm!`,
-      };
+        console.log(`✅ checked if already in crops`);
+
+        suggestAddToMyCrops = {
+          suggested: !isAlreadyInCrops,
+          cropType: validatedBody.cropType,
+          message: !isAlreadyInCrops
+            ? `Would you like to add ${validatedBody.cropType} to My Crops for better tracking, history, and personalized insights?`
+            : `This crop is already in your My Crops. Great job tracking your farm!`,
+        };
+      }
 
       return {
         success: true,
@@ -182,7 +242,11 @@ Analyze this image carefully and follow the system instructions.`;
     }
   }
 
-  if (!isDemoMode && imagePerceptualHash) {
+  // ─── LAYER 2: pHash Similarity Cache
+  // FREE scans skip Layer 2 entirely.
+  // Reason: Layer 2 filters candidates by cropType, but for FREE scans we don't
+  // know the crop yet — scanning all crop types would be noisy and expensive.
+  if (!isDemoMode && !isFreeScan && imagePerceptualHash) {
     console.log("🔎 Layer 1 missed. Checking Layer 2 (pHash similarity)...");
 
     const candidates = await prisma.cachedDiagnosis.findMany({
@@ -314,14 +378,31 @@ Analyze this image carefully and follow the system instructions.`;
       const validatedResult = resultSchema.parse(parsed);
 
       if (!validatedResult.isCorrectCrop) {
-        return {
-          success: false,
-          errorType: "CROP_MISMATCH",
-          message: `The uploaded image does not match the selected crop (${validatedBody.cropType}).`,
-          detectedCrop: validatedResult.detectedCrop,
-          reason: validatedResult.cropVerificationReason,
-        };
+        if (isFreeScan) {
+          //  FREE scan rejection path — no recognizable plant found
+          return {
+            success: false,
+            errorType: "NO_PLANT_DETECTED",
+            message:
+              "No recognizable plant or crop was detected in the image. Please take a clear photo of a plant.",
+            detectedCrop: validatedResult.detectedCrop,
+            reason: validatedResult.cropVerificationReason,
+          };
+        } else {
+          //  normal scan crop mismatch path
+          return {
+            success: false,
+            errorType: "CROP_MISMATCH",
+            message: `The uploaded image does not match the selected crop (${validatedBody.cropType}).`,
+            detectedCrop: validatedResult.detectedCrop,
+            reason: validatedResult.cropVerificationReason,
+          };
+        }
       }
+
+      const resolvedCropType = isFreeScan
+        ? (mapDetectedCropToEnum(validatedResult.detectedCropEnum) ?? "FREE")
+        : validatedBody.cropType;
 
       // ─── LAYER 3a: Disease Label Deduplication
       // TypeScript: We declare cachedDiagnosisId as string | undefined because
@@ -329,7 +410,7 @@ Analyze this image carefully and follow the system instructions.`;
       const existingDiseaseCache = await prisma.cachedDiagnosis.findFirst({
         where: {
           diseaseName: validatedResult.diseaseName,
-          cropType: validatedBody.cropType,
+          cropType: resolvedCropType,
           language: userLanguage,
           expiresAt: { gt: new Date() },
         },
@@ -360,16 +441,6 @@ Analyze this image carefully and follow the system instructions.`;
         );
 
         try {
-          // Replaced the check-then-create transaction with a single
-          // atomic upsert targeting the @@unique([imageHash, language]) constraint
-          // in schema.prisma. The previous logic checked "does this row exist"
-          // then ran a separate create, which left a window for two concurrent
-          // requests (e.g. the retry loop calling itself quickly) to both pass
-          // the check and then both try to create, causing the second one to hit
-          // "Unique constraint failed on the fields: (imageHash, language)".
-          // upsert performs the check-and-write as one atomic database operation,
-          // so the race condition cannot happen regardless of how many requests
-          // arrive at the same time for the same image and language.
           const existingUser = await prisma.user.findUnique({
             where: { id: userId },
             select: { id: true },
@@ -383,15 +454,12 @@ Analyze this image carefully and follow the system instructions.`;
 
           const cachedDiagnosis = await prisma.cachedDiagnosis.upsert({
             where: {
-              // NO CHANGES: this compound key name is auto-generated by Prisma
-              // from the @@unique([imageHash, language]) line in schema.prisma
               imageHash_language: {
                 imageHash,
                 language: userLanguage,
               },
             },
-            // if another request already won the race and created this
-            // row a moment ago, we just refresh its data instead of failing
+
             update: {
               result: validatedResult,
               expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -401,7 +469,7 @@ Analyze this image carefully and follow the system instructions.`;
             },
             create: {
               imageHash,
-              cropType: validatedBody.cropType,
+              cropType: resolvedCropType,
               language: userLanguage,
               result: validatedResult,
               expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -425,7 +493,7 @@ Analyze this image carefully and follow the system instructions.`;
       //  Use safe detection creation
       const detection = await createSafeDetection({
         imageUrl,
-        cropType: validatedBody.cropType,
+        cropType: resolvedCropType,
         rawResponse: parsed,
         diseaseName: validatedResult.diseaseName,
         confidence: validatedResult.confidence,
@@ -443,23 +511,46 @@ Analyze this image carefully and follow the system instructions.`;
 
       console.log(`✅ Diagnosis successful on attempt ${attempt}`);
 
-      console.log(`🔃 checking if already in crops`);
+      let suggestAddToMyCrops;
 
-      const normalizedCropType = validatedBody.cropType.toUpperCase();
-      const isAlreadyInCrops = await cropService.isCropInPreferred(
-        userId,
-        normalizedCropType,
-      );
+      if (isFreeScan) {
+        // FREE scan live Gemini path suggestion logic
+        const enumCandidate = mapDetectedCropToEnum(
+          validatedResult.detectedCropEnum,
+        );
+        if (enumCandidate) {
+          const isAlreadyInCrops = await cropService.isCropInPreferred(
+            userId,
+            enumCandidate,
+          );
+          suggestAddToMyCrops = {
+            suggested: !isAlreadyInCrops,
+            cropType: enumCandidate,
+            message: !isAlreadyInCrops
+              ? `Would you like to add ${enumCandidate} to My Crops for better tracking, history, and personalized insights?`
+              : `This crop is already in your My Crops. Great job tracking your farm!`,
+          };
+        }
+        // null enumCandidate = unsupported crop, suggestAddToMyCrops stays undefined
+      } else {
+        console.log(`🔃 checking if already in crops`);
 
-      console.log(`✅ checked if already in crops`);
+        const normalizedCropType = validatedBody.cropType.toUpperCase();
+        const isAlreadyInCrops = await cropService.isCropInPreferred(
+          userId,
+          normalizedCropType,
+        );
 
-      const suggestAddToMyCrops = {
-        suggested: !isAlreadyInCrops,
-        cropType: validatedBody.cropType,
-        message: !isAlreadyInCrops
-          ? `Would you like to add ${validatedBody.cropType} to My Crops for better tracking, history, and personalized insights?`
-          : `This crop is already in your My Crops. Great job tracking your farm!`,
-      };
+        console.log(`✅ checked if already in crops`);
+
+        suggestAddToMyCrops = {
+          suggested: !isAlreadyInCrops,
+          cropType: validatedBody.cropType,
+          message: !isAlreadyInCrops
+            ? `Would you like to add ${validatedBody.cropType} to My Crops for better tracking, history, and personalized insights?`
+            : `This crop is already in your My Crops. Great job tracking your farm!`,
+        };
+      }
 
       return {
         success: true,
@@ -492,7 +583,12 @@ Analyze this image carefully and follow the system instructions.`;
   console.log("All attempts failed. Checking for similar cached result...");
 
   const similarCache = await prisma.cachedDiagnosis.findFirst({
-    where: { cropType: validatedBody.cropType, language: userLanguage },
+    where: {
+      //  For FREE scans the fallback searches across ALL crop types
+      // since we don't know the crop. For normal scans, filter by cropType as before.
+      ...(isFreeScan ? {} : { cropType: validatedBody.cropType }),
+      language: userLanguage,
+    },
     orderBy: { createdAt: "desc" },
   });
 

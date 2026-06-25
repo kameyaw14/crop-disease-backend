@@ -180,11 +180,7 @@ export const cropService = {
   },
 
   async isCropInPreferred(userId: string, cropType: string) {
-    //  normalizing here too, so this function is safe to call with
-    // any casing. Previously this relied on the caller (detectionService.ts)
-    // remembering to uppercase the value first, which is exactly what caused
-    // the original "Expected CropType" crash. Defensive normalization at the
-    // boundary of the function is more reliable than trusting every call site.
+   
     const normalizedCropType = cropType.toUpperCase();
 
     const existing = await prisma.userPreferredCrop.findUnique({
