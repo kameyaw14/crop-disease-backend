@@ -2,6 +2,7 @@
 
 import type { Request, Response } from "express";
 import { authService } from "../services/authService.js";
+import { passwordResetService } from "../services/passwordResetService.js";
 
 export const authController = {
   async register(req: Request, res: Response) {
@@ -62,6 +63,54 @@ export const authController = {
       res.status(400).json({
         success: false,
         message: error.message || "Failed to update language",
+      });
+    }
+  },
+
+  async forgotPassword(req: Request, res: Response) {
+    try {
+      const result = await passwordResetService.forgotPassword(req.body);
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in forgotPassword:",
+        error.message || "forgotPassword failed",
+      );
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to process request",
+      });
+    }
+  },
+
+  async verifyResetOtp(req: Request, res: Response) {
+    try {
+      const result = await passwordResetService.verifyResetOtp(req.body);
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in verifyResetOtp:",
+        error.message || "verifyResetOtp failed",
+      );
+      res.status(400).json({
+        success: false,
+        message: error.message || "Invalid or expired OTP",
+      });
+    }
+  },
+
+  async resetPassword(req: Request, res: Response) {
+    try {
+      const result = await passwordResetService.resetPassword(req.body);
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in resetPassword:",
+        error.message || "resetPassword failed",
+      );
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to reset password",
       });
     }
   },

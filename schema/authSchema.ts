@@ -42,3 +42,17 @@ export const onboardDataSchema = z.object({
     address: z.string().optional(),
   }),
 });
+
+export const forgotPasswordSchema = z.object({
+  phoneNumber: z.string().min(1, "Phone number is required"),
+});
+
+export const verifyResetOtpSchema = z.object({
+  phoneNumber: z.string().min(1, "Phone number is required"),
+  otp: z.string().length(6, "OTP must be 6 digits"),
+});
+
+export const resetPasswordSchema = z.object({
+  resetToken: z.string().min(1, "Reset token is required"),
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+});

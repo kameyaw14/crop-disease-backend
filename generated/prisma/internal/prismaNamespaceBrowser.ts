@@ -57,7 +57,8 @@ export const ModelName = {
   Detection: 'Detection',
   CachedDiagnosis: 'CachedDiagnosis',
   WeatherRequest: 'WeatherRequest',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  PasswordResetOTP: 'PasswordResetOTP'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -191,6 +192,18 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const PasswordResetOTPScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  otpHash: 'otpHash',
+  expiresAt: 'expiresAt',
+  isUsed: 'isUsed',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetOTPScalarFieldEnum = (typeof PasswordResetOTPScalarFieldEnum)[keyof typeof PasswordResetOTPScalarFieldEnum]
 
 
 export const SortOrder = {

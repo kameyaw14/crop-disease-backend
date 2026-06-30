@@ -390,7 +390,8 @@ export const ModelName = {
   Detection: 'Detection',
   CachedDiagnosis: 'CachedDiagnosis',
   WeatherRequest: 'WeatherRequest',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  PasswordResetOTP: 'PasswordResetOTP'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -406,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "profile" | "userPreferredCrop" | "detection" | "cachedDiagnosis" | "weatherRequest" | "notification"
+    modelProps: "user" | "profile" | "userPreferredCrop" | "detection" | "cachedDiagnosis" | "weatherRequest" | "notification" | "passwordResetOTP"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -928,6 +929,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PasswordResetOTP: {
+      payload: Prisma.$PasswordResetOTPPayload<ExtArgs>
+      fields: Prisma.PasswordResetOTPFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PasswordResetOTPFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PasswordResetOTPFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload>
+        }
+        findFirst: {
+          args: Prisma.PasswordResetOTPFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PasswordResetOTPFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload>
+        }
+        findMany: {
+          args: Prisma.PasswordResetOTPFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload>[]
+        }
+        create: {
+          args: Prisma.PasswordResetOTPCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload>
+        }
+        createMany: {
+          args: Prisma.PasswordResetOTPCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PasswordResetOTPCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload>[]
+        }
+        delete: {
+          args: Prisma.PasswordResetOTPDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload>
+        }
+        update: {
+          args: Prisma.PasswordResetOTPUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload>
+        }
+        deleteMany: {
+          args: Prisma.PasswordResetOTPDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PasswordResetOTPUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PasswordResetOTPUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload>[]
+        }
+        upsert: {
+          args: Prisma.PasswordResetOTPUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOTPPayload>
+        }
+        aggregate: {
+          args: Prisma.PasswordResetOTPAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePasswordResetOTP>
+        }
+        groupBy: {
+          args: Prisma.PasswordResetOTPGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PasswordResetOTPGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PasswordResetOTPCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PasswordResetOTPCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1082,6 +1157,18 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const PasswordResetOTPScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  otpHash: 'otpHash',
+  expiresAt: 'expiresAt',
+  isUsed: 'isUsed',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetOTPScalarFieldEnum = (typeof PasswordResetOTPScalarFieldEnum)[keyof typeof PasswordResetOTPScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1415,6 +1502,7 @@ export type GlobalOmitConfig = {
   cachedDiagnosis?: Prisma.CachedDiagnosisOmit
   weatherRequest?: Prisma.WeatherRequestOmit
   notification?: Prisma.NotificationOmit
+  passwordResetOTP?: Prisma.PasswordResetOTPOmit
 }
 
 /* Types for Logging */

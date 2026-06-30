@@ -228,6 +228,7 @@ export type UserWhereInput = {
   weatherRequests?: Prisma.WeatherRequestListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   cachedDiagnoses?: Prisma.CachedDiagnosisListRelationFilter
+  passwordResetOTPs?: Prisma.PasswordResetOTPListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -247,6 +248,7 @@ export type UserOrderByWithRelationInput = {
   weatherRequests?: Prisma.WeatherRequestOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   cachedDiagnoses?: Prisma.CachedDiagnosisOrderByRelationAggregateInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -269,6 +271,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   weatherRequests?: Prisma.WeatherRequestListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   cachedDiagnoses?: Prisma.CachedDiagnosisListRelationFilter
+  passwordResetOTPs?: Prisma.PasswordResetOTPListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -320,6 +323,7 @@ export type UserCreateInput = {
   weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -339,6 +343,7 @@ export type UserUncheckedCreateInput = {
   weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -358,6 +363,7 @@ export type UserUpdateInput = {
   weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -377,6 +383,7 @@ export type UserUncheckedUpdateInput = {
   weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -573,6 +580,20 @@ export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
 }
 
+export type UserCreateNestedOneWithoutPasswordResetOTPsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetOTPsInput, Prisma.UserUncheckedCreateWithoutPasswordResetOTPsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetOTPsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordResetOTPsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetOTPsInput, Prisma.UserUncheckedCreateWithoutPasswordResetOTPsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetOTPsInput
+  upsert?: Prisma.UserUpsertWithoutPasswordResetOTPsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetOTPsInput, Prisma.UserUpdateWithoutPasswordResetOTPsInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetOTPsInput>
+}
+
 export type UserCreateWithoutProfileInput = {
   id?: string
   email: string
@@ -589,6 +610,7 @@ export type UserCreateWithoutProfileInput = {
   weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProfileInput = {
@@ -607,6 +629,7 @@ export type UserUncheckedCreateWithoutProfileInput = {
   weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProfileInput = {
@@ -641,6 +664,7 @@ export type UserUpdateWithoutProfileInput = {
   weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProfileInput = {
@@ -659,6 +683,7 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserPreferredCropsInput = {
@@ -677,6 +702,7 @@ export type UserCreateWithoutUserPreferredCropsInput = {
   weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserPreferredCropsInput = {
@@ -695,6 +721,7 @@ export type UserUncheckedCreateWithoutUserPreferredCropsInput = {
   weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserPreferredCropsInput = {
@@ -729,6 +756,7 @@ export type UserUpdateWithoutUserPreferredCropsInput = {
   weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserPreferredCropsInput = {
@@ -747,6 +775,7 @@ export type UserUncheckedUpdateWithoutUserPreferredCropsInput = {
   weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDetectionsInput = {
@@ -765,6 +794,7 @@ export type UserCreateWithoutDetectionsInput = {
   weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDetectionsInput = {
@@ -783,6 +813,7 @@ export type UserUncheckedCreateWithoutDetectionsInput = {
   weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDetectionsInput = {
@@ -817,6 +848,7 @@ export type UserUpdateWithoutDetectionsInput = {
   weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDetectionsInput = {
@@ -835,6 +867,7 @@ export type UserUncheckedUpdateWithoutDetectionsInput = {
   weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCachedDiagnosesInput = {
@@ -853,6 +886,7 @@ export type UserCreateWithoutCachedDiagnosesInput = {
   userPreferredCrops?: Prisma.UserPreferredCropCreateNestedManyWithoutUserInput
   weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCachedDiagnosesInput = {
@@ -871,6 +905,7 @@ export type UserUncheckedCreateWithoutCachedDiagnosesInput = {
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedCreateNestedManyWithoutUserInput
   weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCachedDiagnosesInput = {
@@ -905,6 +940,7 @@ export type UserUpdateWithoutCachedDiagnosesInput = {
   userPreferredCrops?: Prisma.UserPreferredCropUpdateManyWithoutUserNestedInput
   weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCachedDiagnosesInput = {
@@ -923,6 +959,7 @@ export type UserUncheckedUpdateWithoutCachedDiagnosesInput = {
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedUpdateManyWithoutUserNestedInput
   weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWeatherRequestsInput = {
@@ -941,6 +978,7 @@ export type UserCreateWithoutWeatherRequestsInput = {
   userPreferredCrops?: Prisma.UserPreferredCropCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWeatherRequestsInput = {
@@ -959,6 +997,7 @@ export type UserUncheckedCreateWithoutWeatherRequestsInput = {
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWeatherRequestsInput = {
@@ -993,6 +1032,7 @@ export type UserUpdateWithoutWeatherRequestsInput = {
   userPreferredCrops?: Prisma.UserPreferredCropUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWeatherRequestsInput = {
@@ -1011,6 +1051,7 @@ export type UserUncheckedUpdateWithoutWeatherRequestsInput = {
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1029,6 +1070,7 @@ export type UserCreateWithoutNotificationsInput = {
   userPreferredCrops?: Prisma.UserPreferredCropCreateNestedManyWithoutUserInput
   weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1047,6 +1089,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedCreateNestedManyWithoutUserInput
   weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1081,6 +1124,7 @@ export type UserUpdateWithoutNotificationsInput = {
   userPreferredCrops?: Prisma.UserPreferredCropUpdateManyWithoutUserNestedInput
   weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1099,6 +1143,99 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   userPreferredCrops?: Prisma.UserPreferredCropUncheckedUpdateManyWithoutUserNestedInput
   weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
   cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPasswordResetOTPsInput = {
+  id?: string
+  email: string
+  password: string
+  role?: $Enums.UserRole
+  phoneNumber: string
+  isOnboarded?: boolean
+  isEmailVerified?: boolean
+  language?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
+  detections?: Prisma.DetectionCreateNestedManyWithoutUserInput
+  userPreferredCrops?: Prisma.UserPreferredCropCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  cachedDiagnoses?: Prisma.CachedDiagnosisCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPasswordResetOTPsInput = {
+  id?: string
+  email: string
+  password: string
+  role?: $Enums.UserRole
+  phoneNumber: string
+  isOnboarded?: boolean
+  isEmailVerified?: boolean
+  language?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
+  detections?: Prisma.DetectionUncheckedCreateNestedManyWithoutUserInput
+  userPreferredCrops?: Prisma.UserPreferredCropUncheckedCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPasswordResetOTPsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetOTPsInput, Prisma.UserUncheckedCreateWithoutPasswordResetOTPsInput>
+}
+
+export type UserUpsertWithoutPasswordResetOTPsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetOTPsInput, Prisma.UserUncheckedUpdateWithoutPasswordResetOTPsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetOTPsInput, Prisma.UserUncheckedCreateWithoutPasswordResetOTPsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordResetOTPsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetOTPsInput, Prisma.UserUncheckedUpdateWithoutPasswordResetOTPsInput>
+}
+
+export type UserUpdateWithoutPasswordResetOTPsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
+  detections?: Prisma.DetectionUpdateManyWithoutUserNestedInput
+  userPreferredCrops?: Prisma.UserPreferredCropUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  cachedDiagnoses?: Prisma.CachedDiagnosisUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordResetOTPsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
+  detections?: Prisma.DetectionUncheckedUpdateManyWithoutUserNestedInput
+  userPreferredCrops?: Prisma.UserPreferredCropUncheckedUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1112,6 +1249,7 @@ export type UserCountOutputType = {
   weatherRequests: number
   notifications: number
   cachedDiagnoses: number
+  passwordResetOTPs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1120,6 +1258,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   weatherRequests?: boolean | UserCountOutputTypeCountWeatherRequestsArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   cachedDiagnoses?: boolean | UserCountOutputTypeCountCachedDiagnosesArgs
+  passwordResetOTPs?: boolean | UserCountOutputTypeCountPasswordResetOTPsArgs
 }
 
 /**
@@ -1167,6 +1306,13 @@ export type UserCountOutputTypeCountCachedDiagnosesArgs<ExtArgs extends runtime.
   where?: Prisma.CachedDiagnosisWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPasswordResetOTPsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordResetOTPWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1185,6 +1331,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   weatherRequests?: boolean | Prisma.User$weatherRequestsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   cachedDiagnoses?: boolean | Prisma.User$cachedDiagnosesArgs<ExtArgs>
+  passwordResetOTPs?: boolean | Prisma.User$passwordResetOTPsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1235,6 +1382,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   weatherRequests?: boolean | Prisma.User$weatherRequestsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   cachedDiagnoses?: boolean | Prisma.User$cachedDiagnosesArgs<ExtArgs>
+  passwordResetOTPs?: boolean | Prisma.User$passwordResetOTPsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1249,6 +1397,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     weatherRequests: Prisma.$WeatherRequestPayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     cachedDiagnoses: Prisma.$CachedDiagnosisPayload<ExtArgs>[]
+    passwordResetOTPs: Prisma.$PasswordResetOTPPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1661,6 +1810,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   weatherRequests<T extends Prisma.User$weatherRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$weatherRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WeatherRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cachedDiagnoses<T extends Prisma.User$cachedDiagnosesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cachedDiagnosesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CachedDiagnosisPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordResetOTPs<T extends Prisma.User$passwordResetOTPsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetOTPsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetOTPPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2229,6 +2379,30 @@ export type User$cachedDiagnosesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.CachedDiagnosisScalarFieldEnum | Prisma.CachedDiagnosisScalarFieldEnum[]
+}
+
+/**
+ * User.passwordResetOTPs
+ */
+export type User$passwordResetOTPsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordResetOTP
+   */
+  select?: Prisma.PasswordResetOTPSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordResetOTP
+   */
+  omit?: Prisma.PasswordResetOTPOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordResetOTPInclude<ExtArgs> | null
+  where?: Prisma.PasswordResetOTPWhereInput
+  orderBy?: Prisma.PasswordResetOTPOrderByWithRelationInput | Prisma.PasswordResetOTPOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordResetOTPWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordResetOTPScalarFieldEnum | Prisma.PasswordResetOTPScalarFieldEnum[]
 }
 
 /**

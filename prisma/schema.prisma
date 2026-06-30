@@ -80,6 +80,8 @@ model User {
 
   cachedDiagnoses CachedDiagnosis[]
 
+  passwordResetOTPs PasswordResetOTP[]
+
   @@index([email])
   @@index([phoneNumber])
   @@map("users")
@@ -217,4 +219,20 @@ model Notification {
   @@index([sentAt])
   @@index([priority])
   @@map("notifications")
+}
+
+model PasswordResetOTP {
+  id        String   @id @default(cuid())
+  userId    String
+  otpHash   String // NEVER store the raw OTP, only its bcrypt hash
+  expiresAt DateTime // OTP is valid for 10 minutes from creation
+  isUsed    Boolean  @default(false) // prevents replay/reuse after a successful reset
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_otps")
 }
