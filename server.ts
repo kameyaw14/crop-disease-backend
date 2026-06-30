@@ -15,6 +15,7 @@ import weatherRouter from "./routes/weatherRoutes.js";
 import notificationRouter from "./routes/notificationRoutes.js";
 import cropRouter from "./routes/cropRoutes.js";
 import ttsRouter from "./routes/ttsRoutes.js";
+import { startAlertCron } from "./utils/cron.js";
 // import { testTtsController } from "./contollers/testController.js";
 
 checkRequiredEnv();
@@ -100,6 +101,8 @@ const startServer = async () => {
       console.log(`Server running in ${env.MODE || "dev"} mode`);
       console.log(`Server is running on http://localhost:${PORT}`);
       console.log(`Allowed client URL: ${env.CLIENT_URL}`);
+      
+      startAlertCron();
     });
   } catch (error) {
     console.error("❌Failed to start server", error);
