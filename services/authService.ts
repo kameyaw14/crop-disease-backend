@@ -60,7 +60,16 @@ export const authService = {
     // Simulate email verification
     console.log(`📧 Verification email would be sent to: ${user.email}`);
 
-    return { user: { id: user.id, email: user.email, role: user.role }, token };
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        phoneNumber: user.phoneNumber,
+        isEmailVerified: user.isEmailVerified,
+      },
+      token,
+    };
   },
 
   async login(email: string, password: string) {
@@ -79,7 +88,9 @@ export const authService = {
       role: user.role,
     });
 
-    return { user, token };
+    const { password: _password, ...safeUser } = user;
+
+    return { user: safeUser, token };
   },
 
   async getMe(userId: string) {
