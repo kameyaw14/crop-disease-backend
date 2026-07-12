@@ -1,8 +1,23 @@
 # Crop Guardian Backend, API Testing Guide
 
-This document was written by reading the actual source code in `kameyaw14/crop-disease-backend` (commit `229efe1`, verified 2026-06-21), not from assumptions. Every route, validation rule, and error case below was traced directly from `routes/`, `controllers/`, `services/`, and `schema/`. If the backend changes, this doc needs to be re-verified against the new code.
+This document was written by reading the actual source code in `kameyaw14/crop-disease-backend` (commit `d22203d`, verified 2026-07-12), not from assumptions. Every route, validation rule, and error case below was traced directly from `routes/`, `controllers/`, `services/`, and `schema/`. This is an update of the previous version of this document (which was based on commit `229efe1`). If the backend changes again, this doc needs to be re-verified against the new code.
 
 Give this whole file to your frontend developer. It is written so they can build the API client and Postman collection without needing to read the backend source themselves.
+
+---
+
+## 0. What Changed Since the Last Version of This Doc
+
+If you already built against the previous README, read this section first.
+
+1. **Three new auth endpoints for password reset**, all phone-number based (not email based): `POST /api/auth/forgot-password`, `POST /api/auth/verify-reset-otp`, `POST /api/auth/reset-password`. Full 3-step OTP flow, see section 5.1.
+2. **Registration now also rejects a duplicate phone number**, not just a duplicate email, since `phoneNumber` is now a unique column on the `User` table.
+3. **The register success response now includes `phoneNumber` and `isEmailVerified`** in the returned `user` object, in addition to `id`, `email`, and `role`.
+4. **The login response no longer leaks the password hash.** This is a security fix from the previous version of this doc. The `login()` service now strips `password` from the returned user object before sending it back. You can now safely store the full `user` object from a login response.
+5. **Disease detection has a new "FREE scan" mode.** Sending `cropType: "FREE"` lets Gemini auto-identify the crop instead of you pre-selecting one. See section 5.3, this is a significant new feature for your "detect first, confirm crop second" UX idea.
+6. **Four new crop types were added to the `CropType` enum:** `RICE`, `YAM`, `GROUNDNUT`, `ONION`. Update your crop picker UI and any hardcoded enum lists on the frontend.
+7. **A new `detectedCropEnum` field is now present on every successful `/api/detect` response**, not just FREE scans. For normal scans it just echoes back the `cropType` you submitted, for FREE scans it is the crop Gemini identified, mapped to a known enum value (or `"UNKNOWN"`).
+8. **A new error type, `NO_PLANT_DETECTED`, exists for FREE scans** where no recognizable plant is in the image at all (distinct from `CROP_MISMATCH`, which is for normal scans where the plant is real but does not match the crop you selected).
 
 ---
 
@@ -13,13 +28,15 @@ Give this whole file to your frontend developer. It is written so they can build
 
 **Base URL (production):** Ask the backend dev for the deployed `SERVER_URL`.
 
-**Every route below (except health check, register, and login) requires this header:**
+**Every route below requires this header, except:** health check, register, login, forgot-password, verify-reset-otp, and reset-password.
 
 ```
 Authorization: Bearer <token>
 ```
 
-The token is returned from `POST /api/auth/register` or `POST /api/auth/login`. There is no refresh token endpoint in this codebase, the token is simply valid for 30 days from issue. Store it securely (e.g. `expo-secure-store` on the mobile app) and attach it to every protected request.
+The token is returned from `POST /api/auth/register` or `POST /api/auth/login`. There is no refresh token endpoint in this codebase, the access token is simply valid for 30 days from issue. Store it securely (e.g. `expo-secure-store` on the mobile app) and attach it to every protected request.
+
+Note there is a second, separate token used only during password reset (the `resetToken`), which behaves differently, see section 5.1.4.
 
 **Content-Type:**
 - All JSON endpoints: `Content-Type: application/json`
@@ -53,29 +70,45 @@ Always check `success` first, before reading any other field. A few endpoints (d
 
 ## 3. Important Behavior Notes (read this before testing)
 
-These are real quirks in the current backend code that will save you debugging time. They are not bugs you need to fix on the frontend, just things to design around.
+These are real quirks in the current backend code that will save you debugging time. They are not bugs you need to fix on the frontend, just things to design around. A few are flagged as things you should push the backend dev to fix before launch.
 
-1. **Detection validation errors return HTTP 500, not 400.** If you POST to `/api/detect` with a missing or invalid `cropType` (anything outside the six allowed enum values), the backend's Zod validation throws, and the controller passes it to the generic error handler, which always replies with a generic `500` message regardless of the real cause. The fix on your side: validate `cropType` against the known enum list client-side before submitting, so the user never actually sends a bad value.
+1. **Detection validation errors return HTTP 500, not 400.** If you POST to `/api/detect` with a missing or invalid `cropType` (anything outside the eleven allowed enum values, including `FREE`), the backend's Zod validation throws, and the controller passes it to the generic error handler, which always replies with a generic `500` message regardless of the real cause. The fix on your side: validate `cropType` against the known enum list client-side before submitting, so the user never actually sends a bad value.
 
 2. **Login does not validate input shape before querying the database.** There is a `loginSchema` defined in the codebase but the login controller does not use it. It just reads `email` and `password` directly from the body. If either is missing, the bcrypt compare will fail and you will get a generic `"Invalid email or password"` 401, not a field-specific validation error. Validate that both fields are present client-side first.
 
-3. **Most validation errors return a generic message, not field-level detail.** For crop endpoints (`addMyCrop`, `updateMyCrop`, etc.), any Zod validation failure is caught and replaced with a generic message like `"Invalid crop data provided."`. The backend deliberately does not leak internal error detail (this is intentional, for security). This means your frontend must do its own client-side validation matching the rules in section 5 below, since the server will not tell you which field was wrong.
+3. **Login now correctly strips the password hash from the response.** In the previous version of this backend, the `login()` service returned the raw Prisma user object including the hashed password field. This has been fixed, the returned `user` object no longer contains `password`. You do not need to strip anything client-side anymore, but it is still good practice not to log the full response body.
 
-4. **`updateMyCrop` and `deleteMyCrop` require the crop to already exist in the user's preferred list.** They do not auto-create. If the crop was never added via `POST /api/crops/my-crops`, both will fail with a generic 400 message.
+4. **Registration does not normalize the phone number to a consistent format, but password reset does.** This is the single most important thing to get right on your signup form. `normalizePhoneNumber()` (which converts any of `0244123456`, `233244123456`, or `+233244123456` into the canonical `+233244123456` form) is only called inside the password reset flow, not inside registration. Whatever string the user types into the signup form's phone field is stored exactly as-is. Then, when that same user later requests a password reset, the backend normalizes their input into `+233244123456` format and looks up a user with that exact string. If the user registered with a phone number in local format (e.g. `0244123456`), the reset lookup will not find them, since the stored value does not match the normalized query value. **Fix on your side:** always format the phone number to `+233XXXXXXXXX` on the frontend before sending it in the registration request body, so it matches what password reset will later search for. Flag this to your backend dev too, ideally registration should call the same normalization function.
 
-5. **`cropType` URL params are case-normalized server-side** (`cropType.toUpperCase()`), so `/my-crops/maize/history` and `/my-crops/MAIZE/history` both work. Still, always send uppercase from the frontend to stay consistent with the enum values returned elsewhere.
+5. **`phoneNumber` is now a unique column.** Registering with a phone number that is already in use returns a `400` with the message `"This phone number is already registered"`, in addition to the existing duplicate-email check.
 
-6. **The detection route is mounted at `/api/detect`, not `/api/detection/detect`.** Check `server.ts`: `app.use("/api", detectionRouter)` plus the router's own `/detect` path. It is easy to assume a nested path here, it is not nested.
+6. **Most crop-tracking validation errors return a generic message, not field-level detail.** For crop endpoints (`addMyCrop`, `updateMyCrop`, etc.), any Zod validation failure is caught and replaced with a generic message like `"Invalid crop data provided."`. The backend deliberately does not leak internal error detail (this is intentional, for security). This means your frontend must do its own client-side validation matching the rules in section 5 below, since the server will not tell you which field was wrong.
 
-7. **`POST /api/notifications/trigger` is explicitly commented `// Dev only` in the source.** It manually fires the daily alert cron job for all users. It is currently behind auth (`protect` middleware) but has no admin-role check, so any logged-in user can trigger it. Do not expose this in the production frontend, and flag this to your backend dev as something to lock down (e.g. restrict to an admin role) before launch.
+7. **`updateMyCrop` and `deleteMyCrop` require the crop to already exist in the user's preferred list.** They do not auto-create. If the crop was never added via `POST /api/crops/my-crops`, both will fail with a generic 400 message.
 
-8. **Weather forecast needs a location, either from query params or from the user's saved profile.** If you don't pass `lat`/`lon` and the user never saved a location during registration, you'll get a `400` with `errorType: "LOCATION_MISSING"`. Always try to capture GPS location at registration time so this fallback exists.
+8. **`cropType` URL params are case-normalized server-side** (`cropType.toUpperCase()`), so `/my-crops/maize/history` and `/my-crops/MAIZE/history` both work. Still, always send uppercase from the frontend to stay consistent with the enum values returned elsewhere.
 
-9. **TTS (`/api/tts/generate`) currently only supports Twi (`tw`).** Sending any other `language` value returns a `400`. This is a real backend limitation right now, not a frontend bug.
+9. **The detection route is mounted at `/api/detect`, not `/api/detection/detect`.** Check `server.ts`: `app.use("/api", detectionRouter)` plus the router's own `/detect` path. It is easy to assume a nested path here, it is not nested.
 
-10. **`preferredCrops` sent during registration is not validated against the crop enum.** Unlike the crop-tracking endpoints, `registerSchema` only checks it's a non-empty array of strings, it does not restrict values to `MAIZE`, `TOMATO`, etc. Still send only the valid enum values from your crop picker UI, since downstream features (like weather risk insights) expect those exact strings.
+10. **`FREE` is only a valid `cropType` value for the detection endpoint, not for crop-tracking endpoints.** Do not offer `FREE` as an option in your "Add a crop" form, the crop tracking Zod schemas do not accept it and will reject the request. `FREE` exists purely so the detection endpoint knows to auto-identify the crop instead of expecting a pre-selected one.
 
-11. **CORS is restricted to a fixed origin list** (`CLIENT_URL` env var, plus `http://localhost:3000` and `http://localhost:3002`). If you're testing the web frontend from a different local port, ask the backend dev to add your origin, or test with Postman/curl, which are not subject to browser CORS restrictions.
+11. **`POST /api/notifications/trigger` is explicitly commented `// Dev only` in the source.** It manually fires the daily alert cron job for all users. It is currently behind auth (`protect` middleware) but has no admin-role check, so any logged-in user can trigger it. Do not expose this in the production frontend, and flag this to your backend dev as something to lock down (e.g. restrict to an admin role) before launch.
+
+12. **Weather forecast needs a location, either from query params or from the user's saved profile.** If you don't pass `lat`/`lon` and the user never saved a location during registration, you'll get a `400` with `errorType: "LOCATION_MISSING"`. Always try to capture GPS location at registration time so this fallback exists.
+
+13. **TTS (`/api/tts/generate`) currently only supports Twi (`tw`).** Sending any other `language` value returns a `400`. This is a real backend limitation right now, not a frontend bug.
+
+14. **`preferredCrops` sent during registration is not validated against the crop enum.** Unlike the crop-tracking endpoints, `registerSchema` only checks it's a non-empty array of strings, it does not restrict values to `MAIZE`, `TOMATO`, etc. Still send only the valid enum values from your crop picker UI, since downstream features (like weather risk insights) expect those exact strings.
+
+15. **CORS is restricted to a fixed origin list** (`CLIENT_URL` env var, plus `http://localhost:3000` and `http://localhost:3002`). If you're testing the web frontend from a different local port, ask the backend dev to add your origin, or test with Postman/curl, which are not subject to browser CORS restrictions.
+
+16. **Password reset OTPs are only logged to the server console right now, no real SMS is sent.** The code has a `TODO: replace this with an Arkesel SMS API call` comment. During testing, you (or the backend dev) will need to check the backend server logs to read the OTP code, it will not arrive on an actual phone yet. Flag this as a pre-launch blocker if SMS delivery is required for your final demo.
+
+17. **`forgotPassword` and `verifyResetOtp` intentionally return the same generic response whether or not the phone number is registered.** This is a deliberate security measure (the same pattern used by login's generic "Invalid email or password" message) so the endpoint cannot be used to check which phone numbers have accounts. Do not rely on the response to tell the user "this number is not registered", design your UI copy around a generic "if this number is registered, an OTP has been sent" message.
+
+18. **The `isEmailVerified` field is misleadingly named, it actually tracks phone/OTP verification, not email verification.** It flips to `true` the moment a user successfully completes step 2 of the password reset flow (`verify-reset-otp`), which proves ownership of their phone number, not their email. There is currently no separate email verification step anywhere in this codebase (registration only simulates one with a `console.log`). Do not build UI copy that says "your email is verified" based on this flag, it is really "your phone number has been verified at least once."
+
+19. **A code comment in `jwtUtils.ts` is inaccurate and can mislead you.** The `generateToken` function has a comment saying "15 minutes, security best practice" right next to `expiresIn: "30d"`. The actual behavior is unchanged from before, access tokens still last 30 days, only the comment is wrong. This is separate from the real 15-minute expiry used by the password reset token (see section 5.1.4), do not confuse the two.
 
 ---
 
@@ -83,14 +116,15 @@ These are real quirks in the current backend code that will save you debugging t
 
 Use these exact values, they are enforced by the Postgres/Prisma enum types on the backend.
 
-| Enum | Values |
-|---|---|
-| `UserRole` | `FARMER`, `BEGINNER`, `GARDENER`, `STUDENT`, `OTHER` |
-| `CropType` | `MAIZE`, `TOMATO`, `CASSAVA`, `PLANTAIN`, `PEPPER`, `COCOA` |
-| `CropStatus` | `HEALTHY`, `MONITORING`, `AT_RISK`, `HARVEST_READY` |
-| `Language` (not a DB enum, just accepted values) | `en`, `tw` |
-| `NotificationType` (read-only, set by backend) | `DAILY_SUMMARY`, `HIGH_RISK`, `CROP_SPECIFIC`, `FAVORABLE_CONDITION`, `GENERAL_ADVICE` |
-| `Priority` (read-only, set by backend) | `LOW`, `MEDIUM`, `HIGH` |
+| Enum | Values | Notes |
+|---|---|---|
+| `UserRole` | `FARMER`, `BEGINNER`, `GARDENER`, `STUDENT`, `OTHER` | |
+| `CropType` | `MAIZE`, `TOMATO`, `CASSAVA`, `PLANTAIN`, `PEPPER`, `COCOA`, `RICE`, `YAM`, `GROUNDNUT`, `ONION`, `FREE` | `RICE`, `YAM`, `GROUNDNUT`, `ONION` are new. `FREE` is detection-only, see Important Behavior Note 10, never send it to a crop-tracking endpoint |
+| `CropStatus` | `HEALTHY`, `MONITORING`, `AT_RISK`, `HARVEST_READY` | |
+| `Language` (not a DB enum, just accepted values) | `en`, `tw` | |
+| `NotificationType` (read-only, set by backend) | `DAILY_SUMMARY`, `HIGH_RISK`, `CROP_SPECIFIC`, `FAVORABLE_CONDITION`, `GENERAL_ADVICE` | |
+| `Priority` (read-only, set by backend) | `LOW`, `MEDIUM`, `HIGH` | |
+| `detectedCropEnum` values returned by `/api/detect` | Same ten real crop values as `CropType` minus `FREE`, plus `"UNKNOWN"` | `"UNKNOWN"` only appears for FREE scans where the identified plant does not map to a known crop |
 
 ---
 
@@ -112,9 +146,9 @@ Creates a user account, a profile, and links preferred crops, all in one call. R
 | `email` | string | Yes | Must be a valid email format |
 | `password` | string | Yes | Minimum 8 characters |
 | `fullName` | string | Yes | Minimum 2 characters |
-| `phoneNumber` | string | Yes | Minimum 10 characters (no format/country-code check beyond length) |
+| `phoneNumber` | string | Yes | Minimum 10 characters (no format/country-code check beyond length). See Important Behavior Note 4, format this as `+233XXXXXXXXX` before sending, since registration does not normalize it for you |
 | `role` | string | Yes | One of `UserRole` enum values |
-| `preferredCrops` | string[] | Yes | At least 1 item. Not enum-validated server-side, but send valid `CropType` values |
+| `preferredCrops` | string[] | Yes | At least 1 item. Not enum-validated server-side, but send valid `CropType` values (not `FREE`) |
 | `location` | object | No | `{ latitude: number, longitude: number, address?: string }`. Strongly recommended, weather forecast depends on this if no lat/lon query is sent later |
 
 **Example request:**
@@ -124,7 +158,7 @@ Creates a user account, a profile, and links preferred crops, all in one call. R
   "email": "ama.farmer@example.com",
   "password": "secureP@ss123",
   "fullName": "Ama Boateng",
-  "phoneNumber": "0244123456",
+  "phoneNumber": "+233244123456",
   "role": "FARMER",
   "preferredCrops": ["MAIZE", "CASSAVA"],
   "location": {
@@ -144,17 +178,22 @@ Creates a user account, a profile, and links preferred crops, all in one call. R
   "user": {
     "id": "cl9x8...",
     "email": "ama.farmer@example.com",
-    "role": "FARMER"
+    "role": "FARMER",
+    "phoneNumber": "+233244123456",
+    "isEmailVerified": false
   },
   "token": "eyJhbGciOi..."
 }
 ```
+
+Note `phoneNumber` and `isEmailVerified` are new additions to this response since the previous version of this doc.
 
 **Error responses:**
 
 | Status | Scenario | Message |
 |---|---|---|
 | `400` | Email already registered | `"User with this email already exists"` |
+| `400` | Phone number already registered (new check, since `phoneNumber` is now unique) | `"This phone number is already registered"` |
 | `400` | Any Zod validation failure (bad email, short password, missing fields, etc.) | The raw Zod error message is returned here, since the catch block uses `error.message`. This can look messy (a stringified Zod issue array), don't render it raw to end users, show a friendly generic message instead and rely on your own client-side validation to prevent this case |
 
 **Use case:** Onboarding screen, final submit step after collecting all profile fields and crop preferences.
@@ -192,9 +231,10 @@ Creates a user account, a profile, and links preferred crops, all in one call. R
     "id": "cl9x8...",
     "email": "ama.farmer@example.com",
     "role": "FARMER",
-    "phoneNumber": "0244123456",
+    "phoneNumber": "+233244123456",
     "language": "en",
     "isOnboarded": true,
+    "isEmailVerified": false,
     "profile": {
       "fullName": "Ama Boateng",
       "location": { "latitude": 6.6885, "longitude": -1.6244, "address": "Kumasi, Ghana" },
@@ -205,7 +245,7 @@ Creates a user account, a profile, and links preferred crops, all in one call. R
 }
 ```
 
-Note the password hash is included in the raw `user` object returned by Prisma here, since `login()` does not `omit` it the way `getMe()` does. Do not log this response body or store it verbatim, strip the `password` field before persisting any part of this object on the client.
+The password hash is no longer present in this response, see Important Behavior Note 3. It is now safe to store this full `user` object on the client.
 
 **Error responses:**
 
@@ -232,7 +272,7 @@ Returns the current authenticated user's profile. Use this to restore session st
     "id": "cl9x8...",
     "email": "ama.farmer@example.com",
     "role": "FARMER",
-    "phoneNumber": "0244123456",
+    "phoneNumber": "+233244123456",
     "language": "en",
     "isOnboarded": true,
     "isEmailVerified": false,
@@ -302,6 +342,129 @@ Updates the user's preferred language, used to drive Twi translation and TTS fea
 
 ---
 
+#### `POST /api/auth/forgot-password` (new)
+
+Step 1 of the password reset flow. The user submits their registered phone number, and if it matches an account, a 6-digit OTP is generated and (for now) logged to the server console, since real SMS sending is not wired up yet (see Important Behavior Note 16). Calling this endpoint again for the same user invalidates any previous unused OTP and issues a fresh one, so it also works as a "resend code" action.
+
+- **Auth required:** No
+- **Content-Type:** `application/json`
+
+**Body:**
+
+| Field | Type | Required | Validation |
+|---|---|---|---|
+| `phoneNumber` | string | Yes | Non-empty. Accepts `0244123456`, `233244123456`, or `+233244123456`, the backend normalizes it internally before looking up the user |
+
+**Example request:**
+
+```json
+{ "phoneNumber": "0244123456" }
+```
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "If this number is registered, an OTP has been sent."
+}
+```
+
+This exact same response is returned whether or not the phone number belongs to a real account, see Important Behavior Note 17. Never tell the user "number not found" based on this response.
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `400` | Phone number does not match any recognized Ghana format at all (empty, too short, garbage input) | `"Please enter a valid Ghana phone number (e.g. 0244123456 or +233244123456)"` |
+
+**Use case:** "Forgot password" screen, first step, also reused as the "resend OTP" button on the next screen.
+
+---
+
+#### `POST /api/auth/verify-reset-otp` (new)
+
+Step 2 of the password reset flow. The user submits their phone number plus the 6-digit OTP they received. On success, this marks the account's phone as verified and returns a short-lived `resetToken` needed for step 3.
+
+- **Auth required:** No
+- **Content-Type:** `application/json`
+
+**Body:**
+
+| Field | Type | Required | Validation |
+|---|---|---|---|
+| `phoneNumber` | string | Yes | Same format tolerance as `forgot-password` |
+| `otp` | string | Yes | Exactly 6 digits |
+
+**Example request:**
+
+```json
+{ "phoneNumber": "0244123456", "otp": "048213" }
+```
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "OTP verified successfully",
+  "resetToken": "eyJhbGciOi..."
+}
+```
+
+`resetToken` is a separate, short-lived JWT, valid for only 15 minutes and only usable at the `reset-password` endpoint, not as a normal `Authorization` bearer token. Store it in memory only (e.g. React state), do not persist it to secure storage the way you do the main login token.
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `400` | Phone number format invalid | `"Invalid phone number format"` |
+| `400` | Phone number not found, OTP expired (older than 10 minutes), OTP already used, or OTP does not match | `"Invalid or expired OTP"` (same message for all four cases, intentionally generic, see Important Behavior Note 17) |
+
+**Use case:** "Enter the code we sent you" screen.
+
+---
+
+#### `POST /api/auth/reset-password` (new)
+
+Step 3 of the password reset flow. The user submits the `resetToken` from step 2 plus their new password.
+
+- **Auth required:** No (uses the `resetToken` from the body instead of the usual `Authorization` header)
+- **Content-Type:** `application/json`
+
+**Body:**
+
+| Field | Type | Required | Validation |
+|---|---|---|---|
+| `resetToken` | string | Yes | Must be the token returned from `verify-reset-otp`, not expired (15 minute window) |
+| `newPassword` | string | Yes | Minimum 8 characters |
+
+**Example request:**
+
+```json
+{ "resetToken": "eyJhbGciOi...", "newPassword": "newSecureP@ss456" }
+```
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "Password reset successfully. You can now log in."
+}
+```
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `400` | `resetToken` expired, tampered with, or not actually a reset-type token | `"Reset session expired. Please request a new OTP."` |
+| `400` | `newPassword` shorter than 8 characters, or `resetToken` missing | Raw Zod error message, same caveat as registration, do not render it raw, rely on your own client-side validation |
+
+**Use case:** "Set a new password" screen, final step. After success, route the user back to the login screen, this endpoint does not return a new session token.
+
+---
+
 ### 5.2 Crops (My Crops tracking)
 
 All routes here are mounted at `/api/crops`.
@@ -368,7 +531,7 @@ Adds a crop to the user's tracked list.
 
 | Field | Type | Required | Validation |
 |---|---|---|---|
-| `cropType` | string | Yes | One of `CropType` enum values |
+| `cropType` | string | Yes | One of `CropType` enum values, **excluding `FREE`**: `MAIZE`, `TOMATO`, `CASSAVA`, `PLANTAIN`, `PEPPER`, `COCOA`, `RICE`, `YAM`, `GROUNDNUT`, `ONION` |
 | `customName` | string | No | Max 100 characters |
 | `plantingDate` | string | No | ISO 8601 datetime string |
 | `expectedHarvestDate` | string | No | ISO 8601 datetime string |
@@ -413,7 +576,7 @@ Adds a crop to the user's tracked list.
 | Status | Scenario | Message |
 |---|---|---|
 | `400` | Crop already exists in the user's list | `{ "success": false, "message": "This crop is already in your list." }` (the controller checks `result.success` to pick the status code, so this returns a normal `400`, not a thrown exception) |
-| `400` | Validation failure (bad enum, oversized strings, negative farm size) | `"Invalid crop data provided."` |
+| `400` | Validation failure (bad enum, oversized strings, negative farm size, or sending `FREE` here) | `"Invalid crop data provided."` |
 
 **Use case:** "Add a crop" form in onboarding or My Crops screen.
 
@@ -421,7 +584,7 @@ Adds a crop to the user's tracked list.
 
 #### `PATCH /api/crops/my-crops/:cropType`
 
-Updates fields on an existing tracked crop. Requires the crop to already be in the user's list (see Important Behavior Notes, item 4).
+Updates fields on an existing tracked crop. Requires the crop to already be in the user's list (see Important Behavior Notes, item 7).
 
 - **Auth required:** Yes
 - **Content-Type:** `application/json`
@@ -430,7 +593,7 @@ Updates fields on an existing tracked crop. Requires the crop to already be in t
 
 | Param | Type | Notes |
 |---|---|---|
-| `cropType` | string | One of `CropType` values, case-insensitive (auto-uppercased server-side) |
+| `cropType` | string | One of `CropType` values (excluding `FREE`), case-insensitive (auto-uppercased server-side) |
 
 **Body (all optional, send only fields you want to change):**
 
@@ -587,6 +750,11 @@ If there's no history yet, `history` is `[]` and the message becomes: `"No diagn
 
 This is the core feature. It uploads a plant image, runs it through a three-layer pipeline (exact-hash cache, then perceptual-hash similarity cache, then a live Gemini AI call with retries), and returns a structured diagnosis. The response language matches the user's saved `language` preference (`en` or `tw`).
 
+As of this version, this endpoint supports two modes:
+
+- **Normal scan:** you pre-select a `cropType` (e.g. `"MAIZE"`), and the AI verifies the image actually matches that crop before diagnosing.
+- **FREE scan (new):** you send `cropType: "FREE"`, and the AI identifies what crop is in the image itself, with no pre-selection needed. This is the backend piece for a "just take a photo" flow where the user does not need to know or choose their crop type first.
+
 - **Auth required:** Yes
 - **Content-Type:** `multipart/form-data` (this is the one endpoint that is NOT JSON)
 
@@ -595,7 +763,7 @@ This is the core feature. It uploads a plant image, runs it through a three-laye
 | Field | Type | Required | Validation |
 |---|---|---|---|
 | `image` | file | Yes | Image file under the configured max size (server default 5MB, controlled by `MAX_IMAGE_SIZE_MB` env var). Must have an `image/*` mimetype (jpg, png, webp, jpeg all work) |
-| `cropType` | string | Yes | One of `CropType` enum values. **Validate this client-side before submitting**, see Important Behavior Note 1 |
+| `cropType` | string | Yes | One of the eleven `CropType` enum values, including `FREE` for auto-detect mode. **Validate this client-side before submitting**, see Important Behavior Note 1 |
 | `notes` | string | No | Free text, currently stored but not yet used in the diagnosis prompt |
 
 **Optional query param:**
@@ -604,7 +772,7 @@ This is the core feature. It uploads a plant image, runs it through a three-laye
 |---|---|---|
 | `demo` | `"true"` | Forces demo mode, bypasses all caching and the live AI call, returns a placeholder failure response. Useful for pitch/demo days when you don't want to burn API quota or risk a slow AI response, but it always returns `success: false`, so don't wire this into your normal user flow, only use it for a specific "demo mode" toggle if your supervisor wants to see a fast offline-style fallback |
 
-**Example request (using FormData on React Native / fetch):**
+**Example request, normal scan (using FormData on React Native / fetch):**
 
 ```js
 const formData = new FormData();
@@ -625,7 +793,9 @@ fetch("http://localhost:3100/api/detect", {
 });
 ```
 
-**Success response, `200`:**
+**Example request, FREE scan:** identical to above except `formData.append("cropType", "FREE")`, no other field changes needed.
+
+**Success response, `200`, normal scan:**
 
 ```json
 {
@@ -634,6 +804,7 @@ fetch("http://localhost:3100/api/detect", {
   "imageUrl": "https://res.cloudinary.com/.../detections/abc.jpg",
   "isCorrectCrop": true,
   "detectedCrop": "MAIZE",
+  "detectedCropEnum": "MAIZE",
   "cropVerificationReason": "Leaf shape and venation match maize.",
   "diseaseName": "Northern Leaf Blight",
   "confidence": 0.82,
@@ -657,6 +828,14 @@ fetch("http://localhost:3100/api/detect", {
 }
 ```
 
+`detectedCropEnum` is a new field present on every successful response now, for a normal scan it always echoes back the `cropType` you submitted.
+
+**Success response, `200`, FREE scan:** same shape as above, with these differences:
+
+- `detectedCrop` is whatever plant name Gemini identified (e.g. `"Cassava"`), not necessarily matching anything you sent, since you didn't send a real crop.
+- `detectedCropEnum` is the identified crop mapped to a known enum value (e.g. `"CASSAVA"`), or the literal string `"UNKNOWN"` if Gemini identified a plant that isn't one of the ten supported crop types.
+- `suggestAddToMyCrops` will be **absent from the response entirely** (not `null`, just not present as a key) if `detectedCropEnum` came back `"UNKNOWN"`, since there's no valid crop to suggest adding. Check for the key's existence before reading it, don't assume it's always there for FREE scans.
+
 `fromCache: true` and `isFallback: true` may also appear if the result came from the cache layers or from a similar-result fallback after an AI outage, design your UI to optionally show a small "cached result" badge when `fromCache` is true, this is good for setting accurate user expectations.
 
 **Error responses:**
@@ -664,14 +843,15 @@ fetch("http://localhost:3100/api/detect", {
 | Status | Scenario | Body |
 |---|---|---|
 | `400` | No `image` file attached | `{ "success": false, "message": "Image file is required" }` |
-| `400` | Image does not match the selected `cropType` (AI determined it's a different plant) | `{ "success": false, "errorType": "CROP_MISMATCH", "message": "The uploaded image does not match the selected crop (MAIZE).", "detectedCrop": "TOMATO", "reason": "Leaf shape matches tomato, not maize." }` |
+| `400` | Image does not match the selected `cropType`, normal scan only (AI determined it's a different plant) | `{ "success": false, "errorType": "CROP_MISMATCH", "message": "The uploaded image does not match the selected crop (MAIZE).", "detectedCrop": "TOMATO", "reason": "Leaf shape matches tomato, not maize." }` |
+| `400` | No recognizable plant in the image at all, FREE scan only (new error type) | `{ "success": false, "errorType": "NO_PLANT_DETECTED", "message": "No recognizable plant or crop was detected in the image. Please take a clear photo of a plant.", "detectedCrop": "...", "reason": "..." }` |
 | `400` | Demo mode was requested | `{ "success": false, "errorType": "DEMO_MODE", "message": "Demo mode is active. Please pre-populate cache with common crops for presentation.", "suggestion": "Use real mode or seed cache for reliable demo." }` |
 | `400` | All 3 AI retry attempts failed and no fallback cache exists for this crop/language | `{ "success": false, "errorType": "AI_UNAVAILABLE", "message": "Our AI service is currently experiencing high traffic. Please try again in a few moments.", "suggestion": "Common diseases for this crop are available in the community section." }` |
 | `500` | Missing/invalid `cropType`, multer file-size limit exceeded, multer file-type rejection, or any unexpected error | Generic message from the global error handler, see Important Behavior Note 1 |
 
 **Offline behavior note:** This endpoint always requires a live network call (image upload to Cloudinary plus, usually, a Gemini API call), it cannot work fully offline today. If full offline disease detection is a hard requirement for your final-year project scope, that needs an on-device model (e.g. TensorFlow Lite) as a separate feature, this backend endpoint is cloud-only. Flag this with your supervisor/backend dev early since it affects your project's claimed offline capability.
 
-**Use case:** Camera scan screen, the main feature flow: take/select photo, pick crop type, submit, show diagnosis result.
+**Use case:** Camera scan screen, the main feature flow. With FREE scan now available, you can design the flow either way: ask the user to pick a crop first (normal scan), or let them just take a photo and confirm the crop afterward (FREE scan, then use `suggestAddToMyCrops` to offer adding it).
 
 ---
 
@@ -734,7 +914,7 @@ If neither is provided, the backend falls back to `profile.location` saved at re
 }
 ```
 
-A few field notes worth knowing for the UI: `weather_code` is the raw WMO numeric code (not all codes are mapped, unmapped codes like `95` show as `"Unknown"`, you may want to extend this map or handle `"Unknown"` gracefully in the UI). `riskLevel` is computed from a simple rule (humidity over 80% and rain probability over 50% equals High), it's not a machine-learning model, just a heuristic, present it as "today's risk estimate" rather than a guaranteed forecast.
+A few field notes worth knowing for the UI: `weather_code` is the raw WMO numeric code (not all codes are mapped, unmapped codes like `95` show as `"Unknown"`, you may want to extend this map or handle `"Unknown"` gracefully in the UI). `riskLevel` is computed from a simple rule (humidity over 80% and rain probability over 50% equals High), it's not a machine-learning model, just a heuristic, present it as "today's risk estimate" rather than a guaranteed forecast. Rules are only defined for `MAIZE`, `CASSAVA`, and `COCOA` right now, other crops (including the newly added `RICE`, `YAM`, `GROUNDNUT`, `ONION`) fall back to a generic message like `"[Crop] conditions look manageable."` regardless of actual risk level, flag this to your backend dev if you want crop-specific messaging for the new crop types too.
 
 **Error responses:**
 
@@ -830,7 +1010,7 @@ Marks a single notification as read.
 
 #### `POST /api/notifications/trigger`
 
-Manually runs the daily alert generation job for all users. See Important Behavior Note 7, this is a dev/testing utility, not a real user-facing feature, do not wire a button to this in the production app.
+Manually runs the daily alert generation job for all users. See Important Behavior Note 11, this is a dev/testing utility, not a real user-facing feature, do not wire a button to this in the production app. For context, the real cron job runs automatically every day at 5:30 AM Ghana time (`Africa/Accra`), this endpoint just lets you force it to run immediately for testing.
 
 - **Auth required:** Yes (but no admin-role check currently enforced)
 
@@ -858,7 +1038,7 @@ Proxies a request to the Ghana NLP translation API to synthesize Twi speech audi
 | Field | Type | Required | Validation |
 |---|---|---|---|
 | `text` | string | Yes | Non-empty after trimming |
-| `language` | string | No | Defaults to `"tw"`. Currently any other value is rejected (see Important Behavior Note 9) |
+| `language` | string | No | Defaults to `"tw"`. Currently any other value is rejected (see Important Behavior Note 13) |
 
 **Example request:**
 
@@ -906,7 +1086,7 @@ Not under `/api`, this is the server root.
   "success": true,
   "message": "Crop Guardian server running!!",
   "environment": "dev",
-  "timestamp": "2026-06-21T12:00:00.000Z"
+  "timestamp": "2026-07-12T12:00:00.000Z"
 }
 ```
 
@@ -922,6 +1102,9 @@ Not under `/api`, this is the server root.
 | POST | `/api/auth/login` | No | JSON |
 | GET | `/api/auth/me` | Yes | None |
 | PUT | `/api/auth/language` | Yes | JSON |
+| POST | `/api/auth/forgot-password` | No | JSON |
+| POST | `/api/auth/verify-reset-otp` | No | JSON |
+| POST | `/api/auth/reset-password` | No | JSON |
 | GET | `/api/crops/my-crops` | Yes | None |
 | POST | `/api/crops/my-crops` | Yes | JSON |
 | PATCH | `/api/crops/my-crops/:cropType` | Yes | JSON |
@@ -935,11 +1118,13 @@ Not under `/api`, this is the server root.
 | POST | `/api/tts/generate` | Yes | JSON |
 | GET | `/` | No | None |
 
+Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` are new since the previous version of this doc.
+
 ---
 
 ## 7. Suggested Postman Setup
 
-1. Create a Postman environment with two variables: `baseUrl` (e.g. `http://localhost:3100`) and `token` (leave blank initially).
+1. Create a Postman environment with three variables: `baseUrl` (e.g. `http://localhost:3100`), `token` (leave blank initially), and `resetToken` (leave blank initially, used only during the password reset flow).
 2. In the `POST /api/auth/login` request, add a "Tests" script to auto-save the token:
    ```js
    const data = pm.response.json();
@@ -947,19 +1132,30 @@ Not under `/api`, this is the server root.
      pm.environment.set("token", data.token);
    }
    ```
-3. On every protected request, set the Authorization header to `Bearer {{token}}` (Postman's "Bearer Token" auth type works too, just paste `{{token}}` as the value).
-4. Suggested test order for a full end-to-end pass: register, login, get me, add a crop, get my crops, run a detection on that crop, get crop history, get weather forecast, get notifications, generate TTS audio.
-5. For `POST /api/detect`, use Postman's `form-data` body type (not `raw` or `x-www-form-urlencoded`), set the `image` field type to "File" and pick a real plant photo, and add a text field for `cropType`.
+3. In the `POST /api/auth/verify-reset-otp` request, add a similar script to auto-save `resetToken`:
+   ```js
+   const data = pm.response.json();
+   if (data.success) {
+     pm.environment.set("resetToken", data.resetToken);
+   }
+   ```
+4. On every protected request, set the Authorization header to `Bearer {{token}}` (Postman's "Bearer Token" auth type works too, just paste `{{token}}` as the value).
+5. Suggested test order for a full end-to-end pass: register, login, get me, add a crop, get my crops, run a normal detection on that crop, run a FREE scan detection, get crop history, get weather forecast, get notifications, generate TTS audio, then separately walk through forgot-password, verify-reset-otp, and reset-password with a test account.
+6. For `POST /api/detect`, use Postman's `form-data` body type (not `raw` or `x-www-form-urlencoded`), set the `image` field type to "File" and pick a real plant photo, and add a text field for `cropType` (try both a real crop like `MAIZE` and the value `FREE` to test both modes).
+7. For the password reset flow, since OTPs are only logged to the server console right now (Important Behavior Note 16), you will need terminal access to the running backend to read the OTP code during testing, it will not be delivered anywhere else yet.
 
 ---
 
 ## 8. Things to Confirm With the Backend Dev Before You Build Against This
 
 - The exact `PORT` value in their local `.env`, and the deployed `SERVER_URL` once hosted.
-- Whether `POST /api/notifications/trigger` will get an admin-role guard before production, or be removed from the router entirely (see Important Behavior Note 7).
+- Whether `POST /api/notifications/trigger` will get an admin-role guard before production, or be removed from the router entirely (see Important Behavior Note 11).
 - Whether the `500`-on-validation-error behavior for `POST /api/detect` (Important Behavior Note 1) will be fixed to return a proper `400`, since right now your client-side validation is the only thing protecting users from seeing a generic error message there.
+- Whether registration will be updated to normalize the phone number the same way password reset does (Important Behavior Note 4), this is worth prioritizing since it can silently lock users out of password reset.
+- Whether real SMS delivery (e.g. via Arkesel) will be wired up before your final demo, or whether the console-log OTP approach is acceptable to show your supervisor.
+- Whether weather risk messaging (section 5.4) will be extended to cover the four newly added crops (`RICE`, `YAM`, `GROUNDNUT`, `ONION`), which currently only get a generic message regardless of actual risk.
 - Whether a community/social feature (mentioned in the original project scope) has its own routes yet, none currently exist in this repository, only auth, crops, detection, weather, notifications, and TTS are implemented as of this commit.
 
 ---
 
-*Generated from a direct read of the source code in `kameyaw14/crop-disease-backend`, commit `229efe1`, 2026-06-21. Re-verify against the live code if the backend has been updated since.*
+*Generated from a direct read of the source code in `kameyaw14/crop-disease-backend`, commit `d22203d`, 2026-07-12. Re-verify against the live code if the backend has been updated since.*
