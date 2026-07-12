@@ -10,7 +10,7 @@ export const authService = {
     const validated = registerSchema.parse(data);
 
     // Check if user exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
           { email: validated.email },
