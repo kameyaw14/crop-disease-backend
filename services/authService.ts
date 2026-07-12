@@ -11,11 +11,19 @@ export const authService = {
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
-      where: { email: validated.email },
+      where: {
+        OR: [
+          { email: validated.email },
+          { phoneNumber: validated.phoneNumber },
+        ],
+      },
     });
 
     if (existingUser) {
-      throw new Error("User with this email already exists");
+      if (existingUser.email === validated.email) {
+        throw new Error("User with this email already exists");
+      }
+      throw new Error("This phone number is already registered");
     }
 
     const hashedPassword = await bcrypt.hash(validated.password, 12);

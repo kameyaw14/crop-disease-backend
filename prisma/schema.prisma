@@ -62,7 +62,7 @@ model User {
   email           String   @unique
   password        String
   role            UserRole @default(OTHER)
-  phoneNumber     String
+  phoneNumber     String   @unique
   isOnboarded     Boolean  @default(false)
   isEmailVerified Boolean  @default(false)
   language        String   @default("en") // For Twi support later
@@ -83,7 +83,6 @@ model User {
   passwordResetOTPs PasswordResetOTP[]
 
   @@index([email])
-  @@index([phoneNumber])
   @@map("users")
 }
 
