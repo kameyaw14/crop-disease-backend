@@ -6,7 +6,29 @@ import { notificationController } from "../controllers/notificationController.js
 const notificationRouter = express.Router();
 
 notificationRouter.get("/", protect, notificationController.getNotifications);
-notificationRouter.patch("/:id/read", protect, notificationController.markAsRead);
-notificationRouter.post("/trigger", protect, notificationController.triggerAlerts); // Dev only
+
+notificationRouter.patch(
+  "/:id/read",
+  protect,
+  notificationController.markAsRead,
+);
+
+notificationRouter.post(
+  "/trigger",
+  protect,
+  notificationController.triggerAlerts,
+); // Dev only
+
+notificationRouter.put(
+  "/push-token",
+  protect,
+  notificationController.registerPushToken,
+);
+
+notificationRouter.delete(
+  "/push-token",
+  protect,
+  notificationController.removePushToken,
+);
 
 export default notificationRouter;

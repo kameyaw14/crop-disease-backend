@@ -53,6 +53,11 @@ export type WeatherRequest = Prisma.WeatherRequestModel
  */
 export type Notification = Prisma.NotificationModel
 /**
+ * Model PushToken
+ * 
+ */
+export type PushToken = Prisma.PushTokenModel
+/**
  * Model PasswordResetOTP
  * 
  */

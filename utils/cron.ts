@@ -3,6 +3,7 @@ import cron from "node-cron";
 import { prisma } from "../config/connectDb.js";
 import { alertService } from "../services/alertService.js";
 import type { User } from "../generated/prisma/client.js";
+import { pushService } from "../services/pushService.js";
 
 export const startAlertCron = () => {
   console.log(
@@ -51,6 +52,15 @@ export async function processDailyAlerts() {
           },
         });
         console.log(`✅ Alert sent to ${user.email} | ${alert.title}`);
+
+        await pushService.sendToUser(user.id, {
+          title: alert.title,
+          body: alert.message,
+          data: {
+            actionLink: alert.actionLink,
+            type: alert.type,
+          },
+        });
       }
       processed++;
     } catch (err) {

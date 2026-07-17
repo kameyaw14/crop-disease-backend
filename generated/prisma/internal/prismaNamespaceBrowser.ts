@@ -58,6 +58,7 @@ export const ModelName = {
   CachedDiagnosis: 'CachedDiagnosis',
   WeatherRequest: 'WeatherRequest',
   Notification: 'Notification',
+  PushToken: 'PushToken',
   PasswordResetOTP: 'PasswordResetOTP'
 } as const
 
@@ -192,6 +193,17 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const PushTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PushTokenScalarFieldEnum = (typeof PushTokenScalarFieldEnum)[keyof typeof PushTokenScalarFieldEnum]
 
 
 export const PasswordResetOTPScalarFieldEnum = {

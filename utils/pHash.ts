@@ -1,5 +1,5 @@
-//@ts-nocheck
 // utils/pHash.ts
+//@ts-nocheck
 
 // NEW ADDITION: This entire file is new.
 // Implements perceptual hashing (pHash) for image similarity detection.
