@@ -102,11 +102,46 @@ export const authService = {
   },
 
   async getMe(userId: string) {
-    return prisma.user.findUnique({
-      where: { id: userId },
-      include: { profile: true },
-      omit: { password: true },
-    });
+    const [user, unreadNotificationsCount] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          profile: true,
+          _count: {
+            select: {
+              userPreferredCrops: true,
+              detections: true,
+              notifications: true,
+            },
+          },
+        },
+        omit: { password: true },
+      }),
+      prisma.notification.count({
+        where: {
+          userId,
+          isRead: false,
+        },
+      }),
+    ]);
+
+    if (!user) {
+      return null;
+    }
+
+    const { _count, ...safeUser } = user;
+
+    const stats = {
+      cropsCount: _count.userPreferredCrops,
+      detectionsCount: _count.detections,
+      notificationsCount: _count.notifications,
+      unreadNotificationsCount,
+    };
+
+    return {
+      user: safeUser,
+      stats,
+    };
   },
 
   async updateLanguage(userId: string, data: any) {

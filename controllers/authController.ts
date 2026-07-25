@@ -43,8 +43,20 @@ export const authController = {
 
   async getMe(req: Request, res: Response) {
     try {
-      const user = await authService.getMe(req.user!.userId);
-      res.json({ success: true, user });
+      const result = await authService.getMe(req.user!.userId);
+
+      if (!result) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        user: result.user,
+        stats: result.stats,
+      });
     } catch (error: any) {
       console.error("❗Error in getMe:", error.message || "getMe failed");
       res.status(500).json({ success: false, message: "Failed to fetch user" });
