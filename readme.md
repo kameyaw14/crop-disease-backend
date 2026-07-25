@@ -1,6 +1,6 @@
 # Crop Guardian Backend, API Testing Guide
 
-This document was written by reading the actual source code in `kameyaw14/crop-disease-backend` (commit `d22203d`, verified 2026-07-12), not from assumptions. Every route, validation rule, and error case below was traced directly from `routes/`, `controllers/`, `services/`, and `schema/`. This is an update of the previous version of this document (which was based on commit `229efe1`). If the backend changes again, this doc needs to be re-verified against the new code.
+This document was written by reading the actual source code in `kameyaw14/crop-disease-backend` (commit `1d5bba7`, verified 2026-07-25), not from assumptions. Every route, validation rule, and error case below was traced directly from `routes/`, `controllers/`, `services/`, `schema/`, and `prisma/schema.prisma`. This is an update of the previous version of this document (which was based on commit `d22203d`). Where the code disagreed with the old doc, the code wins, every change is called out inline below. If the backend changes again, this doc needs to be re-verified against the new code.
 
 Give this whole file to your frontend developer. It is written so they can build the API client and Postman collection without needing to read the backend source themselves.
 
@@ -18,6 +18,13 @@ If you already built against the previous README, read this section first.
 6. **Four new crop types were added to the `CropType` enum:** `RICE`, `YAM`, `GROUNDNUT`, `ONION`. Update your crop picker UI and any hardcoded enum lists on the frontend.
 7. **A new `detectedCropEnum` field is now present on every successful `/api/detect` response**, not just FREE scans. For normal scans it just echoes back the `cropType` you submitted, for FREE scans it is the crop Gemini identified, mapped to a known enum value (or `"UNKNOWN"`).
 8. **A new error type, `NO_PLANT_DETECTED`, exists for FREE scans** where no recognizable plant is in the image at all (distinct from `CROP_MISMATCH`, which is for normal scans where the plant is real but does not match the crop you selected).
+
+**Biggest changes in this version (since the section above was written):**
+
+9. 🆕 **Real push notification delivery now exists.** Two new endpoints, `PUT /api/notifications/push-token` and `DELETE /api/notifications/push-token`, let the app register and unregister a device's Expo push token against the logged-in user. The daily 5:30 AM weather alert cron job now sends an actual push notification (via Expo's push API) to every registered device for a user, in addition to writing the `Notification` row it already created before. See section 5.5.
+10. ⚠️ **`GET /api/auth/me` response shape changed.** It now returns a top-level `stats` object alongside `user` (crop count, detection count, total notifications, and unread notification count), and returns a clean `404` if the user record is somehow missing, instead of only ever succeeding or 500ing. See section 5.1, update any code that only destructures `user` from this response.
+11. ✅ **The Twi text-to-speech endpoint (`POST /api/tts/generate`) had a real bug fixed.** It was calling a deprecated Ghana NLP endpoint (`/tts/v1/tts`) that could return an HTML/JSON error page instead of audio. It now calls the current `/tts/v1/synthesize` operation, and the controller explicitly checks the response `content-type` before trusting it is audio, returning a clean `502` instead of silently sending back a broken audio blob. The request/response shape your app already built against is unchanged, only the reliability improved.
+12. There is still no community/social feature in this codebase, this remains scoped work only, see section 8.
 
 ---
 
@@ -109,6 +116,12 @@ These are real quirks in the current backend code that will save you debugging t
 18. **The `isEmailVerified` field is misleadingly named, it actually tracks phone/OTP verification, not email verification.** It flips to `true` the moment a user successfully completes step 2 of the password reset flow (`verify-reset-otp`), which proves ownership of their phone number, not their email. There is currently no separate email verification step anywhere in this codebase (registration only simulates one with a `console.log`). Do not build UI copy that says "your email is verified" based on this flag, it is really "your phone number has been verified at least once."
 
 19. **A code comment in `jwtUtils.ts` is inaccurate and can mislead you.** The `generateToken` function has a comment saying "15 minutes, security best practice" right next to `expiresIn: "30d"`. The actual behavior is unchanged from before, access tokens still last 30 days, only the comment is wrong. This is separate from the real 15-minute expiry used by the password reset token (see section 5.1.4), do not confuse the two.
+
+20. 🆕 **Registering a push token twice on two different accounts silently reassigns it, it does not error.** `PUT /api/notifications/push-token` upserts on the token string itself. If a physical device previously registered its Expo push token while logged in as User A, then a different user (User B) logs in on that same device and registers again, the token row is simply updated to point at User B. This is correct behavior for a shared/reset device, but means you should always call the register endpoint again right after every successful login (and call the remove endpoint on logout, if you want that device to stop receiving alerts for the account that just logged out).
+
+21. 🆕 **There is no server-side format validation on the push token string.** `registerPushToken` only checks that `token` is a non-empty string, it does not verify it looks like a real Expo push token (`ExponentPushToken[...]`). Validate the token client-side (it comes directly from `expo-notifications`' `getExpoPushTokenAsync()`, so this should rarely be an issue) rather than relying on the backend to catch a malformed value.
+
+22. 🆕 **A dead push token is cleaned up automatically, but only the next time an alert is sent.** If a user uninstalls the app or revokes notification permissions, Expo's push receipt will report `DeviceNotRegistered` the next time the daily cron tries to notify that device, at which point the backend deletes the stale `PushToken` row. There is no immediate cleanup when permissions are revoked, so do not be surprised if a token still exists in the database for up to a day after the user turned notifications off.
 
 ---
 
@@ -263,6 +276,8 @@ Returns the current authenticated user's profile. Use this to restore session st
 
 - **Auth required:** Yes
 
+**⚠️ Changed - the response now also includes a top-level `stats` object.** `authService.getMe` runs the user lookup and an unread-notifications count concurrently (`Promise.all`), then returns `{ user, stats }` instead of just the raw user record. `user.profile` is unchanged in shape. If your app currently does `const { user } = await api.getMe()` you do not need to change anything, but you are now leaving useful data (`stats`) on the table.
+
 **Success response, `200`:**
 
 ```json
@@ -284,11 +299,26 @@ Returns the current authenticated user's profile. Use this to restore session st
       "location": { "latitude": 6.6885, "longitude": -1.6244, "address": "Kumasi, Ghana" },
       "preferredCrops": ["MAIZE", "CASSAVA"]
     }
+  },
+  "stats": {
+    "cropsCount": 2,
+    "detectionsCount": 14,
+    "notificationsCount": 6,
+    "unreadNotificationsCount": 3
   }
 }
 ```
 
 Password is correctly excluded here via Prisma's `omit`.
+
+**🆕 `stats` field reference:**
+
+| Field | Meaning |
+|---|---|
+| `cropsCount` | Number of crops in the user's tracked "My Crops" list (`UserPreferredCrop` rows) |
+| `detectionsCount` | Total lifetime disease detections the user has run |
+| `notificationsCount` | Total notifications ever sent to this user (read and unread combined) |
+| `unreadNotificationsCount` | Notifications with `isRead: false`. Use this to badge a bell icon without a separate call to `GET /api/notifications?unreadOnly=true` |
 
 **Error responses:**
 
@@ -296,9 +326,10 @@ Password is correctly excluded here via Prisma's `omit`.
 |---|---|---|
 | `401` | Missing or malformed `Authorization` header | `"Access denied. No token provided."` |
 | `401` | Invalid or expired token | `"Invalid or expired token"` |
+| `404` | 🆕 Token is valid but the user record no longer exists (e.g. deleted) | `"User not found"` |
 | `500` | Unexpected lookup failure | `"Failed to fetch user"` |
 
-**Use case:** App launch / splash screen session check, profile screen.
+**Use case:** App launch / splash screen session check, profile screen, and now also a lightweight way to populate a home-screen "X crops tracked, Y scans done" summary card plus an unread-notifications badge, without extra round trips.
 
 ---
 
@@ -1012,6 +1043,8 @@ Marks a single notification as read.
 
 Manually runs the daily alert generation job for all users. See Important Behavior Note 11, this is a dev/testing utility, not a real user-facing feature, do not wire a button to this in the production app. For context, the real cron job runs automatically every day at 5:30 AM Ghana time (`Africa/Accra`), this endpoint just lets you force it to run immediately for testing.
 
+**⚠️ Changed - this now also sends a real push notification, not just a database row.** For every alert generated, `processDailyAlerts` (in `utils/cron.ts`) writes the `Notification` row as before, then calls `pushService.sendToUser()`, which looks up every `PushToken` on file for that user and sends an Expo push notification carrying the same title, message, and `actionLink`/`type` as `data`. If the user has no registered push token, this step is silently skipped, no error is thrown. Registering a token via the endpoints below is what makes this actually reach a device.
+
 - **Auth required:** Yes (but no admin-role check currently enforced)
 
 **Success response, `200`:**
@@ -1020,7 +1053,83 @@ Manually runs the daily alert generation job for all users. See Important Behavi
 { "success": true, "message": "Manual alert trigger executed. Check server logs." }
 ```
 
-**Use case:** Only useful while testing the notification system locally, to force-generate alert data without waiting for the cron schedule.
+**Use case:** Only useful while testing the notification system locally, to force-generate alert data without waiting for the cron schedule, and now also to confirm push delivery is working end to end during development.
+
+---
+
+#### `PUT /api/notifications/push-token`
+
+🆕 **New endpoint.** Registers (or re-registers) the current device's Expo push token against the logged-in user, so they receive push notifications for future alerts.
+
+- **Auth required:** Yes
+- **Content-Type:** `application/json`
+
+**Body:**
+
+| Field | Type | Required | Validation |
+|---|---|---|---|
+| `token` | string | Yes | Non-empty string. Should be the value returned by `expo-notifications`' `getExpoPushTokenAsync()` on the device |
+
+**Example request:**
+
+```json
+{ "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]" }
+```
+
+**Success response, `200`:**
+
+```json
+{ "success": true, "message": "Push token registered." }
+```
+
+Internally this is an upsert keyed on the token itself (`token` is a unique column), so calling this again with the same token just updates which user it belongs to, see Important Behavior Note 20 for what that means if the same device is shared between accounts.
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `400` | `token` missing or not a string | `"A valid push token is required."` |
+| `401` | Missing/invalid token | Same as other protected routes |
+
+**Use case:** Call this once, right after the user grants notification permission (and again after every successful login, per Important Behavior Note 20), so the Expo push token on the device is always tied to whichever account is currently logged in.
+
+---
+
+#### `DELETE /api/notifications/push-token`
+
+🆕 **New endpoint.** Removes a push token from the database entirely, so that device stops receiving push notifications.
+
+- **Auth required:** Yes
+- **Content-Type:** `application/json`
+
+**Body:**
+
+| Field | Type | Required | Validation |
+|---|---|---|---|
+| `token` | string | Yes | Non-empty string, the same token that was registered |
+
+**Example request:**
+
+```json
+{ "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]" }
+```
+
+**Success response, `200`:**
+
+```json
+{ "success": true, "message": "Push token removed." }
+```
+
+Note this deletes by token value only, not scoped to the logged-in user, any authenticated request with a matching token will remove it. This is fine for the current single-purpose use case (a user logging out on their own device).
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `400` | `token` missing or not a string | `"A valid push token is required."` |
+| `401` | Missing/invalid token | Same as other protected routes |
+
+**Use case:** Call this on logout, and optionally when the user turns off notifications in the app's own settings screen (as a faster alternative to waiting for the automatic `DeviceNotRegistered` cleanup described in Important Behavior Note 22).
 
 ---
 
@@ -1029,6 +1138,8 @@ Manually runs the daily alert generation job for all users. See Important Behavi
 #### `POST /api/tts/generate`
 
 Proxies a request to the Ghana NLP translation API to synthesize Twi speech audio from text. Used to read diagnosis results aloud in Twi, useful for low-literacy users.
+
+**✅ Fixed - the backend now calls the current, non-deprecated Ghana NLP (Khaya AI) operation.** It previously called `/tts/v1/tts`, which is deprecated on their portal and could intermittently return an HTML or JSON error page instead of audio bytes. It now calls `/tts/v1/synthesize`, and explicitly checks the response `content-type` before trusting it, returning a clean `502` if the upstream service did not actually return audio. The request body and success response shape you already built against are unchanged, this is a reliability fix, not a contract change.
 
 - **Auth required:** Yes
 - **Content-Type:** `application/json`
@@ -1065,7 +1176,8 @@ Proxies a request to the Ghana NLP translation API to synthesize Twi speech audi
 |---|---|---|
 | `400` | Empty or missing `text` | `"Text is required for TTS"` |
 | `400` | `language` is anything other than `"tw"` | `"Only Twi (tw) supported currently"` |
-| `500` | Ghana NLP API call failed (rate limit, key issue, network) | `"Failed to generate speech. Please try again."` |
+| `502` | 🆕 Upstream Ghana NLP call responded, but with something other than audio (error page, rate-limit message, etc.) | `"Speech service is temporarily unavailable. Please try again later."` |
+| `500` | Ghana NLP API call failed outright (network error, key issue, thrown exception) | `"Failed to generate speech. Please try again."` |
 
 **Use case:** "Listen in Twi" button on the diagnosis result screen, paired with translated diagnosis text.
 
@@ -1115,10 +1227,12 @@ Not under `/api`, this is the server root.
 | GET | `/api/notifications` | Yes | Query params only |
 | PATCH | `/api/notifications/:id/read` | Yes | None |
 | POST | `/api/notifications/trigger` | Yes (dev only) | None |
+| PUT | `/api/notifications/push-token` | Yes | JSON |
+| DELETE | `/api/notifications/push-token` | Yes | JSON |
 | POST | `/api/tts/generate` | Yes | JSON |
 | GET | `/` | No | None |
 
-Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` are new since the previous version of this doc.
+Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were new in the previous version of this doc. The two `push-token` rows are new in this version.
 
 ---
 
@@ -1155,7 +1269,9 @@ Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` are new sin
 - Whether real SMS delivery (e.g. via Arkesel) will be wired up before your final demo, or whether the console-log OTP approach is acceptable to show your supervisor.
 - Whether weather risk messaging (section 5.4) will be extended to cover the four newly added crops (`RICE`, `YAM`, `GROUNDNUT`, `ONION`), which currently only get a generic message regardless of actual risk.
 - Whether a community/social feature (mentioned in the original project scope) has its own routes yet, none currently exist in this repository, only auth, crops, detection, weather, notifications, and TTS are implemented as of this commit.
+- 🆕 Whether the app-side Firebase (FCM V1) credentials and `expo-notifications` permission priming flow are ready. The backend's half of push delivery (token storage plus the Expo push send call in `pushService.ts`) is done, but it only works end to end once the app registers a real token, which requires Firebase set up in the EAS project on the frontend.
+- 🆕 Whether `PushToken` rows should ever be scoped to a specific installation vs. account, right now one physical device can only ever be linked to one user at a time (Important Behavior Note 20), confirm this matches the intended multi-user-per-device behavior (e.g. a shared family phone) before launch.
 
 ---
 
-*Generated from a direct read of the source code in `kameyaw14/crop-disease-backend`, commit `d22203d`, 2026-07-12. Re-verify against the live code if the backend has been updated since.*
+*Generated from a direct read of the source code in `kameyaw14/crop-disease-backend`, commit `1d5bba7`, 2026-07-25. Re-verify against the live code if the backend has been updated since.*
