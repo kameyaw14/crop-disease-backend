@@ -1,8 +1,52 @@
 # Crop Guardian Backend, API Testing Guide
 
-This document was written by reading the actual source code in `kameyaw14/crop-disease-backend` (commit `1d5bba7`, verified 2026-07-25), not from assumptions. Every route, validation rule, and error case below was traced directly from `routes/`, `controllers/`, `services/`, `schema/`, and `prisma/schema.prisma`. This is an update of the previous version of this document (which was based on commit `d22203d`). Where the code disagreed with the old doc, the code wins, every change is called out inline below. If the backend changes again, this doc needs to be re-verified against the new code.
+This document was written by reading the actual source code in `kameyaw14/crop-disease-backend` (commit `23c3f8b`, verified 2026-07-26), not from assumptions. Every route, validation rule, and error case below was traced directly from `routes/`, `controllers/`, `services/`, `schema/`, and `prisma/schema.prisma`. This is an update of the previous version of this document (which was based on commit `1d5bba7`). Where the code disagreed with the old doc, the code wins, every change is called out inline below. If the backend changes again, this doc needs to be re-verified against the new code.
 
 Give this whole file to your frontend developer. It is written so they can build the API client and Postman collection without needing to read the backend source themselves.
+
+---
+
+## Table of Contents
+
+- [0. What Changed Since the Last Version of This Doc](#0-what-changed-since-the-last-version-of-this-doc)
+- [1. Quick Start](#1-quick-start)
+- [2. Standard Response Shape](#2-standard-response-shape)
+- [3. Important Behavior Notes (read this before testing)](#3-important-behavior-notes-read-this-before-testing)
+- [4. Enum Reference](#4-enum-reference)
+- [5. Endpoints](#5-endpoints)
+  - [5.1 Auth](#51-auth)
+    - [`POST /api/auth/register`](#post-apiauthregister)
+    - [`POST /api/auth/login`](#post-apiauthlogin)
+    - [`GET /api/auth/me`](#get-apiauthme)
+    - [`PUT /api/auth/language`](#put-apiauthlanguage)
+    - [`POST /api/auth/forgot-password`](#post-apiauthforgot-password-new)
+    - [`POST /api/auth/verify-reset-otp`](#post-apiauthverify-reset-otp-new)
+    - [`POST /api/auth/reset-password`](#post-apiauthreset-password-new)
+    - [`PUT /api/auth/profile`](#put-apiauthprofile-new)
+    - [`PUT /api/auth/avatar`](#put-apiauthavatar-new)
+  - [5.2 Crops (My Crops tracking)](#52-crops-my-crops-tracking)
+    - [`GET /api/crops/my-crops`](#get-apicropsmy-crops)
+    - [`POST /api/crops/my-crops`](#post-apicropsmy-crops)
+    - [`PATCH /api/crops/my-crops/:cropType`](#patch-apicropsmy-cropscroptype)
+    - [`DELETE /api/crops/my-crops/:cropType`](#delete-apicropsmy-cropscroptype)
+    - [`GET /api/crops/my-crops/:cropType/history`](#get-apicropsmy-cropscroptypehistory)
+  - [5.3 Disease Detection](#53-disease-detection)
+    - [`POST /api/detect`](#post-apidetect)
+  - [5.4 Weather](#54-weather)
+    - [`GET /api/weather/forecast`](#get-apiweatherforecast)
+  - [5.5 Notifications](#55-notifications)
+    - [`GET /api/notifications`](#get-apinotifications)
+    - [`PATCH /api/notifications/:id/read`](#patch-apinotificationsidread)
+    - [`POST /api/notifications/trigger`](#post-apinotificationstrigger)
+    - [`PUT /api/notifications/push-token`](#put-apinotificationspush-token)
+    - [`DELETE /api/notifications/push-token`](#delete-apinotificationspush-token)
+  - [5.6 Text to Speech (Twi)](#56-text-to-speech-twi)
+    - [`POST /api/tts/generate`](#post-apittsgenerate)
+  - [5.7 Health Check](#57-health-check)
+    - [`GET /`](#get-)
+- [6. Endpoint Quick Reference](#6-endpoint-quick-reference)
+- [7. Suggested Postman Setup](#7-suggested-postman-setup)
+- [8. Things to Confirm With the Backend Dev Before You Build Against This](#8-things-to-confirm-with-the-backend-dev-before-you-build-against-this)
 
 ---
 
@@ -24,7 +68,12 @@ If you already built against the previous README, read this section first.
 9. 🆕 **Real push notification delivery now exists.** Two new endpoints, `PUT /api/notifications/push-token` and `DELETE /api/notifications/push-token`, let the app register and unregister a device's Expo push token against the logged-in user. The daily 5:30 AM weather alert cron job now sends an actual push notification (via Expo's push API) to every registered device for a user, in addition to writing the `Notification` row it already created before. See section 5.5.
 10. ⚠️ **`GET /api/auth/me` response shape changed.** It now returns a top-level `stats` object alongside `user` (crop count, detection count, total notifications, and unread notification count), and returns a clean `404` if the user record is somehow missing, instead of only ever succeeding or 500ing. See section 5.1, update any code that only destructures `user` from this response.
 11. ✅ **The Twi text-to-speech endpoint (`POST /api/tts/generate`) had a real bug fixed.** It was calling a deprecated Ghana NLP endpoint (`/tts/v1/tts`) that could return an HTML/JSON error page instead of audio. It now calls the current `/tts/v1/synthesize` operation, and the controller explicitly checks the response `content-type` before trusting it is audio, returning a clean `502` instead of silently sending back a broken audio blob. The request/response shape your app already built against is unchanged, only the reliability improved.
-12. There is still no community/social feature in this codebase, this remains scoped work only, see section 8.
+
+**Newest changes in this version:**
+
+13. 🆕 **Two new profile-editing endpoints exist: `PUT /api/auth/profile` and `PUT /api/auth/avatar`.** Together these let a user edit their `fullName`/`location` and upload/replace a profile picture after registration, instead of profile fields only ever being set once at sign-up. See section 5.1 for both.
+14. 🆕 **`PUT /api/auth/avatar` uploads to Cloudinary, same pattern as `/api/detect`.** It requires `multipart/form-data` with an `image` field (not JSON), automatically crops/resizes to a 400x400 face-focused square, and best-effort deletes the user's previous avatar image from Cloudinary storage (a failed delete never blocks the new upload from succeeding).
+15. There is still no community/social feature in this codebase, this remains scoped work only, see section 8.
 
 ---
 
@@ -47,7 +96,7 @@ Note there is a second, separate token used only during password reset (the `res
 
 **Content-Type:**
 - All JSON endpoints: `Content-Type: application/json`
-- Only `POST /api/detect` uses `multipart/form-data` (it uploads an image file). Do not send JSON to this one.
+- `POST /api/detect` and `PUT /api/auth/avatar` use `multipart/form-data` (both upload an image file). Do not send JSON to these two.
 
 ---
 
@@ -122,6 +171,12 @@ These are real quirks in the current backend code that will save you debugging t
 21. 🆕 **There is no server-side format validation on the push token string.** `registerPushToken` only checks that `token` is a non-empty string, it does not verify it looks like a real Expo push token (`ExponentPushToken[...]`). Validate the token client-side (it comes directly from `expo-notifications`' `getExpoPushTokenAsync()`, so this should rarely be an issue) rather than relying on the backend to catch a malformed value.
 
 22. 🆕 **A dead push token is cleaned up automatically, but only the next time an alert is sent.** If a user uninstalls the app or revokes notification permissions, Expo's push receipt will report `DeviceNotRegistered` the next time the daily cron tries to notify that device, at which point the backend deletes the stale `PushToken` row. There is no immediate cleanup when permissions are revoked, so do not be surprised if a token still exists in the database for up to a day after the user turned notifications off.
+
+23. 🆕 **`PUT /api/auth/profile` and `PUT /api/auth/avatar` both require the user's `Profile` row to already exist**, and will fail with a `400` (`"Profile not found. Please complete registration first."`) if it does not. In practice every user gets a `Profile` row created during `POST /api/auth/register`, so this should only ever happen for corrupted/manually-edited data, but do not assume it can never fire, still handle the error message in your UI.
+
+24. 🆕 **`updateProfile` silently ignores unknown fields and requires at least one real field.** The body is validated with `.partial()` (every field optional) then a `.refine()` that rejects an empty object. Sending `{}` returns a `400` with `"At least one field (fullName or location) must be provided"`. You cannot update `email`, `phoneNumber`, `role`, or `preferredCrops` through this endpoint, only `fullName` and `location`, there is no endpoint for changing the other fields yet.
+
+25. 🆕 **Avatar deletion from Cloudinary is best-effort and never blocks the new upload.** When you upload a new avatar, the backend tries to delete the old one from Cloudinary storage by parsing its public ID out of the stored URL. If that parsing or delete call fails for any reason, the failure is only logged server-side (`⚠️ Failed to delete old avatar`), the new avatar still saves and the request still returns `200`. This means orphaned images can build up in Cloudinary's free tier storage over time, not something the frontend needs to handle, just flagging it so nobody is surprised by unused images sitting in the Cloudinary dashboard.
 
 ---
 
@@ -493,6 +548,101 @@ Step 3 of the password reset flow. The user submits the `resetToken` from step 2
 | `400` | `newPassword` shorter than 8 characters, or `resetToken` missing | Raw Zod error message, same caveat as registration, do not render it raw, rely on your own client-side validation |
 
 **Use case:** "Set a new password" screen, final step. After success, route the user back to the login screen, this endpoint does not return a new session token.
+
+---
+
+#### `PUT /api/auth/profile` (new)
+
+Updates the logged-in user's `fullName` and/or `location`. Both fields are optional, but at least one must be present. Cannot change `email`, `phoneNumber`, `role`, or `preferredCrops`, there is no endpoint for those yet.
+
+- **Auth required:** Yes
+- **Content-Type:** `application/json`
+
+**Body:**
+
+| Field | Type | Required | Validation |
+|---|---|---|---|
+| `fullName` | string | No (but at least one field required) | Minimum 2 characters if provided |
+| `location` | object | No (but at least one field required) | `{ latitude: number, longitude: number, address?: string }` if provided |
+
+**Example request:**
+
+```json
+{
+  "fullName": "Ama K. Boateng",
+  "location": { "latitude": 6.6885, "longitude": -1.6244, "address": "Kumasi, Ghana" }
+}
+```
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "profile": {
+    "id": "cl9x8...",
+    "fullName": "Ama K. Boateng",
+    "avatarUrl": null,
+    "location": { "latitude": 6.6885, "longitude": -1.6244, "address": "Kumasi, Ghana" },
+    "preferredCrops": ["MAIZE", "CASSAVA"]
+  }
+}
+```
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `400` | Body is empty, or has no recognized field set | `"At least one field (fullName or location) must be provided"` |
+| `400` | `fullName` provided but shorter than 2 characters | Raw Zod error message, same caveat as registration, do your own client-side validation and show a friendly message instead |
+| `400` | The user's `Profile` row does not exist (see Important Behavior Note 23) | `"Profile not found. Please complete registration first."` |
+| `401` | Missing/invalid token | Same as other protected routes |
+
+**Use case:** "Edit Profile" screen, saving a changed name or updated farm location (e.g. after moving, or correcting a GPS location captured inaccurately at signup).
+
+---
+
+#### `PUT /api/auth/avatar` (new)
+
+Uploads or replaces the logged-in user's profile picture. Stores the image on Cloudinary, auto-crops to a 400x400 square focused on the detected face, and best-effort deletes the previous avatar image (see Important Behavior Note 25).
+
+- **Auth required:** Yes
+- **Content-Type:** `multipart/form-data` (not JSON, same pattern as `/api/detect`)
+
+**Body (form-data):**
+
+| Field | Type | Required | Validation |
+|---|---|---|---|
+| `image` | file | Yes | Must be an image mimetype (`image/*`). Same file size limit as detection uploads (`MAX_IMAGE_SIZE_MB` env var, 5MB default) |
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "Avatar updated successfully",
+  "avatarUrl": "https://res.cloudinary.com/xxx/image/upload/v123/crop-diagnose/avatars/abc123.jpg",
+  "profile": {
+    "id": "cl9x8...",
+    "fullName": "Ama Boateng",
+    "avatarUrl": "https://res.cloudinary.com/xxx/image/upload/v123/crop-diagnose/avatars/abc123.jpg",
+    "location": { "latitude": 6.6885, "longitude": -1.6244, "address": "Kumasi, Ghana" },
+    "preferredCrops": ["MAIZE", "CASSAVA"]
+  }
+}
+```
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `400` | No `image` file attached to the request | `"Image file is required"` |
+| `400` | Attached file is not an image mimetype | Raw multer error message, validate the file type client-side (e.g. restrict the image picker to photos) before upload |
+| `400` | The user's `Profile` row does not exist (see Important Behavior Note 23) | `"Profile not found. Please complete registration first."` |
+| `401` | Missing/invalid token | Same as other protected routes |
+
+**Use case:** "Change profile photo" tap target on the profile screen, typically paired with an image picker (camera or gallery) same as the detection flow's photo capture.
 
 ---
 
@@ -1217,6 +1367,8 @@ Not under `/api`, this is the server root.
 | POST | `/api/auth/forgot-password` | No | JSON |
 | POST | `/api/auth/verify-reset-otp` | No | JSON |
 | POST | `/api/auth/reset-password` | No | JSON |
+| PUT | `/api/auth/profile` | Yes | JSON |
+| PUT | `/api/auth/avatar` | Yes | multipart/form-data |
 | GET | `/api/crops/my-crops` | Yes | None |
 | POST | `/api/crops/my-crops` | Yes | JSON |
 | PATCH | `/api/crops/my-crops/:cropType` | Yes | JSON |
@@ -1232,7 +1384,7 @@ Not under `/api`, this is the server root.
 | POST | `/api/tts/generate` | Yes | JSON |
 | GET | `/` | No | None |
 
-Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were new in the previous version of this doc. The two `push-token` rows are new in this version.
+Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were added two versions ago. The two `push-token` rows were added in the previous version. The `profile` and `avatar` rows are new in this version.
 
 ---
 
@@ -1254,7 +1406,7 @@ Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were new in
    }
    ```
 4. On every protected request, set the Authorization header to `Bearer {{token}}` (Postman's "Bearer Token" auth type works too, just paste `{{token}}` as the value).
-5. Suggested test order for a full end-to-end pass: register, login, get me, add a crop, get my crops, run a normal detection on that crop, run a FREE scan detection, get crop history, get weather forecast, get notifications, generate TTS audio, then separately walk through forgot-password, verify-reset-otp, and reset-password with a test account.
+5. Suggested test order for a full end-to-end pass: register, login, get me, update profile, upload avatar, add a crop, get my crops, run a normal detection on that crop, run a FREE scan detection, get crop history, get weather forecast, get notifications, generate TTS audio, then separately walk through forgot-password, verify-reset-otp, and reset-password with a test account.
 6. For `POST /api/detect`, use Postman's `form-data` body type (not `raw` or `x-www-form-urlencoded`), set the `image` field type to "File" and pick a real plant photo, and add a text field for `cropType` (try both a real crop like `MAIZE` and the value `FREE` to test both modes).
 7. For the password reset flow, since OTPs are only logged to the server console right now (Important Behavior Note 16), you will need terminal access to the running backend to read the OTP code during testing, it will not be delivered anywhere else yet.
 
@@ -1274,4 +1426,4 @@ Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were new in
 
 ---
 
-*Generated from a direct read of the source code in `kameyaw14/crop-disease-backend`, commit `1d5bba7`, 2026-07-25. Re-verify against the live code if the backend has been updated since.*
+*Generated from a direct read of the source code in `kameyaw14/crop-disease-backend`, commit `23c3f8b`, 2026-07-26. Re-verify against the live code if the backend has been updated since.*
