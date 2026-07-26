@@ -1,7 +1,13 @@
 // services/authService.ts
 //@ts-nocheck
+import { v2 as cloudinary } from "cloudinary";
 import { prisma } from "../config/connectDb.js";
-import { languageSchema, registerSchema } from "../schema/authSchema.js";
+import {
+  languageSchema,
+  registerSchema,
+  updateProfileSchema,
+  type UpdateProfileInput,
+} from "../schema/authSchema.js";
 import bcrypt from "bcrypt";
 import { jwtUtils } from "../utils/jwtUtils.js";
 
@@ -161,6 +167,120 @@ export const authService = {
       success: true,
       message: `Language updated successfully to ${validated.language === "tw" ? "Twi" : "English"}`,
       language: user.language,
+    };
+  },
+
+  async updateProfile(userId: string, data: UpdateProfileInput) {
+    const validated = updateProfileSchema.parse(data);
+
+    // Ensure the profile row exists (it should after registration)
+    const existingProfile = await prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!existingProfile) {
+      throw new Error("Profile not found. Please complete registration first.");
+    }
+
+    const updatedProfile = await prisma.profile.update({
+      where: { userId },
+      data: {
+        ...(validated.fullName !== undefined && {
+          fullName: validated.fullName,
+        }),
+        ...(validated.location !== undefined && {
+          location: validated.location,
+        }),
+      },
+      select: {
+        id: true,
+        fullName: true,
+        avatarUrl: true,
+        location: true,
+        preferredCrops: true,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Profile updated successfully",
+      profile: updatedProfile,
+    };
+  },
+
+  async uploadAvatar(userId: string, file: Express.Multer.File) {
+    // 1. Fetch current profile so we know the old avatarUrl (if any)
+    const profile = await prisma.profile.findUnique({
+      where: { userId },
+      select: { avatarUrl: true },
+    });
+
+    if (!profile) {
+      throw new Error("Profile not found. Please complete registration first.");
+    }
+
+    // 2. Upload the new image to Cloudinary
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: "crop-diagnose/avatars",
+            resource_type: "image",
+            transformation: [
+              { width: 400, height: 400, crop: "fill", gravity: "face" }, // square crop focused on face
+            ],
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          },
+        )
+        .end(file.buffer);
+    });
+
+    const newAvatarUrl = uploadResult.secure_url as string;
+
+    // 3. Best-effort delete of the previous Cloudinary image (never throws)
+    if (profile.avatarUrl) {
+      try {
+        // Extract public_id from a typical Cloudinary URL
+        // Example: https://res.cloudinary.com/xxx/image/upload/v123/crop-diagnose/avatars/abc.jpg
+        const parts = profile.avatarUrl.split("/");
+        const uploadIndex = parts.findIndex((p) => p === "upload");
+        if (uploadIndex !== -1) {
+          // Everything after "upload/vXXXX/" becomes the public_id (without extension)
+          const publicIdWithExt = parts.slice(uploadIndex + 2).join("/");
+          const publicId = publicIdWithExt.replace(/\.[^/.]+$/, ""); // strip extension
+          await cloudinary.uploader.destroy(publicId);
+          console.log("🗑️ Old avatar deleted from Cloudinary:", publicId);
+        }
+      } catch (deleteError: any) {
+        // IMPORTANT: never block the new upload if delete fails
+        console.warn(
+          "⚠️ Failed to delete old avatar (non-blocking):",
+          deleteError.message,
+        );
+      }
+    }
+
+    // 4. Persist the new URL
+    const updatedProfile = await prisma.profile.update({
+      where: { userId },
+      data: { avatarUrl: newAvatarUrl },
+      select: {
+        id: true,
+        fullName: true,
+        avatarUrl: true,
+        location: true,
+        preferredCrops: true,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Avatar updated successfully",
+      avatarUrl: newAvatarUrl,
+      profile: updatedProfile,
     };
   },
 };

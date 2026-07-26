@@ -126,4 +126,46 @@ export const authController = {
       });
     }
   },
+
+  async updateProfile(req: Request, res: Response) {
+    try {
+      const result = await authService.updateProfile(
+        req.user!.userId,
+        req.body,
+      );
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in updateProfile:",
+        error.message || "updateProfile failed",
+      );
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to update profile",
+      });
+    }
+  },
+
+  async uploadAvatar(req: Request, res: Response) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Image file is required",
+        });
+      }
+
+      const result = await authService.uploadAvatar(req.user!.userId, req.file);
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in uploadAvatar:",
+        error.message || "uploadAvatar failed",
+      );
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to upload avatar",
+      });
+    }
+  },
 };

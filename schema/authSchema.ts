@@ -56,3 +56,21 @@ export const resetPasswordSchema = z.object({
   resetToken: z.string().min(1, "Reset token is required"),
   newPassword: z.string().min(8, "Password must be at least 8 characters"),
 });
+
+export const updateProfileSchema = z
+  .object({
+    fullName: z.string().min(2, "Full name must be at least 2 characters"),
+    location: z
+      .object({
+        latitude: z.number(),
+        longitude: z.number(),
+        address: z.string().optional(),
+      })
+      .optional(),
+  })
+  .partial() // TypeScript: .partial() turns every key into optional
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field (fullName or location) must be provided",
+  });
+
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
