@@ -23,3 +23,9 @@ communityRouter.get(
 
 communityRouter.get("/users/me/posts", protect, communityController.getMyPosts);
 export default communityRouter;
+
+communityRouter.delete(
+  "/posts/:postId",
+  protect,
+  communityController.deletePost,
+);
