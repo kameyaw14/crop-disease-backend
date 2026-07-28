@@ -148,4 +148,24 @@ export const communityService = {
       },
     };
   },
+
+  async getAllTags() {
+    const tags = await prisma.tag.findMany({
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+      orderBy: {
+        createdAt: "asc", // preserves the order we seeded them
+      },
+    });
+
+    return {
+      success: true,
+      message: "Tags retrieved successfully",
+      data: tags,
+      total: tags.length,
+    };
+  },
 };
