@@ -59,7 +59,16 @@ export const ModelName = {
   WeatherRequest: 'WeatherRequest',
   Notification: 'Notification',
   PushToken: 'PushToken',
-  PasswordResetOTP: 'PasswordResetOTP'
+  PasswordResetOTP: 'PasswordResetOTP',
+  Tag: 'Tag',
+  Post: 'Post',
+  PostTag: 'PostTag',
+  Comment: 'Comment',
+  PostLike: 'PostLike',
+  SavedPost: 'SavedPost',
+  Follow: 'Follow',
+  TagFollow: 'TagFollow',
+  CommentMark: 'CommentMark'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -100,7 +109,12 @@ export const ProfileScalarFieldEnum = {
   fullName: 'fullName',
   avatarUrl: 'avatarUrl',
   location: 'location',
-  preferredCrops: 'preferredCrops'
+  preferredCrops: 'preferredCrops',
+  bio: 'bio',
+  communityRegion: 'communityRegion',
+  reputationScore: 'reputationScore',
+  helpfulAnswersCount: 'helpfulAnswersCount',
+  solvedAnswersCount: 'solvedAnswersCount'
 } as const
 
 export type ProfileScalarFieldEnum = (typeof ProfileScalarFieldEnum)[keyof typeof ProfileScalarFieldEnum]
@@ -216,6 +230,104 @@ export const PasswordResetOTPScalarFieldEnum = {
 } as const
 
 export type PasswordResetOTPScalarFieldEnum = (typeof PasswordResetOTPScalarFieldEnum)[keyof typeof PasswordResetOTPScalarFieldEnum]
+
+
+export const TagScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  createdAt: 'createdAt'
+} as const
+
+export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
+
+
+export const PostScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  content: 'content',
+  imageUrls: 'imageUrls',
+  region: 'region',
+  cropType: 'cropType',
+  detectionId: 'detectionId',
+  likesCount: 'likesCount',
+  commentsCount: 'commentsCount',
+  savesCount: 'savesCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
+
+
+export const PostTagScalarFieldEnum = {
+  postId: 'postId',
+  tagId: 'tagId'
+} as const
+
+export type PostTagScalarFieldEnum = (typeof PostTagScalarFieldEnum)[keyof typeof PostTagScalarFieldEnum]
+
+
+export const CommentScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  userId: 'userId',
+  parentId: 'parentId',
+  content: 'content',
+  helpfulCount: 'helpfulCount',
+  solvedCount: 'solvedCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
+
+
+export const PostLikeScalarFieldEnum = {
+  userId: 'userId',
+  postId: 'postId',
+  createdAt: 'createdAt'
+} as const
+
+export type PostLikeScalarFieldEnum = (typeof PostLikeScalarFieldEnum)[keyof typeof PostLikeScalarFieldEnum]
+
+
+export const SavedPostScalarFieldEnum = {
+  userId: 'userId',
+  postId: 'postId',
+  createdAt: 'createdAt'
+} as const
+
+export type SavedPostScalarFieldEnum = (typeof SavedPostScalarFieldEnum)[keyof typeof SavedPostScalarFieldEnum]
+
+
+export const FollowScalarFieldEnum = {
+  followerId: 'followerId',
+  followingId: 'followingId',
+  createdAt: 'createdAt'
+} as const
+
+export type FollowScalarFieldEnum = (typeof FollowScalarFieldEnum)[keyof typeof FollowScalarFieldEnum]
+
+
+export const TagFollowScalarFieldEnum = {
+  userId: 'userId',
+  tagId: 'tagId',
+  createdAt: 'createdAt'
+} as const
+
+export type TagFollowScalarFieldEnum = (typeof TagFollowScalarFieldEnum)[keyof typeof TagFollowScalarFieldEnum]
+
+
+export const CommentMarkScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  commentId: 'commentId',
+  type: 'type',
+  createdAt: 'createdAt'
+} as const
+
+export type CommentMarkScalarFieldEnum = (typeof CommentMarkScalarFieldEnum)[keyof typeof CommentMarkScalarFieldEnum]
 
 
 export const SortOrder = {

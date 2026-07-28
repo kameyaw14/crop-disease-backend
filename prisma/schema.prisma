@@ -49,12 +49,22 @@ enum NotificationType {
   CROP_SPECIFIC
   FAVORABLE_CONDITION
   GENERAL_ADVICE
+  POST_LIKED
+  POST_COMMENTED
+  COMMENT_REPLIED
+  USER_FOLLOWED
+  FOLLOWED_USER_POSTED
 }
 
 enum Priority {
   LOW
   MEDIUM
   HIGH
+}
+
+enum CommentMarkType {
+  HELPFUL
+  SOLVED
 }
 
 model User {
@@ -73,7 +83,6 @@ model User {
   // Relationships
   profile            Profile?
   detections         Detection[]
-  // posts         Post[]     // Will be added later for community
   userPreferredCrops UserPreferredCrop[]
   weatherRequests    WeatherRequest[]
   notifications      Notification[]
@@ -82,6 +91,15 @@ model User {
 
   passwordResetOTPs PasswordResetOTP[]
   pushTokens        PushToken[]
+
+  posts        Post[]
+  comments     Comment[]
+  postLikes    PostLike[]
+  savedPosts   SavedPost[]
+  followers    Follow[]      @relation("UserFollowers")
+  following    Follow[]      @relation("UserFollowing")
+  tagFollows   TagFollow[]
+  commentMarks CommentMark[]
 
   @@index([email])
   @@map("users")
@@ -95,6 +113,12 @@ model Profile {
   avatarUrl      String?
   location       Json? // { latitude, longitude, address, accuracy? } - Auto-detected from frontend GPS
   preferredCrops CropType[]
+
+  bio                 String?
+  communityRegion     String? // one of the 16 Ghana regions
+  reputationScore     Int     @default(0)
+  helpfulAnswersCount Int     @default(0)
+  solvedAnswersCount  Int     @default(0)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -145,6 +169,7 @@ model Detection {
 
   cachedDiagnosisId String?
   cachedDiagnosis   CachedDiagnosis? @relation(fields: [cachedDiagnosisId], references: [id])
+  posts             Post[]
 
   @@index([cropType])
   @@index([createdAt])
@@ -248,4 +273,145 @@ model PasswordResetOTP {
   @@index([userId])
   @@index([expiresAt])
   @@map("password_reset_otps")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  posts      PostTag[]
+  tagFollows TagFollow[]
+
+  @@map("tags")
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  userId      String
+  content     String
+  imageUrls   String[] // max 3 images (enforced in service)
+  region      String? // one of the 16 Ghana regions
+  cropType    CropType?
+  detectionId String? // optional link to a Detection
+
+  likesCount    Int @default(0)
+  commentsCount Int @default(0)
+  savesCount    Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  detection Detection?  @relation(fields: [detectionId], references: [id], onDelete: SetNull)
+  tags      PostTag[]
+  comments  Comment[]
+  likes     PostLike[]
+  saves     SavedPost[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([region])
+  @@index([cropType])
+  @@index([likesCount])
+  @@map("posts")
+}
+
+model PostTag {
+  postId String
+  tagId  String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+model Comment {
+  id           String  @id @default(cuid())
+  postId       String
+  userId       String
+  parentId     String? // null = top-level comment, set = reply (one level only)
+  content      String
+  helpfulCount Int     @default(0)
+  solvedCount  Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post    Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[]     @relation("CommentReplies")
+  marks   CommentMark[]
+
+  @@index([postId])
+  @@index([userId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model PostLike {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@map("post_likes")
+}
+
+model SavedPost {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@map("saved_posts")
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@map("follows")
+}
+
+model TagFollow {
+  userId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tagId])
+  @@map("tag_follows")
+}
+
+model CommentMark {
+  id        String          @id @default(cuid())
+  userId    String
+  commentId String
+  type      CommentMarkType
+  createdAt DateTime        @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId, type])
+  @@index([commentId])
+  @@map("comment_marks")
 }

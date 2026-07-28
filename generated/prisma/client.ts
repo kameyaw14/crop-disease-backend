@@ -86,3 +86,48 @@ export type PushToken = Prisma.PushTokenModel
  * 
  */
 export type PasswordResetOTP = Prisma.PasswordResetOTPModel
+/**
+ * Model Tag
+ * 
+ */
+export type Tag = Prisma.TagModel
+/**
+ * Model Post
+ * 
+ */
+export type Post = Prisma.PostModel
+/**
+ * Model PostTag
+ * 
+ */
+export type PostTag = Prisma.PostTagModel
+/**
+ * Model Comment
+ * 
+ */
+export type Comment = Prisma.CommentModel
+/**
+ * Model PostLike
+ * 
+ */
+export type PostLike = Prisma.PostLikeModel
+/**
+ * Model SavedPost
+ * 
+ */
+export type SavedPost = Prisma.SavedPostModel
+/**
+ * Model Follow
+ * 
+ */
+export type Follow = Prisma.FollowModel
+/**
+ * Model TagFollow
+ * 
+ */
+export type TagFollow = Prisma.TagFollowModel
+/**
+ * Model CommentMark
+ * 
+ */
+export type CommentMark = Prisma.CommentMarkModel

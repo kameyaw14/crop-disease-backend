@@ -314,6 +314,7 @@ export type DetectionWhereInput = {
   cachedDiagnosisId?: Prisma.StringNullableFilter<"Detection"> | string | null
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   cachedDiagnosis?: Prisma.XOR<Prisma.CachedDiagnosisNullableScalarRelationFilter, Prisma.CachedDiagnosisWhereInput> | null
+  posts?: Prisma.PostListRelationFilter
 }
 
 export type DetectionOrderByWithRelationInput = {
@@ -337,6 +338,7 @@ export type DetectionOrderByWithRelationInput = {
   cachedDiagnosisId?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   cachedDiagnosis?: Prisma.CachedDiagnosisOrderByWithRelationInput
+  posts?: Prisma.PostOrderByRelationAggregateInput
 }
 
 export type DetectionWhereUniqueInput = Prisma.AtLeast<{
@@ -363,6 +365,7 @@ export type DetectionWhereUniqueInput = Prisma.AtLeast<{
   cachedDiagnosisId?: Prisma.StringNullableFilter<"Detection"> | string | null
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   cachedDiagnosis?: Prisma.XOR<Prisma.CachedDiagnosisNullableScalarRelationFilter, Prisma.CachedDiagnosisWhereInput> | null
+  posts?: Prisma.PostListRelationFilter
 }, "id">
 
 export type DetectionOrderByWithAggregationInput = {
@@ -434,6 +437,7 @@ export type DetectionCreateInput = {
   updatedAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutDetectionsInput
   cachedDiagnosis?: Prisma.CachedDiagnosisCreateNestedOneWithoutDetectionsInput
+  posts?: Prisma.PostCreateNestedManyWithoutDetectionInput
 }
 
 export type DetectionUncheckedCreateInput = {
@@ -455,6 +459,7 @@ export type DetectionUncheckedCreateInput = {
   updatedAt?: Date | string
   userId?: string | null
   cachedDiagnosisId?: string | null
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutDetectionInput
 }
 
 export type DetectionUpdateInput = {
@@ -476,6 +481,7 @@ export type DetectionUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutDetectionsNestedInput
   cachedDiagnosis?: Prisma.CachedDiagnosisUpdateOneWithoutDetectionsNestedInput
+  posts?: Prisma.PostUpdateManyWithoutDetectionNestedInput
 }
 
 export type DetectionUncheckedUpdateInput = {
@@ -497,6 +503,7 @@ export type DetectionUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cachedDiagnosisId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posts?: Prisma.PostUncheckedUpdateManyWithoutDetectionNestedInput
 }
 
 export type DetectionCreateManyInput = {
@@ -637,6 +644,11 @@ export type DetectionSumOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
 }
 
+export type DetectionNullableScalarRelationFilter = {
+  is?: Prisma.DetectionWhereInput | null
+  isNot?: Prisma.DetectionWhereInput | null
+}
+
 export type DetectionCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.DetectionCreateWithoutUserInput, Prisma.DetectionUncheckedCreateWithoutUserInput> | Prisma.DetectionCreateWithoutUserInput[] | Prisma.DetectionUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.DetectionCreateOrConnectWithoutUserInput | Prisma.DetectionCreateOrConnectWithoutUserInput[]
@@ -729,6 +741,22 @@ export type DetectionUncheckedUpdateManyWithoutCachedDiagnosisNestedInput = {
   deleteMany?: Prisma.DetectionScalarWhereInput | Prisma.DetectionScalarWhereInput[]
 }
 
+export type DetectionCreateNestedOneWithoutPostsInput = {
+  create?: Prisma.XOR<Prisma.DetectionCreateWithoutPostsInput, Prisma.DetectionUncheckedCreateWithoutPostsInput>
+  connectOrCreate?: Prisma.DetectionCreateOrConnectWithoutPostsInput
+  connect?: Prisma.DetectionWhereUniqueInput
+}
+
+export type DetectionUpdateOneWithoutPostsNestedInput = {
+  create?: Prisma.XOR<Prisma.DetectionCreateWithoutPostsInput, Prisma.DetectionUncheckedCreateWithoutPostsInput>
+  connectOrCreate?: Prisma.DetectionCreateOrConnectWithoutPostsInput
+  upsert?: Prisma.DetectionUpsertWithoutPostsInput
+  disconnect?: Prisma.DetectionWhereInput | boolean
+  delete?: Prisma.DetectionWhereInput | boolean
+  connect?: Prisma.DetectionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DetectionUpdateToOneWithWhereWithoutPostsInput, Prisma.DetectionUpdateWithoutPostsInput>, Prisma.DetectionUncheckedUpdateWithoutPostsInput>
+}
+
 export type DetectionCreateWithoutUserInput = {
   id?: string
   imageUrl?: string | null
@@ -747,6 +775,7 @@ export type DetectionCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   cachedDiagnosis?: Prisma.CachedDiagnosisCreateNestedOneWithoutDetectionsInput
+  posts?: Prisma.PostCreateNestedManyWithoutDetectionInput
 }
 
 export type DetectionUncheckedCreateWithoutUserInput = {
@@ -767,6 +796,7 @@ export type DetectionUncheckedCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   cachedDiagnosisId?: string | null
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutDetectionInput
 }
 
 export type DetectionCreateOrConnectWithoutUserInput = {
@@ -837,6 +867,7 @@ export type DetectionCreateWithoutCachedDiagnosisInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutDetectionsInput
+  posts?: Prisma.PostCreateNestedManyWithoutDetectionInput
 }
 
 export type DetectionUncheckedCreateWithoutCachedDiagnosisInput = {
@@ -857,6 +888,7 @@ export type DetectionUncheckedCreateWithoutCachedDiagnosisInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   userId?: string | null
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutDetectionInput
 }
 
 export type DetectionCreateOrConnectWithoutCachedDiagnosisInput = {
@@ -883,6 +915,106 @@ export type DetectionUpdateWithWhereUniqueWithoutCachedDiagnosisInput = {
 export type DetectionUpdateManyWithWhereWithoutCachedDiagnosisInput = {
   where: Prisma.DetectionScalarWhereInput
   data: Prisma.XOR<Prisma.DetectionUpdateManyMutationInput, Prisma.DetectionUncheckedUpdateManyWithoutCachedDiagnosisInput>
+}
+
+export type DetectionCreateWithoutPostsInput = {
+  id?: string
+  imageUrl?: string | null
+  cropType: $Enums.CropType
+  rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  diseaseName: string
+  confidence?: number
+  possibleDiseases?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  symptoms?: string | null
+  causes?: string | null
+  organicTreatments?: string | null
+  chemicalOptions?: string | null
+  prevention?: string | null
+  localNotes?: string | null
+  aiProvider?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user?: Prisma.UserCreateNestedOneWithoutDetectionsInput
+  cachedDiagnosis?: Prisma.CachedDiagnosisCreateNestedOneWithoutDetectionsInput
+}
+
+export type DetectionUncheckedCreateWithoutPostsInput = {
+  id?: string
+  imageUrl?: string | null
+  cropType: $Enums.CropType
+  rawResponse: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  diseaseName: string
+  confidence?: number
+  possibleDiseases?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  symptoms?: string | null
+  causes?: string | null
+  organicTreatments?: string | null
+  chemicalOptions?: string | null
+  prevention?: string | null
+  localNotes?: string | null
+  aiProvider?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  userId?: string | null
+  cachedDiagnosisId?: string | null
+}
+
+export type DetectionCreateOrConnectWithoutPostsInput = {
+  where: Prisma.DetectionWhereUniqueInput
+  create: Prisma.XOR<Prisma.DetectionCreateWithoutPostsInput, Prisma.DetectionUncheckedCreateWithoutPostsInput>
+}
+
+export type DetectionUpsertWithoutPostsInput = {
+  update: Prisma.XOR<Prisma.DetectionUpdateWithoutPostsInput, Prisma.DetectionUncheckedUpdateWithoutPostsInput>
+  create: Prisma.XOR<Prisma.DetectionCreateWithoutPostsInput, Prisma.DetectionUncheckedCreateWithoutPostsInput>
+  where?: Prisma.DetectionWhereInput
+}
+
+export type DetectionUpdateToOneWithWhereWithoutPostsInput = {
+  where?: Prisma.DetectionWhereInput
+  data: Prisma.XOR<Prisma.DetectionUpdateWithoutPostsInput, Prisma.DetectionUncheckedUpdateWithoutPostsInput>
+}
+
+export type DetectionUpdateWithoutPostsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
+  rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  possibleDiseases?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  symptoms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  causes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  organicTreatments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chemicalOptions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prevention?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneWithoutDetectionsNestedInput
+  cachedDiagnosis?: Prisma.CachedDiagnosisUpdateOneWithoutDetectionsNestedInput
+}
+
+export type DetectionUncheckedUpdateWithoutPostsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cropType?: Prisma.EnumCropTypeFieldUpdateOperationsInput | $Enums.CropType
+  rawResponse?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  diseaseName?: Prisma.StringFieldUpdateOperationsInput | string
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  possibleDiseases?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  symptoms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  causes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  organicTreatments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chemicalOptions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prevention?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cachedDiagnosisId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DetectionCreateManyUserInput = {
@@ -923,6 +1055,7 @@ export type DetectionUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cachedDiagnosis?: Prisma.CachedDiagnosisUpdateOneWithoutDetectionsNestedInput
+  posts?: Prisma.PostUpdateManyWithoutDetectionNestedInput
 }
 
 export type DetectionUncheckedUpdateWithoutUserInput = {
@@ -943,6 +1076,7 @@ export type DetectionUncheckedUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cachedDiagnosisId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posts?: Prisma.PostUncheckedUpdateManyWithoutDetectionNestedInput
 }
 
 export type DetectionUncheckedUpdateManyWithoutUserInput = {
@@ -1003,6 +1137,7 @@ export type DetectionUpdateWithoutCachedDiagnosisInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutDetectionsNestedInput
+  posts?: Prisma.PostUpdateManyWithoutDetectionNestedInput
 }
 
 export type DetectionUncheckedUpdateWithoutCachedDiagnosisInput = {
@@ -1023,6 +1158,7 @@ export type DetectionUncheckedUpdateWithoutCachedDiagnosisInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posts?: Prisma.PostUncheckedUpdateManyWithoutDetectionNestedInput
 }
 
 export type DetectionUncheckedUpdateManyWithoutCachedDiagnosisInput = {
@@ -1046,6 +1182,35 @@ export type DetectionUncheckedUpdateManyWithoutCachedDiagnosisInput = {
 }
 
 
+/**
+ * Count Type DetectionCountOutputType
+ */
+
+export type DetectionCountOutputType = {
+  posts: number
+}
+
+export type DetectionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  posts?: boolean | DetectionCountOutputTypeCountPostsArgs
+}
+
+/**
+ * DetectionCountOutputType without action
+ */
+export type DetectionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DetectionCountOutputType
+   */
+  select?: Prisma.DetectionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * DetectionCountOutputType without action
+ */
+export type DetectionCountOutputTypeCountPostsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PostWhereInput
+}
+
 
 export type DetectionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1068,6 +1233,8 @@ export type DetectionSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   cachedDiagnosisId?: boolean
   user?: boolean | Prisma.Detection$userArgs<ExtArgs>
   cachedDiagnosis?: boolean | Prisma.Detection$cachedDiagnosisArgs<ExtArgs>
+  posts?: boolean | Prisma.Detection$postsArgs<ExtArgs>
+  _count?: boolean | Prisma.DetectionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["detection"]>
 
 export type DetectionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1141,6 +1308,8 @@ export type DetectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type DetectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.Detection$userArgs<ExtArgs>
   cachedDiagnosis?: boolean | Prisma.Detection$cachedDiagnosisArgs<ExtArgs>
+  posts?: boolean | Prisma.Detection$postsArgs<ExtArgs>
+  _count?: boolean | Prisma.DetectionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DetectionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.Detection$userArgs<ExtArgs>
@@ -1156,6 +1325,7 @@ export type $DetectionPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {
     user: Prisma.$UserPayload<ExtArgs> | null
     cachedDiagnosis: Prisma.$CachedDiagnosisPayload<ExtArgs> | null
+    posts: Prisma.$PostPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1572,6 +1742,7 @@ export interface Prisma__DetectionClient<T, Null = never, ExtArgs extends runtim
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.Detection$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Detection$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   cachedDiagnosis<T extends Prisma.Detection$cachedDiagnosisArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Detection$cachedDiagnosisArgs<ExtArgs>>): Prisma.Prisma__CachedDiagnosisClient<runtime.Types.Result.GetResult<Prisma.$CachedDiagnosisPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  posts<T extends Prisma.Detection$postsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Detection$postsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2055,6 +2226,30 @@ export type Detection$cachedDiagnosisArgs<ExtArgs extends runtime.Types.Extensio
    */
   include?: Prisma.CachedDiagnosisInclude<ExtArgs> | null
   where?: Prisma.CachedDiagnosisWhereInput
+}
+
+/**
+ * Detection.posts
+ */
+export type Detection$postsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Post
+   */
+  select?: Prisma.PostSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Post
+   */
+  omit?: Prisma.PostOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PostInclude<ExtArgs> | null
+  where?: Prisma.PostWhereInput
+  orderBy?: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[]
+  cursor?: Prisma.PostWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PostScalarFieldEnum | Prisma.PostScalarFieldEnum[]
 }
 
 /**

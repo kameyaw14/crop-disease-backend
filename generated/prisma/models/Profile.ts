@@ -20,8 +20,22 @@ export type ProfileModel = runtime.Types.Result.DefaultSelection<Prisma.$Profile
 
 export type AggregateProfile = {
   _count: ProfileCountAggregateOutputType | null
+  _avg: ProfileAvgAggregateOutputType | null
+  _sum: ProfileSumAggregateOutputType | null
   _min: ProfileMinAggregateOutputType | null
   _max: ProfileMaxAggregateOutputType | null
+}
+
+export type ProfileAvgAggregateOutputType = {
+  reputationScore: number | null
+  helpfulAnswersCount: number | null
+  solvedAnswersCount: number | null
+}
+
+export type ProfileSumAggregateOutputType = {
+  reputationScore: number | null
+  helpfulAnswersCount: number | null
+  solvedAnswersCount: number | null
 }
 
 export type ProfileMinAggregateOutputType = {
@@ -29,6 +43,11 @@ export type ProfileMinAggregateOutputType = {
   userId: string | null
   fullName: string | null
   avatarUrl: string | null
+  bio: string | null
+  communityRegion: string | null
+  reputationScore: number | null
+  helpfulAnswersCount: number | null
+  solvedAnswersCount: number | null
 }
 
 export type ProfileMaxAggregateOutputType = {
@@ -36,6 +55,11 @@ export type ProfileMaxAggregateOutputType = {
   userId: string | null
   fullName: string | null
   avatarUrl: string | null
+  bio: string | null
+  communityRegion: string | null
+  reputationScore: number | null
+  helpfulAnswersCount: number | null
+  solvedAnswersCount: number | null
 }
 
 export type ProfileCountAggregateOutputType = {
@@ -45,15 +69,37 @@ export type ProfileCountAggregateOutputType = {
   avatarUrl: number
   location: number
   preferredCrops: number
+  bio: number
+  communityRegion: number
+  reputationScore: number
+  helpfulAnswersCount: number
+  solvedAnswersCount: number
   _all: number
 }
 
+
+export type ProfileAvgAggregateInputType = {
+  reputationScore?: true
+  helpfulAnswersCount?: true
+  solvedAnswersCount?: true
+}
+
+export type ProfileSumAggregateInputType = {
+  reputationScore?: true
+  helpfulAnswersCount?: true
+  solvedAnswersCount?: true
+}
 
 export type ProfileMinAggregateInputType = {
   id?: true
   userId?: true
   fullName?: true
   avatarUrl?: true
+  bio?: true
+  communityRegion?: true
+  reputationScore?: true
+  helpfulAnswersCount?: true
+  solvedAnswersCount?: true
 }
 
 export type ProfileMaxAggregateInputType = {
@@ -61,6 +107,11 @@ export type ProfileMaxAggregateInputType = {
   userId?: true
   fullName?: true
   avatarUrl?: true
+  bio?: true
+  communityRegion?: true
+  reputationScore?: true
+  helpfulAnswersCount?: true
+  solvedAnswersCount?: true
 }
 
 export type ProfileCountAggregateInputType = {
@@ -70,6 +121,11 @@ export type ProfileCountAggregateInputType = {
   avatarUrl?: true
   location?: true
   preferredCrops?: true
+  bio?: true
+  communityRegion?: true
+  reputationScore?: true
+  helpfulAnswersCount?: true
+  solvedAnswersCount?: true
   _all?: true
 }
 
@@ -111,6 +167,18 @@ export type ProfileAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ProfileAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ProfileSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ProfileMinAggregateInputType
@@ -141,6 +209,8 @@ export type ProfileGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: ProfileCountAggregateInputType | true
+  _avg?: ProfileAvgAggregateInputType
+  _sum?: ProfileSumAggregateInputType
   _min?: ProfileMinAggregateInputType
   _max?: ProfileMaxAggregateInputType
 }
@@ -152,7 +222,14 @@ export type ProfileGroupByOutputType = {
   avatarUrl: string | null
   location: runtime.JsonValue | null
   preferredCrops: $Enums.CropType[]
+  bio: string | null
+  communityRegion: string | null
+  reputationScore: number
+  helpfulAnswersCount: number
+  solvedAnswersCount: number
   _count: ProfileCountAggregateOutputType | null
+  _avg: ProfileAvgAggregateOutputType | null
+  _sum: ProfileSumAggregateOutputType | null
   _min: ProfileMinAggregateOutputType | null
   _max: ProfileMaxAggregateOutputType | null
 }
@@ -182,6 +259,11 @@ export type ProfileWhereInput = {
   avatarUrl?: Prisma.StringNullableFilter<"Profile"> | string | null
   location?: Prisma.JsonNullableFilter<"Profile">
   preferredCrops?: Prisma.EnumCropTypeNullableListFilter<"Profile">
+  bio?: Prisma.StringNullableFilter<"Profile"> | string | null
+  communityRegion?: Prisma.StringNullableFilter<"Profile"> | string | null
+  reputationScore?: Prisma.IntFilter<"Profile"> | number
+  helpfulAnswersCount?: Prisma.IntFilter<"Profile"> | number
+  solvedAnswersCount?: Prisma.IntFilter<"Profile"> | number
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -192,6 +274,11 @@ export type ProfileOrderByWithRelationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   preferredCrops?: Prisma.SortOrder
+  bio?: Prisma.SortOrderInput | Prisma.SortOrder
+  communityRegion?: Prisma.SortOrderInput | Prisma.SortOrder
+  reputationScore?: Prisma.SortOrder
+  helpfulAnswersCount?: Prisma.SortOrder
+  solvedAnswersCount?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -205,6 +292,11 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   avatarUrl?: Prisma.StringNullableFilter<"Profile"> | string | null
   location?: Prisma.JsonNullableFilter<"Profile">
   preferredCrops?: Prisma.EnumCropTypeNullableListFilter<"Profile">
+  bio?: Prisma.StringNullableFilter<"Profile"> | string | null
+  communityRegion?: Prisma.StringNullableFilter<"Profile"> | string | null
+  reputationScore?: Prisma.IntFilter<"Profile"> | number
+  helpfulAnswersCount?: Prisma.IntFilter<"Profile"> | number
+  solvedAnswersCount?: Prisma.IntFilter<"Profile"> | number
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "userId">
 
@@ -215,9 +307,16 @@ export type ProfileOrderByWithAggregationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   preferredCrops?: Prisma.SortOrder
+  bio?: Prisma.SortOrderInput | Prisma.SortOrder
+  communityRegion?: Prisma.SortOrderInput | Prisma.SortOrder
+  reputationScore?: Prisma.SortOrder
+  helpfulAnswersCount?: Prisma.SortOrder
+  solvedAnswersCount?: Prisma.SortOrder
   _count?: Prisma.ProfileCountOrderByAggregateInput
+  _avg?: Prisma.ProfileAvgOrderByAggregateInput
   _max?: Prisma.ProfileMaxOrderByAggregateInput
   _min?: Prisma.ProfileMinOrderByAggregateInput
+  _sum?: Prisma.ProfileSumOrderByAggregateInput
 }
 
 export type ProfileScalarWhereWithAggregatesInput = {
@@ -230,6 +329,11 @@ export type ProfileScalarWhereWithAggregatesInput = {
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
   location?: Prisma.JsonNullableWithAggregatesFilter<"Profile">
   preferredCrops?: Prisma.EnumCropTypeNullableListFilter<"Profile">
+  bio?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
+  communityRegion?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
+  reputationScore?: Prisma.IntWithAggregatesFilter<"Profile"> | number
+  helpfulAnswersCount?: Prisma.IntWithAggregatesFilter<"Profile"> | number
+  solvedAnswersCount?: Prisma.IntWithAggregatesFilter<"Profile"> | number
 }
 
 export type ProfileCreateInput = {
@@ -238,6 +342,11 @@ export type ProfileCreateInput = {
   avatarUrl?: string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileCreatepreferredCropsInput | $Enums.CropType[]
+  bio?: string | null
+  communityRegion?: string | null
+  reputationScore?: number
+  helpfulAnswersCount?: number
+  solvedAnswersCount?: number
   user: Prisma.UserCreateNestedOneWithoutProfileInput
 }
 
@@ -248,6 +357,11 @@ export type ProfileUncheckedCreateInput = {
   avatarUrl?: string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileCreatepreferredCropsInput | $Enums.CropType[]
+  bio?: string | null
+  communityRegion?: string | null
+  reputationScore?: number
+  helpfulAnswersCount?: number
+  solvedAnswersCount?: number
 }
 
 export type ProfileUpdateInput = {
@@ -256,6 +370,11 @@ export type ProfileUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileUpdatepreferredCropsInput | $Enums.CropType[]
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communityRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reputationScore?: Prisma.IntFieldUpdateOperationsInput | number
+  helpfulAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
+  solvedAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
   user?: Prisma.UserUpdateOneRequiredWithoutProfileNestedInput
 }
 
@@ -266,6 +385,11 @@ export type ProfileUncheckedUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileUpdatepreferredCropsInput | $Enums.CropType[]
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communityRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reputationScore?: Prisma.IntFieldUpdateOperationsInput | number
+  helpfulAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
+  solvedAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ProfileCreateManyInput = {
@@ -275,6 +399,11 @@ export type ProfileCreateManyInput = {
   avatarUrl?: string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileCreatepreferredCropsInput | $Enums.CropType[]
+  bio?: string | null
+  communityRegion?: string | null
+  reputationScore?: number
+  helpfulAnswersCount?: number
+  solvedAnswersCount?: number
 }
 
 export type ProfileUpdateManyMutationInput = {
@@ -283,6 +412,11 @@ export type ProfileUpdateManyMutationInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileUpdatepreferredCropsInput | $Enums.CropType[]
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communityRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reputationScore?: Prisma.IntFieldUpdateOperationsInput | number
+  helpfulAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
+  solvedAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ProfileUncheckedUpdateManyInput = {
@@ -292,6 +426,11 @@ export type ProfileUncheckedUpdateManyInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileUpdatepreferredCropsInput | $Enums.CropType[]
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communityRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reputationScore?: Prisma.IntFieldUpdateOperationsInput | number
+  helpfulAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
+  solvedAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ProfileNullableScalarRelationFilter = {
@@ -314,6 +453,17 @@ export type ProfileCountOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   location?: Prisma.SortOrder
   preferredCrops?: Prisma.SortOrder
+  bio?: Prisma.SortOrder
+  communityRegion?: Prisma.SortOrder
+  reputationScore?: Prisma.SortOrder
+  helpfulAnswersCount?: Prisma.SortOrder
+  solvedAnswersCount?: Prisma.SortOrder
+}
+
+export type ProfileAvgOrderByAggregateInput = {
+  reputationScore?: Prisma.SortOrder
+  helpfulAnswersCount?: Prisma.SortOrder
+  solvedAnswersCount?: Prisma.SortOrder
 }
 
 export type ProfileMaxOrderByAggregateInput = {
@@ -321,6 +471,11 @@ export type ProfileMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
+  bio?: Prisma.SortOrder
+  communityRegion?: Prisma.SortOrder
+  reputationScore?: Prisma.SortOrder
+  helpfulAnswersCount?: Prisma.SortOrder
+  solvedAnswersCount?: Prisma.SortOrder
 }
 
 export type ProfileMinOrderByAggregateInput = {
@@ -328,6 +483,17 @@ export type ProfileMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
+  bio?: Prisma.SortOrder
+  communityRegion?: Prisma.SortOrder
+  reputationScore?: Prisma.SortOrder
+  helpfulAnswersCount?: Prisma.SortOrder
+  solvedAnswersCount?: Prisma.SortOrder
+}
+
+export type ProfileSumOrderByAggregateInput = {
+  reputationScore?: Prisma.SortOrder
+  helpfulAnswersCount?: Prisma.SortOrder
+  solvedAnswersCount?: Prisma.SortOrder
 }
 
 export type ProfileCreateNestedOneWithoutUserInput = {
@@ -375,12 +541,25 @@ export type ProfileUpdatepreferredCropsInput = {
   push?: $Enums.CropType | $Enums.CropType[]
 }
 
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type ProfileCreateWithoutUserInput = {
   id?: string
   fullName: string
   avatarUrl?: string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileCreatepreferredCropsInput | $Enums.CropType[]
+  bio?: string | null
+  communityRegion?: string | null
+  reputationScore?: number
+  helpfulAnswersCount?: number
+  solvedAnswersCount?: number
 }
 
 export type ProfileUncheckedCreateWithoutUserInput = {
@@ -389,6 +568,11 @@ export type ProfileUncheckedCreateWithoutUserInput = {
   avatarUrl?: string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileCreatepreferredCropsInput | $Enums.CropType[]
+  bio?: string | null
+  communityRegion?: string | null
+  reputationScore?: number
+  helpfulAnswersCount?: number
+  solvedAnswersCount?: number
 }
 
 export type ProfileCreateOrConnectWithoutUserInput = {
@@ -413,6 +597,11 @@ export type ProfileUpdateWithoutUserInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileUpdatepreferredCropsInput | $Enums.CropType[]
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communityRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reputationScore?: Prisma.IntFieldUpdateOperationsInput | number
+  helpfulAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
+  solvedAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ProfileUncheckedUpdateWithoutUserInput = {
@@ -421,6 +610,11 @@ export type ProfileUncheckedUpdateWithoutUserInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   preferredCrops?: Prisma.ProfileUpdatepreferredCropsInput | $Enums.CropType[]
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communityRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reputationScore?: Prisma.IntFieldUpdateOperationsInput | number
+  helpfulAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
+  solvedAnswersCount?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -432,6 +626,11 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   avatarUrl?: boolean
   location?: boolean
   preferredCrops?: boolean
+  bio?: boolean
+  communityRegion?: boolean
+  reputationScore?: boolean
+  helpfulAnswersCount?: boolean
+  solvedAnswersCount?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["profile"]>
 
@@ -442,6 +641,11 @@ export type ProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   avatarUrl?: boolean
   location?: boolean
   preferredCrops?: boolean
+  bio?: boolean
+  communityRegion?: boolean
+  reputationScore?: boolean
+  helpfulAnswersCount?: boolean
+  solvedAnswersCount?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["profile"]>
 
@@ -452,6 +656,11 @@ export type ProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   avatarUrl?: boolean
   location?: boolean
   preferredCrops?: boolean
+  bio?: boolean
+  communityRegion?: boolean
+  reputationScore?: boolean
+  helpfulAnswersCount?: boolean
+  solvedAnswersCount?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["profile"]>
 
@@ -462,9 +671,14 @@ export type ProfileSelectScalar = {
   avatarUrl?: boolean
   location?: boolean
   preferredCrops?: boolean
+  bio?: boolean
+  communityRegion?: boolean
+  reputationScore?: boolean
+  helpfulAnswersCount?: boolean
+  solvedAnswersCount?: boolean
 }
 
-export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "fullName" | "avatarUrl" | "location" | "preferredCrops", ExtArgs["result"]["profile"]>
+export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "fullName" | "avatarUrl" | "location" | "preferredCrops" | "bio" | "communityRegion" | "reputationScore" | "helpfulAnswersCount" | "solvedAnswersCount", ExtArgs["result"]["profile"]>
 export type ProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -487,6 +701,11 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     avatarUrl: string | null
     location: runtime.JsonValue | null
     preferredCrops: $Enums.CropType[]
+    bio: string | null
+    communityRegion: string | null
+    reputationScore: number
+    helpfulAnswersCount: number
+    solvedAnswersCount: number
   }, ExtArgs["result"]["profile"]>
   composites: {}
 }
@@ -917,6 +1136,11 @@ export interface ProfileFieldRefs {
   readonly avatarUrl: Prisma.FieldRef<"Profile", 'String'>
   readonly location: Prisma.FieldRef<"Profile", 'Json'>
   readonly preferredCrops: Prisma.FieldRef<"Profile", 'CropType[]'>
+  readonly bio: Prisma.FieldRef<"Profile", 'String'>
+  readonly communityRegion: Prisma.FieldRef<"Profile", 'String'>
+  readonly reputationScore: Prisma.FieldRef<"Profile", 'Int'>
+  readonly helpfulAnswersCount: Prisma.FieldRef<"Profile", 'Int'>
+  readonly solvedAnswersCount: Prisma.FieldRef<"Profile", 'Int'>
 }
     
 

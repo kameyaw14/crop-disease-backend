@@ -52,7 +52,12 @@ export const NotificationType = {
   HIGH_RISK: 'HIGH_RISK',
   CROP_SPECIFIC: 'CROP_SPECIFIC',
   FAVORABLE_CONDITION: 'FAVORABLE_CONDITION',
-  GENERAL_ADVICE: 'GENERAL_ADVICE'
+  GENERAL_ADVICE: 'GENERAL_ADVICE',
+  POST_LIKED: 'POST_LIKED',
+  POST_COMMENTED: 'POST_COMMENTED',
+  COMMENT_REPLIED: 'COMMENT_REPLIED',
+  USER_FOLLOWED: 'USER_FOLLOWED',
+  FOLLOWED_USER_POSTED: 'FOLLOWED_USER_POSTED'
 } as const
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
@@ -65,3 +70,11 @@ export const Priority = {
 } as const
 
 export type Priority = (typeof Priority)[keyof typeof Priority]
+
+
+export const CommentMarkType = {
+  HELPFUL: 'HELPFUL',
+  SOLVED: 'SOLVED'
+} as const
+
+export type CommentMarkType = (typeof CommentMarkType)[keyof typeof CommentMarkType]

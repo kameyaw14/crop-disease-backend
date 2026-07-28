@@ -3,7 +3,6 @@ import multer from "multer";
 import type { Request } from "express";
 import { env } from "../utils/env.js";
 
-// NEW ADDITION: Reusable and secure multer configuration
 const storage = multer.memoryStorage();
 
 const upload = multer({
@@ -20,7 +19,7 @@ const upload = multer({
   },
 });
 
-// NEW ADDITION: Single image upload middleware (easy to extend later)
 export const uploadSingleImage = upload.single("image");
+export const uploadPostImages = upload.array("images", 3);
 
 export default upload;
