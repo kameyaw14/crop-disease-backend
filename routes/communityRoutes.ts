@@ -6,6 +6,8 @@ import { communityController } from "../controllers/communityController.js";
 
 const communityRouter = express.Router();
 
+communityRouter.get("/tags", communityController.getAllTags);
+
 communityRouter.post(
   "/posts",
   protect,
