@@ -43,4 +43,31 @@ export const communityController = {
       });
     }
   },
+
+  async getPostById(req: Request, res: Response) {
+    try {
+      const { postId } = req.params;
+      const currentUserId = req.user?.userId; // undefined if guest
+
+      const result = await communityService.getPostById(
+        postId as string,
+        currentUserId,
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getPostById:",
+        error.message || "getPostById failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to retrieve post. Please try again.",
+      });
+    }
+  },
 };

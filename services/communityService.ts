@@ -168,4 +168,104 @@ export const communityService = {
       total: tags.length,
     };
   },
+
+  async getPostById(postId: string, currentUserId?: string) {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                fullName: true,
+                avatarUrl: true,
+                reputationScore: true,
+              },
+            },
+          },
+        },
+        tags: {
+          include: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!post) {
+      return {
+        success: false,
+        message: "Post not found",
+      };
+    }
+
+    // Check if the current user has liked / saved this post (only if logged in)
+    let isLiked = false;
+    let isSaved = false;
+
+    if (currentUserId) {
+      const [like, saved] = await Promise.all([
+        prisma.postLike.findUnique({
+          where: {
+            userId_postId: {
+              userId: currentUserId,
+              postId,
+            },
+          },
+        }),
+        prisma.savedPost.findUnique({
+          where: {
+            userId_postId: {
+              userId: currentUserId,
+              postId,
+            },
+          },
+        }),
+      ]);
+
+      isLiked = !!like;
+      isSaved = !!saved;
+    }
+
+    return {
+      success: true,
+      message: "Post retrieved successfully",
+      data: {
+        id: post.id,
+        content: post.content,
+        imageUrls: post.imageUrls,
+        region: post.region,
+        cropType: post.cropType,
+        detectionId: post.detectionId,
+        likesCount: post.likesCount,
+        commentsCount: post.commentsCount,
+        savesCount: post.savesCount,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        author: {
+          id: post.user.id,
+          fullName: post.user.profile?.fullName ?? "Unknown",
+          avatarUrl: post.user.profile?.avatarUrl ?? null,
+          reputationScore: post.user.profile?.reputationScore ?? 0,
+        },
+        tags: post.tags.map((pt) => ({
+          id: pt.tag.id,
+          name: pt.tag.name,
+          slug: pt.tag.slug,
+        })),
+        // Only included when user is logged in
+        ...(currentUserId && {
+          isLiked,
+          isSaved,
+        }),
+      },
+    };
+  },
 };

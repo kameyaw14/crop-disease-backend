@@ -1,6 +1,6 @@
 // routes/communityRoutes.ts
 import express from "express";
-import { protect } from "../middleware/authMiddleware.js";
+import { optionalAuth, protect } from "../middleware/authMiddleware.js";
 import { uploadPostImages } from "../middleware/upload.js";
 import { communityController } from "../controllers/communityController.js";
 
@@ -13,6 +13,12 @@ communityRouter.post(
   protect,
   uploadPostImages,
   communityController.createPost,
+);
+
+communityRouter.get(
+  "/posts/:postId",
+  optionalAuth,
+  communityController.getPostById,
 );
 
 export default communityRouter;
