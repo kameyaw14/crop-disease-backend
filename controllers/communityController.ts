@@ -73,18 +73,48 @@ export const communityController = {
     }
   },
 
-    async getMyPosts(req: Request, res: Response) {
+  async getMyPosts(req: Request, res: Response) {
     try {
       const userId = req.user!.userId;
       const result = await communityService.getMyPosts(userId, req.query);
       res.status(200).json(result);
     } catch (error: any) {
-      console.error("❗Error in getMyPosts:", error.message || "getMyPosts failed");
+      console.error(
+        "❗Error in getMyPosts:",
+        error.message || "getMyPosts failed",
+      );
       res.status(400).json({
         success: false,
         message: error.message || "Failed to retrieve your posts",
       });
     }
   },
- 
+
+  async deletePost(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { postId } = req.params;
+
+      const result = await communityService.deletePost(
+        userId,
+        postId as string,
+      );
+
+      if (!result.success) {
+        const status = result.message === "Post not found" ? 404 : 403;
+        return res.status(status).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in deletePost:",
+        error.message || "deletePost failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete post. Please try again.",
+      });
+    }
+  },
 };

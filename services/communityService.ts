@@ -359,4 +359,68 @@ export const communityService = {
       },
     };
   },
+
+  async deletePost(userId: string, postId: string) {
+    // 1. Find the post and verify ownership
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: {
+        id: true,
+        userId: true,
+        imageUrls: true,
+      },
+    });
+
+    if (!post) {
+      return {
+        success: false,
+        message: "Post not found",
+      };
+    }
+
+    if (post.userId !== userId) {
+      return {
+        success: false,
+        message: "You can only delete your own posts",
+      };
+    }
+
+    // 2. Best-effort delete images from Cloudinary
+    if (post.imageUrls && post.imageUrls.length > 0) {
+      for (const imageUrl of post.imageUrls) {
+        try {
+          // Extract public_id from Cloudinary URL
+          // Example: https://res.cloudinary.com/xxx/image/upload/v123/crop-diagnose/community/abc.jpg
+          const parts = imageUrl.split("/");
+          const uploadIndex = parts.findIndex((p) => p === "upload");
+
+          if (uploadIndex !== -1) {
+            const publicIdWithExt = parts.slice(uploadIndex + 2).join("/");
+            const publicId = publicIdWithExt.replace(/\.[^/.]+$/, ""); // remove extension
+            await cloudinary.uploader.destroy(publicId);
+            console.log(
+              "🗑️ Deleted community image from Cloudinary:",
+              publicId,
+            );
+          }
+        } catch (deleteError: any) {
+          // Never block the post deletion if Cloudinary fails
+          console.warn(
+            "⚠️ Failed to delete community image (non-blocking):",
+            deleteError.message,
+          );
+        }
+      }
+    }
+
+    // 3. Hard delete the post (cascades comments, likes, saves, PostTags)
+    await prisma.post.delete({
+      where: { id: postId },
+    });
+
+    return {
+      success: true,
+      message: "Post deleted successfully",
+    };
+  },
 };
