@@ -54,6 +54,7 @@ enum NotificationType {
   COMMENT_REPLIED
   USER_FOLLOWED
   FOLLOWED_USER_POSTED
+  COMMENT_MARKED
 }
 
 enum Priority {

@@ -35,4 +35,47 @@ communityRouter.delete(
   communityController.deletePost,
 );
 
+communityRouter.post(
+  "/posts/:postId/comments",
+  protect,
+  communityController.createComment,
+);
+
+communityRouter.post(
+  "/comments/:commentId/replies",
+  protect,
+  communityController.createReply,
+);
+
+communityRouter.get("/posts/:postId/comments", communityController.getComments);
+
+communityRouter.delete(
+  "/comments/:commentId",
+  protect,
+  communityController.deleteComment,
+);
+
+communityRouter.post(
+  "/comments/:commentId/helpful",
+  protect,
+  communityController.markCommentHelpful,
+);
+
+communityRouter.post(
+  "/comments/:commentId/solved",
+  protect,
+  communityController.markCommentSolved,
+);
+
+communityRouter.delete(
+  "/comments/:commentId/helpful",
+  protect,
+  communityController.unmarkCommentHelpful,
+);
+
+communityRouter.delete(
+  "/comments/:commentId/solved",
+  protect,
+  communityController.unmarkCommentSolved,
+);
 export default communityRouter;

@@ -151,3 +151,39 @@ export const getPostsSchema = z.object({
 });
 
 export type GetPostsInput = z.infer<typeof getPostsSchema>;
+
+export const createCommentSchema = z.object({
+  content: z
+    .string()
+    .min(1, "Comment cannot be empty")
+    .max(1000, "Comment cannot exceed 1000 characters"),
+});
+
+export type CreateCommentInput = z.infer<typeof createCommentSchema>;
+
+export const createReplySchema = createCommentSchema;
+
+export type CreateReplyInput = z.infer<typeof createReplySchema>;
+
+export const getCommentsSchema = z.object({
+  page: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1, "Page can't be less than 1"))
+    .optional()
+    .default("1"),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1, "Limit can't be less than 1")
+        .max(20, "Limit can't be more than 20"),
+    )
+    .optional()
+    .default("10"),
+});
+
+export type GetCommentsInput = z.infer<typeof getCommentsSchema>;

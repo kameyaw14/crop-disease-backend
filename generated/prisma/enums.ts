@@ -57,7 +57,8 @@ export const NotificationType = {
   POST_COMMENTED: 'POST_COMMENTED',
   COMMENT_REPLIED: 'COMMENT_REPLIED',
   USER_FOLLOWED: 'USER_FOLLOWED',
-  FOLLOWED_USER_POSTED: 'FOLLOWED_USER_POSTED'
+  FOLLOWED_USER_POSTED: 'FOLLOWED_USER_POSTED',
+  COMMENT_MARKED: 'COMMENT_MARKED'
 } as const
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]

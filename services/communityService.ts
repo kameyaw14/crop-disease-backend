@@ -2,12 +2,54 @@
 import { v2 as cloudinary } from "cloudinary";
 import { prisma } from "../config/connectDb.js";
 import {
+  createCommentSchema,
   createPostSchema,
+  createReplySchema,
+  getCommentsSchema,
   getMyPostsSchema,
   getPostsSchema,
+  type CreateCommentInput,
   type CreatePostInput,
+  type CreateReplyInput,
+  type GetCommentsInput,
   type GetPostsInput,
 } from "../schema/communitySchema.js";
+
+type CommentMarkType = "HELPFUL" | "SOLVED";
+
+type CommentAuthor = {
+  id: string;
+  fullName: string;
+  avatarUrl: string | null;
+  reputationScore: number;
+};
+
+function formatCommentAuthor(user: {
+  id: string;
+  profile: {
+    fullName: string;
+    avatarUrl: string | null;
+    reputationScore: number;
+  } | null;
+}): CommentAuthor {
+  return {
+    id: user.id,
+    fullName: user.profile?.fullName ?? "Unknown",
+    avatarUrl: user.profile?.avatarUrl ?? null,
+    reputationScore: user.profile?.reputationScore ?? 0,
+  };
+}
+
+const commentAuthorInclude = {
+  id: true,
+  profile: {
+    select: {
+      fullName: true,
+      avatarUrl: true,
+      reputationScore: true,
+    },
+  },
+} as const;
 
 export const communityService = {
   async createPost(
@@ -563,6 +605,437 @@ export const communityService = {
         total,
         totalPages: Math.ceil(total / limit) || 0,
       },
+    };
+  },
+
+  async createComment(userId: string, postId: string, data: any) {
+    const validated: CreateCommentInput = createCommentSchema.parse(data);
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { id: true },
+    });
+
+    if (!post) {
+      throw new Error("Post not found");
+    }
+
+    const comment = await prisma.$transaction(async (tx) => {
+      const newComment = await tx.comment.create({
+        data: {
+          postId,
+          userId,
+          content: validated.content,
+          // parentId is left undefined (null in the DB) since this is a
+          // top-level comment, not a reply
+        },
+      });
+
+      await tx.post.update({
+        where: { id: postId },
+        data: { commentsCount: { increment: 1 } },
+      });
+
+      return tx.comment.findUnique({
+        where: { id: newComment.id },
+        include: { user: { select: commentAuthorInclude } },
+      });
+    });
+
+    return {
+      success: true,
+      message: "Comment posted successfully",
+      data: {
+        id: comment!.id,
+        postId: comment!.postId,
+        parentId: comment!.parentId,
+        content: comment!.content,
+        helpfulCount: comment!.helpfulCount,
+        solvedCount: comment!.solvedCount,
+        createdAt: comment!.createdAt,
+        author: formatCommentAuthor(comment!.user),
+        replies: [] as const, // a brand-new comment never has replies yet
+      },
+    };
+  },
+
+  async createReply(userId: string, commentId: string, data: any) {
+    const validated: CreateReplyInput = createReplySchema.parse(data);
+
+    const parentComment = await prisma.comment.findUnique({
+      where: { id: commentId },
+      select: { id: true, postId: true, parentId: true },
+    });
+
+    if (!parentComment) {
+      throw new Error("Comment not found");
+    }
+
+    // If the comment we're replying to already HAS a parentId, it means it is
+    // itself a reply. Replying to a reply would create a second level of
+    // nesting, which the product docs explicitly rule out.
+    if (parentComment.parentId !== null) {
+      throw new Error(
+        "Replies can only be added to a top-level comment, not to another reply",
+      );
+    }
+
+    const reply = await prisma.$transaction(async (tx) => {
+      const newReply = await tx.comment.create({
+        data: {
+          postId: parentComment.postId,
+          userId,
+          parentId: parentComment.id,
+          content: validated.content,
+        },
+      });
+
+      await tx.post.update({
+        where: { id: parentComment.postId },
+        data: { commentsCount: { increment: 1 } },
+      });
+
+      return tx.comment.findUnique({
+        where: { id: newReply.id },
+        include: { user: { select: commentAuthorInclude } },
+      });
+    });
+
+    return {
+      success: true,
+      message: "Reply posted successfully",
+      data: {
+        id: reply!.id,
+        postId: reply!.postId,
+        parentId: reply!.parentId,
+        content: reply!.content,
+        helpfulCount: reply!.helpfulCount,
+        solvedCount: reply!.solvedCount,
+        createdAt: reply!.createdAt,
+        author: formatCommentAuthor(reply!.user),
+      },
+    };
+  },
+
+  async getComments(postId: string, query: any) {
+    const validated: GetCommentsInput = getCommentsSchema.parse(query);
+
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 10, 20);
+    const skip = (page - 1) * limit;
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { id: true },
+    });
+
+    if (!post) {
+      return {
+        success: false,
+        message: "Post not found",
+      };
+    }
+
+    const [comments, total] = await Promise.all([
+      prisma.comment.findMany({
+        where: { postId, parentId: null },
+        orderBy: { createdAt: "asc" }, // oldest first, so a thread reads top to bottom
+        skip,
+        take: limit,
+        include: {
+          user: { select: commentAuthorInclude },
+          replies: {
+            orderBy: { createdAt: "asc" },
+            include: { user: { select: commentAuthorInclude } },
+          },
+        },
+      }),
+      prisma.comment.count({ where: { postId, parentId: null } }),
+    ]);
+
+    const data = comments.map((comment) => ({
+      id: comment.id,
+      postId: comment.postId,
+      parentId: comment.parentId,
+      content: comment.content,
+      helpfulCount: comment.helpfulCount,
+      solvedCount: comment.solvedCount,
+      createdAt: comment.createdAt,
+      author: formatCommentAuthor(comment.user),
+      replies: comment.replies.map((reply) => ({
+        id: reply.id,
+        postId: reply.postId,
+        parentId: reply.parentId,
+        content: reply.content,
+        helpfulCount: reply.helpfulCount,
+        solvedCount: reply.solvedCount,
+        createdAt: reply.createdAt,
+        author: formatCommentAuthor(reply.user),
+      })),
+    }));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? "Comments retrieved successfully"
+          : "No comments yet. Be the first to respond!",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+    };
+  },
+
+  async deleteComment(userId: string, commentId: string) {
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+      select: { id: true, userId: true, postId: true },
+    });
+
+    if (!comment) {
+      return {
+        success: false,
+        message: "Comment not found",
+      };
+    }
+
+    if (comment.userId !== userId) {
+      return {
+        success: false,
+        message: "You can only delete your own comments",
+      };
+    }
+
+    // Count direct replies so Post.commentsCount can be decremented by the
+    // correct total. If this comment is itself a reply, repliesCount is
+    // always 0, since replies cannot have their own replies.
+    const repliesCount = await prisma.comment.count({
+      where: { parentId: commentId },
+    });
+
+    const totalToRemove = 1 + repliesCount;
+
+    // Transaction needed: the delete and the commentsCount decrement on Post
+    // must both happen, or the post's displayed comment count drifts out of
+    // sync with what's actually in the database.
+    await prisma.$transaction(async (tx) => {
+      await tx.comment.delete({ where: { id: commentId } });
+
+      await tx.post.update({
+        where: { id: comment.postId },
+        data: { commentsCount: { decrement: totalToRemove } },
+      });
+    });
+
+    return {
+      success: true,
+      message: "Comment deleted successfully",
+    };
+  },
+
+  async markComment(
+    actingUserId: string,
+    commentId: string,
+    type: CommentMarkType,
+  ) {
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+      select: {
+        id: true,
+        postId: true,
+        userId: true,
+        post: { select: { userId: true } },
+      },
+    });
+
+    if (!comment) {
+      return { success: false, message: "Comment not found" };
+    }
+
+    if (comment.post.userId !== actingUserId) {
+      return {
+        success: false,
+        message: "Only the post author can mark comments as helpful or solved",
+      };
+    }
+
+    if (comment.userId === actingUserId) {
+      return {
+        success: false,
+        message: "You cannot mark your own comment",
+      };
+    }
+
+    // Prisma generates this compound-key name as "userId_commentId_type" from
+    // the @@unique([userId, commentId, type]) line in schema.prisma
+    const existingMark = await prisma.commentMark.findUnique({
+      where: {
+        userId_commentId_type: {
+          userId: actingUserId,
+          commentId,
+          type,
+        },
+      },
+    });
+
+    if (existingMark) {
+      return {
+        success: false,
+        message: `You have already marked this comment as ${type.toLowerCase()}`,
+      };
+    }
+
+    const reputationPoints = type === "HELPFUL" ? 1 : 2;
+
+    // Transaction is required: creating the mark, bumping the comment's own
+    // counter, bumping the author's reputation, and creating the notification
+    // must all succeed together, otherwise reputation and marks fall out of
+    // sync (e.g. a mark exists but reputation was never awarded).
+    const updatedComment = await prisma.$transaction(async (tx) => {
+      await tx.commentMark.create({
+        data: { userId: actingUserId, commentId, type },
+      });
+
+      const comment = await tx.comment.update({
+        where: { id: commentId },
+        data:
+          type === "HELPFUL"
+            ? { helpfulCount: { increment: 1 } }
+            : { solvedCount: { increment: 1 } },
+      });
+
+      await tx.profile.update({
+        where: { userId: comment.userId },
+        data: {
+          reputationScore: { increment: reputationPoints },
+          ...(type === "HELPFUL"
+            ? { helpfulAnswersCount: { increment: 1 } }
+            : { solvedAnswersCount: { increment: 1 } }),
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: comment.userId,
+          type: "COMMENT_MARKED",
+          title:
+            type === "HELPFUL"
+              ? "Your comment was marked Helpful"
+              : "Your comment solved a problem",
+          message:
+            type === "HELPFUL"
+              ? "Someone found your comment helpful. Keep sharing what you know!"
+              : "Your comment was marked as solving the problem. Great work!",
+          priority: "LOW",
+          actionLink: `/community/posts/${comment.postId}`,
+          metadata: { commentId, markType: type },
+        },
+      });
+
+      return comment;
+    });
+
+    return {
+      success: true,
+      message: `Comment marked as ${type.toLowerCase()} successfully`,
+      data: {
+        commentId: updatedComment.id,
+        helpfulCount: updatedComment.helpfulCount,
+        solvedCount: updatedComment.solvedCount,
+      },
+    };
+  },
+
+  async unmarkComment(
+    actingUserId: string,
+    commentId: string,
+    type: CommentMarkType,
+  ) {
+    const existingMark = await prisma.commentMark.findUnique({
+      where: {
+        userId_commentId_type: {
+          userId: actingUserId,
+          commentId,
+          type,
+        },
+      },
+    });
+
+    if (!existingMark) {
+      return {
+        success: false,
+        message:
+          "You have not marked this comment, so there is nothing to remove",
+      };
+    }
+
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+      select: { userId: true, helpfulCount: true, solvedCount: true },
+    });
+
+    if (!comment) {
+      return { success: false, message: "Comment not found" };
+    }
+
+    const reputationPoints = type === "HELPFUL" ? 1 : 2;
+
+    await prisma.$transaction(async (tx) => {
+      await tx.commentMark.delete({
+        where: {
+          userId_commentId_type: {
+            userId: actingUserId,
+            commentId,
+            type,
+          },
+        },
+      });
+
+      await tx.comment.update({
+        where: { id: commentId },
+        data:
+          type === "HELPFUL"
+            ? { helpfulCount: Math.max(0, comment.helpfulCount - 1) }
+            : { solvedCount: Math.max(0, comment.solvedCount - 1) },
+      });
+
+      const profile = await tx.profile.findUnique({
+        where: { userId: comment.userId },
+      });
+
+      if (profile) {
+        await tx.profile.update({
+          where: { userId: comment.userId },
+          data: {
+            reputationScore: Math.max(
+              0,
+              profile.reputationScore - reputationPoints,
+            ),
+            ...(type === "HELPFUL"
+              ? {
+                  helpfulAnswersCount: Math.max(
+                    0,
+                    profile.helpfulAnswersCount - 1,
+                  ),
+                }
+              : {
+                  solvedAnswersCount: Math.max(
+                    0,
+                    profile.solvedAnswersCount - 1,
+                  ),
+                }),
+          },
+        });
+      }
+    });
+
+    return {
+      success: true,
+      message: `${type === "HELPFUL" ? "Helpful" : "Solved"} mark removed successfully`,
     };
   },
 };

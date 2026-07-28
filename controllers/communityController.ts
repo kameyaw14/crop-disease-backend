@@ -133,4 +133,239 @@ export const communityController = {
       });
     }
   },
+
+  async createComment(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { postId } = req.params;
+
+      const result = await communityService.createComment(
+        userId,
+        postId as string,
+        req.body,
+      );
+
+      res.status(201).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in createComment:",
+        error.message || "createComment failed",
+      );
+
+      const status = error.message === "Post not found" ? 404 : 400;
+
+      res.status(status).json({
+        success: false,
+        message: error.message || "Failed to post comment. Please try again.",
+      });
+    }
+  },
+
+  async createReply(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { commentId } = req.params;
+
+      const result = await communityService.createReply(
+        userId,
+        commentId as string,
+        req.body,
+      );
+
+      res.status(201).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in createReply:",
+        error.message || "createReply failed",
+      );
+
+      const status = error.message === "Comment not found" ? 404 : 400;
+
+      res.status(status).json({
+        success: false,
+        message: error.message || "Failed to post reply. Please try again.",
+      });
+    }
+  },
+
+  async getComments(req: Request, res: Response) {
+    try {
+      const { postId } = req.params;
+
+      const result = await communityService.getComments(
+        postId as string,
+        req.query,
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getComments:",
+        error.message || "getComments failed",
+      );
+      res.status(400).json({
+        success: false,
+        message:
+          error.message || "Failed to retrieve comments. Please try again.",
+      });
+    }
+  },
+
+  async deleteComment(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { commentId } = req.params;
+
+      const result = await communityService.deleteComment(
+        userId,
+        commentId as string,
+      );
+
+      if (!result.success) {
+        const status = result.message === "Comment not found" ? 404 : 403;
+        return res.status(status).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in deleteComment:",
+        error.message || "deleteComment failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete comment. Please try again.",
+      });
+    }
+  },
+
+  async markCommentHelpful(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { commentId } = req.params;
+
+      const result = await communityService.markComment(
+        userId,
+        commentId as string,
+        "HELPFUL",
+      );
+
+      if (!result.success) {
+        const status = getMarkErrorStatus(result.message);
+        return res.status(status).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in markCommentHelpful:",
+        error.message || "markCommentHelpful failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to mark comment as helpful. Please try again.",
+      });
+    }
+  },
+
+  async markCommentSolved(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { commentId } = req.params;
+
+      const result = await communityService.markComment(
+        userId,
+        commentId as string,
+        "SOLVED",
+      );
+
+      if (!result.success) {
+        const status = getMarkErrorStatus(result.message);
+        return res.status(status).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in markCommentSolved:",
+        error.message || "markCommentSolved failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to mark comment as solved. Please try again.",
+      });
+    }
+  },
+
+  async unmarkCommentHelpful(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { commentId } = req.params;
+
+      const result = await communityService.unmarkComment(
+        userId,
+        commentId as string,
+        "HELPFUL",
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in unmarkCommentHelpful:",
+        error.message || "unmarkCommentHelpful failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to remove helpful mark. Please try again.",
+      });
+    }
+  },
+
+  async unmarkCommentSolved(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { commentId } = req.params;
+
+      const result = await communityService.unmarkComment(
+        userId,
+        commentId as string,
+        "SOLVED",
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in unmarkCommentSolved:",
+        error.message || "unmarkCommentSolved failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to remove solved mark. Please try again.",
+      });
+    }
+  },
 };
+
+// small helper (not part of the exported object) that maps a
+// markComment failure message to the right HTTP status code. Declaring it as
+// a plain function outside the object avoids repeating this if/else chain in
+// both markCommentHelpful and markCommentSolved.
+function getMarkErrorStatus(message: string): number {
+  if (message === "Comment not found") return 404;
+  if (message.startsWith("Only the post author")) return 403;
+  if (message === "You cannot mark your own comment") return 403;
+  if (message.startsWith("You have already marked")) return 409; // 409 = Conflict, the mark already exists
+  return 400;
+}
