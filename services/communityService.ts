@@ -3,6 +3,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { prisma } from "../config/connectDb.js";
 import {
   createPostSchema,
+  getMyPostsSchema,
   type CreatePostInput,
 } from "../schema/communitySchema.js";
 
@@ -265,6 +266,96 @@ export const communityService = {
           isLiked,
           isSaved,
         }),
+      },
+    };
+  },
+
+  async getMyPosts(userId: string, query: any) {
+    const validated = getMyPostsSchema.parse(query);
+
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 10, 50);
+    const skip = (page - 1) * limit;
+
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          tags: {
+            include: {
+              tag: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.post.count({ where: { userId } }),
+    ]);
+
+    // Get liked & saved status for these posts
+    const postIds = posts.map((p) => p.id);
+
+    const [likes, saves] = await Promise.all([
+      prisma.postLike.findMany({
+        where: {
+          userId,
+          postId: { in: postIds },
+        },
+        select: { postId: true },
+      }),
+      prisma.savedPost.findMany({
+        where: {
+          userId,
+          postId: { in: postIds },
+        },
+        select: { postId: true },
+      }),
+    ]);
+
+    const likedSet = new Set(likes.map((l) => l.postId));
+    const savedSet = new Set(saves.map((s) => s.postId));
+
+    const data = posts.map((post) => ({
+      id: post.id,
+      content: post.content,
+      imageUrls: post.imageUrls,
+      region: post.region,
+      cropType: post.cropType,
+      detectionId: post.detectionId,
+      likesCount: post.likesCount,
+      commentsCount: post.commentsCount,
+      savesCount: post.savesCount,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      tags: post.tags.map((pt) => ({
+        id: pt.tag.id,
+        name: pt.tag.name,
+        slug: pt.tag.slug,
+      })),
+      isLiked: likedSet.has(post.id),
+      isSaved: savedSet.has(post.id),
+    }));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? "Your posts retrieved successfully"
+          : "You have not created any posts yet",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     };
   },

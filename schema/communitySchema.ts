@@ -82,3 +82,20 @@ export const createPostSchema = z.object({
 });
 
 export type CreatePostInput = z.infer<typeof createPostSchema>;
+
+export const getMyPostsSchema = z.object({
+  page: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1, "Page can't be less than 1"))
+    .optional()
+    .default("1"),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1,"Limit can't be less than 1").max(50,"Limit can't be over than 50"))
+    .optional()
+    .default("10"),
+});
+
+export type GetMyPostsInput = z.infer<typeof getMyPostsSchema>;

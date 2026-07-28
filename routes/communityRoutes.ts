@@ -21,4 +21,5 @@ communityRouter.get(
   communityController.getPostById,
 );
 
+communityRouter.get("/users/me/posts", protect, communityController.getMyPosts);
 export default communityRouter;

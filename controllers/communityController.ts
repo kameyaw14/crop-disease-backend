@@ -1,6 +1,8 @@
 // controllers/communityController.ts
 import type { Request, Response } from "express";
 import { communityService } from "../services/communityService.js";
+import { prisma } from "../config/connectDb.js";
+import { getMyPostsSchema } from "../schema/communitySchema.js";
 
 export const communityController = {
   async createPost(req: Request, res: Response) {
@@ -70,4 +72,19 @@ export const communityController = {
       });
     }
   },
+
+    async getMyPosts(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const result = await communityService.getMyPosts(userId, req.query);
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error("❗Error in getMyPosts:", error.message || "getMyPosts failed");
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to retrieve your posts",
+      });
+    }
+  },
+ 
 };
