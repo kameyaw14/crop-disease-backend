@@ -4,7 +4,9 @@ import { prisma } from "../config/connectDb.js";
 import {
   createPostSchema,
   getMyPostsSchema,
+  getPostsSchema,
   type CreatePostInput,
+  type GetPostsInput,
 } from "../schema/communitySchema.js";
 
 export const communityService = {
@@ -421,6 +423,146 @@ export const communityService = {
     return {
       success: true,
       message: "Post deleted successfully",
+    };
+  },
+
+  async getPosts(query: any, currentUserId?: string) {
+    const validated: GetPostsInput = getPostsSchema.parse(query);
+
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 10, 20);
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (validated.region) {
+      where.region = validated.region;
+    }
+
+    if (validated.cropType) {
+      where.cropType = validated.cropType;
+    }
+
+    if (validated.q) {
+      where.content = {
+        contains: validated.q,
+        mode: "insensitive",
+      };
+    }
+
+    if (validated.tag) {
+      where.tags = {
+        some: {
+          tag: {
+            slug: validated.tag,
+          },
+        },
+      };
+    }
+
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        where,
+        orderBy: { createdAt: "desc" }, // chronological (newest first)
+        skip,
+        take: limit,
+        include: {
+          user: {
+            select: {
+              id: true,
+              profile: {
+                select: {
+                  fullName: true,
+                  avatarUrl: true,
+                  reputationScore: true,
+                },
+              },
+            },
+          },
+          tags: {
+            include: {
+              tag: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.post.count({ where }),
+    ]);
+
+    let likedSet = new Set<string>();
+    let savedSet = new Set<string>();
+
+    if (currentUserId && posts.length > 0) {
+      const postIds = posts.map((p) => p.id);
+
+      const [likes, saves] = await Promise.all([
+        prisma.postLike.findMany({
+          where: {
+            userId: currentUserId,
+            postId: { in: postIds },
+          },
+          select: { postId: true },
+        }),
+        prisma.savedPost.findMany({
+          where: {
+            userId: currentUserId,
+            postId: { in: postIds },
+          },
+          select: { postId: true },
+        }),
+      ]);
+
+      likedSet = new Set(likes.map((l) => l.postId));
+      savedSet = new Set(saves.map((s) => s.postId));
+    }
+
+    const data = posts.map((post) => ({
+      id: post.id,
+      content: post.content, // full content - frontend truncates if needed
+      imageUrls: post.imageUrls,
+      region: post.region,
+      cropType: post.cropType,
+      likesCount: post.likesCount,
+      commentsCount: post.commentsCount,
+      savesCount: post.savesCount,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      author: {
+        id: post.user.id,
+        fullName: post.user.profile?.fullName ?? "Unknown",
+        avatarUrl: post.user.profile?.avatarUrl ?? null,
+        reputationScore: post.user.profile?.reputationScore ?? 0,
+      },
+      tags: post.tags.map((pt) => ({
+        id: pt.tag.id,
+        name: pt.tag.name,
+        slug: pt.tag.slug,
+      })),
+      ...(currentUserId && {
+        isLiked: likedSet.has(post.id),
+        isSaved: savedSet.has(post.id),
+      }),
+    }));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? "Posts retrieved successfully"
+          : "No posts found. Be the first to share your experience!",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
     };
   },
 };

@@ -93,9 +93,61 @@ export const getMyPostsSchema = z.object({
   limit: z
     .string()
     .transform(Number)
-    .pipe(z.number().int().min(1,"Limit can't be less than 1").max(50,"Limit can't be over than 50"))
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1, "Limit can't be less than 1")
+        .max(50, "Limit can't be over than 50"),
+    )
     .optional()
     .default("10"),
 });
 
 export type GetMyPostsInput = z.infer<typeof getMyPostsSchema>;
+
+export const getPostsSchema = z.object({
+  page: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1, "Page can't be less than 1"))
+    .optional()
+    .default("1"),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1, "Limit can't be less than 1")
+        .max(20, "Limit can't be more than 20"),
+    )
+    .optional()
+    .default("10"),
+  tag: z.string().min(1).optional(),
+  region: z
+    .enum(GHANA_REGIONS, {
+      errorMap: () => ({
+        message: "Please select a valid Ghana region",
+      }),
+    })
+    .optional(),
+  cropType: z
+    .enum([
+      "MAIZE",
+      "TOMATO",
+      "CASSAVA",
+      "PLANTAIN",
+      "PEPPER",
+      "COCOA",
+      "RICE",
+      "YAM",
+      "GROUNDNUT",
+      "ONION",
+    ])
+    .optional(),
+  q: z.string().min(1).optional(),
+});
+
+export type GetPostsInput = z.infer<typeof getPostsSchema>;

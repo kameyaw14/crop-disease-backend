@@ -117,4 +117,20 @@ export const communityController = {
       });
     }
   },
+
+  async getPosts(req: Request, res: Response) {
+    try {
+      const currentUserId = req.user?.userId;
+
+      const result = await communityService.getPosts(req.query, currentUserId);
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error("❗Error in getPosts:", error.message || "getPosts failed");
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to retrieve posts. Please try again.",
+      });
+    }
+  },
 };

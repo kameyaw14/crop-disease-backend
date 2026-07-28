@@ -16,16 +16,23 @@ communityRouter.post(
 );
 
 communityRouter.get(
+  "/posts",
+  optionalAuth, // public read + isLiked/isSaved when logged in
+  communityController.getPosts,
+);
+
+communityRouter.get(
   "/posts/:postId",
   optionalAuth,
   communityController.getPostById,
 );
 
 communityRouter.get("/users/me/posts", protect, communityController.getMyPosts);
-export default communityRouter;
 
 communityRouter.delete(
   "/posts/:postId",
   protect,
   communityController.deletePost,
 );
+
+export default communityRouter;
