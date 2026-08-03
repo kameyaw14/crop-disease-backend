@@ -7,12 +7,16 @@ import {
   createReplySchema,
   getCommentsSchema,
   getMyPostsSchema,
+  getPostLikesSchema,
   getPostsSchema,
+  getSavedPostsSchema,
   type CreateCommentInput,
   type CreatePostInput,
   type CreateReplyInput,
   type GetCommentsInput,
+  type GetPostLikesInput,
   type GetPostsInput,
+  type GetSavedPostsInput,
 } from "../schema/communitySchema.js";
 
 type CommentMarkType = "HELPFUL" | "SOLVED";
@@ -1036,6 +1040,275 @@ export const communityService = {
     return {
       success: true,
       message: `${type === "HELPFUL" ? "Helpful" : "Solved"} mark removed successfully`,
+    };
+  },
+
+  async likePost(userId: string, postId: string) {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { id: true, userId: true },
+    });
+
+    if (!post) {
+      return { success: false, message: "Post not found" };
+    }
+
+    const existingLike = await prisma.postLike.findUnique({
+      where: { userId_postId: { userId, postId } },
+    });
+
+    if (existingLike) {
+      return { success: false, message: "You have already liked this post" };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.postLike.create({ data: { userId, postId } });
+
+      await tx.post.update({
+        where: { id: postId },
+        data: { likesCount: { increment: 1 } },
+      });
+
+      // Only notify if someone else liked the post; liking your own post
+      // (which is allowed) should never generate a notification to yourself
+      if (post.userId !== userId) {
+        await tx.notification.create({
+          data: {
+            userId: post.userId,
+            type: "POST_LIKED",
+            title: "Someone liked your post",
+            message: "Your post got a new like in the community.",
+            priority: "LOW",
+            actionLink: `/community/posts/${postId}`,
+            metadata: { postId, likedBy: userId },
+          },
+        });
+      }
+    });
+
+    return { success: true, message: "Post liked successfully" };
+  },
+
+  async unlikePost(userId: string, postId: string) {
+    const existingLike = await prisma.postLike.findUnique({
+      where: { userId_postId: { userId, postId } },
+    });
+
+    if (!existingLike) {
+      return { success: false, message: "You have not liked this post" };
+    }
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { likesCount: true },
+    });
+
+    if (!post) {
+      return { success: false, message: "Post not found" };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.postLike.delete({
+        where: { userId_postId: { userId, postId } },
+      });
+
+      // Set an explicit floored value instead of using { decrement: 1 },
+      // so likesCount can never go negative if this ever runs twice in a race
+      await tx.post.update({
+        where: { id: postId },
+        data: { likesCount: Math.max(0, post.likesCount - 1) },
+      });
+    });
+
+    return { success: true, message: "Post unliked successfully" };
+  },
+
+  async getPostLikes(postId: string, query: any) {
+    const validated: GetPostLikesInput = getPostLikesSchema.parse(query);
+
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 20, 50);
+    const skip = (page - 1) * limit;
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { id: true },
+    });
+
+    if (!post) {
+      return { success: false, message: "Post not found" };
+    }
+
+    const [likes, total] = await Promise.all([
+      prisma.postLike.findMany({
+        where: { postId },
+        orderBy: { createdAt: "desc" }, // most recent likers first
+        skip,
+        take: limit,
+        include: { user: { select: commentAuthorInclude } },
+      }),
+      prisma.postLike.count({ where: { postId } }),
+    ]);
+
+    const data = likes.map((like) => formatCommentAuthor(like.user));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? "Likes retrieved successfully"
+          : "No likes on this post yet",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+    };
+  },
+
+  async savePost(userId: string, postId: string) {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { id: true },
+    });
+
+    if (!post) {
+      return { success: false, message: "Post not found" };
+    }
+
+    const existingSave = await prisma.savedPost.findUnique({
+      where: { userId_postId: { userId, postId } },
+    });
+
+    if (existingSave) {
+      return { success: false, message: "You have already saved this post" };
+    }
+
+    // Transaction required for the same reason as likePost: the SavedPost row
+    // and Post.savesCount must stay in sync with each other
+    await prisma.$transaction(async (tx) => {
+      await tx.savedPost.create({ data: { userId, postId } });
+
+      await tx.post.update({
+        where: { id: postId },
+        data: { savesCount: { increment: 1 } },
+      });
+    });
+
+    return { success: true, message: "Post saved successfully" };
+  },
+
+  async unsavePost(userId: string, postId: string) {
+    const existingSave = await prisma.savedPost.findUnique({
+      where: { userId_postId: { userId, postId } },
+    });
+
+    if (!existingSave) {
+      return { success: false, message: "You have not saved this post" };
+    }
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { savesCount: true },
+    });
+
+    if (!post) {
+      return { success: false, message: "Post not found" };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.savedPost.delete({
+        where: { userId_postId: { userId, postId } },
+      });
+
+      await tx.post.update({
+        where: { id: postId },
+        data: { savesCount: Math.max(0, post.savesCount - 1) },
+      });
+    });
+
+    return { success: true, message: "Post unsaved successfully" };
+  },
+
+  async getSavedPosts(userId: string, query: any) {
+    const validated: GetSavedPostsInput = getSavedPostsSchema.parse(query);
+
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 10, 20);
+    const skip = (page - 1) * limit;
+
+    const [savedEntries, total] = await Promise.all([
+      prisma.savedPost.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" }, // most recently saved first
+        skip,
+        take: limit,
+        include: {
+          post: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  profile: {
+                    select: {
+                      fullName: true,
+                      avatarUrl: true,
+                      reputationScore: true,
+                    },
+                  },
+                },
+              },
+              tags: {
+                include: {
+                  tag: { select: { id: true, name: true, slug: true } },
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.savedPost.count({ where: { userId } }),
+    ]);
+
+    const data = savedEntries.map((entry) => ({
+      savedAt: entry.createdAt,
+      id: entry.post.id,
+      content: entry.post.content,
+      imageUrls: entry.post.imageUrls,
+      region: entry.post.region,
+      cropType: entry.post.cropType,
+      likesCount: entry.post.likesCount,
+      commentsCount: entry.post.commentsCount,
+      savesCount: entry.post.savesCount,
+      createdAt: entry.post.createdAt,
+      author: {
+        id: entry.post.user.id,
+        fullName: entry.post.user.profile?.fullName ?? "Unknown",
+        avatarUrl: entry.post.user.profile?.avatarUrl ?? null,
+        reputationScore: entry.post.user.profile?.reputationScore ?? 0,
+      },
+      tags: entry.post.tags.map((pt) => ({
+        id: pt.tag.id,
+        name: pt.tag.name,
+        slug: pt.tag.slug,
+      })),
+    }));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? "Saved posts retrieved successfully"
+          : "You have not saved any posts yet",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
     };
   },
 };

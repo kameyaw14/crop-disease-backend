@@ -187,3 +187,49 @@ export const getCommentsSchema = z.object({
 });
 
 export type GetCommentsInput = z.infer<typeof getCommentsSchema>;
+
+export const getPostLikesSchema = z.object({
+  page: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1, "Page can't be less than 1"))
+    .optional()
+    .default("1"),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1, "Limit can't be less than 1")
+        .max(50, "Limit can't be more than 50"),
+    )
+    .optional()
+    .default("20"),
+});
+
+export type GetPostLikesInput = z.infer<typeof getPostLikesSchema>;
+
+export const getSavedPostsSchema = z.object({
+  page: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1, "Page can't be less than 1"))
+    .optional()
+    .default("1"),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1, "Limit can't be less than 1")
+        .max(20, "Limit can't be more than 20"),
+    )
+    .optional()
+    .default("10"),
+});
+
+export type GetSavedPostsInput = z.infer<typeof getSavedPostsSchema>;

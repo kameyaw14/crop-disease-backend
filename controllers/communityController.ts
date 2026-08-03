@@ -356,6 +356,152 @@ export const communityController = {
       });
     }
   },
+
+  async likePost(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { postId } = req.params;
+
+      const result = await communityService.likePost(userId, postId as string);
+
+      if (!result.success) {
+        const status = getLikeSaveErrorStatus(result.message);
+        return res.status(status).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error("❗Error in likePost:", error.message || "likePost failed");
+      res.status(500).json({
+        success: false,
+        message: "Failed to like post. Please try again.",
+      });
+    }
+  },
+
+  async unlikePost(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { postId } = req.params;
+
+      const result = await communityService.unlikePost(
+        userId,
+        postId as string,
+      );
+
+      if (!result.success) {
+        const status = getLikeSaveErrorStatus(result.message);
+        return res.status(status).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in unlikePost:",
+        error.message || "unlikePost failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to unlike post. Please try again.",
+      });
+    }
+  },
+
+  async getPostLikes(req: Request, res: Response) {
+    try {
+      const { postId } = req.params;
+
+      const result = await communityService.getPostLikes(
+        postId as string,
+        req.query,
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getPostLikes:",
+        error.message || "getPostLikes failed",
+      );
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to retrieve likes. Please try again.",
+      });
+    }
+  },
+
+  async savePost(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { postId } = req.params;
+
+      const result = await communityService.savePost(userId, postId as string);
+
+      if (!result.success) {
+        const status = getLikeSaveErrorStatus(result.message);
+        return res.status(status).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error("❗Error in savePost:", error.message || "savePost failed");
+      res.status(500).json({
+        success: false,
+        message: "Failed to save post. Please try again.",
+      });
+    }
+  },
+
+  async unsavePost(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { postId } = req.params;
+
+      const result = await communityService.unsavePost(
+        userId,
+        postId as string,
+      );
+
+      if (!result.success) {
+        const status = getLikeSaveErrorStatus(result.message);
+        return res.status(status).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in unsavePost:",
+        error.message || "unsavePost failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to unsave post. Please try again.",
+      });
+    }
+  },
+
+  async getSavedPosts(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+
+      const result = await communityService.getSavedPosts(userId, req.query);
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getSavedPosts:",
+        error.message || "getSavedPosts failed",
+      );
+      res.status(400).json({
+        success: false,
+        message:
+          error.message || "Failed to retrieve saved posts. Please try again.",
+      });
+    }
+  },
 };
 
 // small helper (not part of the exported object) that maps a
@@ -367,5 +513,12 @@ function getMarkErrorStatus(message: string): number {
   if (message.startsWith("Only the post author")) return 403;
   if (message === "You cannot mark your own comment") return 403;
   if (message.startsWith("You have already marked")) return 409; // 409 = Conflict, the mark already exists
+  return 400;
+}
+
+function getLikeSaveErrorStatus(message: string): number {
+  if (message === "Post not found") return 404;
+  if (message.startsWith("You have already")) return 409; // 409 = Conflict, already liked/saved
+  if (message.startsWith("You have not")) return 404; // nothing to unlike/unsave
   return 400;
 }

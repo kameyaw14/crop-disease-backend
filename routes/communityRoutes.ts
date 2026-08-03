@@ -21,6 +21,8 @@ communityRouter.get(
   communityController.getPosts,
 );
 
+communityRouter.get("/saved", protect, communityController.getSavedPosts);
+
 communityRouter.get(
   "/posts/:postId",
   optionalAuth,
@@ -77,5 +79,31 @@ communityRouter.delete(
   "/comments/:commentId/solved",
   protect,
   communityController.unmarkCommentSolved,
+);
+
+communityRouter.post(
+  "/posts/:postId/like",
+  protect,
+  communityController.likePost,
+);
+
+communityRouter.delete(
+  "/posts/:postId/like",
+  protect,
+  communityController.unlikePost,
+);
+
+communityRouter.get("/posts/:postId/likes", communityController.getPostLikes);
+
+communityRouter.post(
+  "/posts/:postId/save",
+  protect,
+  communityController.savePost,
+);
+
+communityRouter.delete(
+  "/posts/:postId/save",
+  protect,
+  communityController.unsavePost,
 );
 export default communityRouter;
