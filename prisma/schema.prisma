@@ -93,14 +93,16 @@ model User {
   passwordResetOTPs PasswordResetOTP[]
   pushTokens        PushToken[]
 
-  posts        Post[]
-  comments     Comment[]
-  postLikes    PostLike[]
-  savedPosts   SavedPost[]
-  followers    Follow[]      @relation("UserFollowers")
-  following    Follow[]      @relation("UserFollowing")
-  tagFollows   TagFollow[]
-  commentMarks CommentMark[]
+  posts           Post[]
+  comments        Comment[]
+  postLikes       PostLike[]
+  savedPosts      SavedPost[]
+  followers       Follow[]             @relation("UserFollowers")
+  following       Follow[]             @relation("UserFollowing")
+  tagFollows      TagFollow[]
+  commentMarks    CommentMark[]
+  tipServings     UserTipServing[]
+  dailyTipsCaches UserDailyTipsCache[]
 
   @@index([email])
   @@map("users")
@@ -415,4 +417,63 @@ model CommentMark {
   @@unique([userId, commentId, type])
   @@index([commentId])
   @@map("comment_marks")
+}
+
+model DailyTip {
+  id        String     @id @default(cuid())
+  title     String
+  body      String
+  // empty array = general (applies to any crop)
+  cropTypes CropType[]
+  // empty = nationwide; values should match GHANA_REGIONS strings
+  regions   String[]
+  // 1–12; empty = any month
+  months    Int[]
+  // free-form themes for matching recent detections e.g. "fungal", "drainage", "prevention", "rust"
+  themes    String[]
+  weight    Int        @default(1)
+  isActive  Boolean    @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  servings UserTipServing[]
+
+  @@index([isActive])
+  @@map("daily_tips")
+}
+
+model UserTipServing {
+  id       String   @id @default(cuid())
+  userId   String
+  tipId    String
+  date     String
+  servedAt DateTime @default(now())
+
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tip  DailyTip @relation(fields: [tipId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tipId, date])
+  @@index([userId, servedAt])
+  @@index([userId, tipId])
+  @@map("user_tip_servings")
+}
+
+model UserDailyTipsCache {
+  id       String   @id @default(cuid())
+  userId   String
+  // YYYY-MM-DD in Africa/Accra
+  date     String
+  // final payload returned by API (personalized titles/bodies + order)
+  tipsJson Json
+  tipIds   String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@map("user_daily_tips_cache")
 }

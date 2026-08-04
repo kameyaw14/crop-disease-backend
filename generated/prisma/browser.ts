@@ -107,3 +107,18 @@ export type TagFollow = Prisma.TagFollowModel
  * 
  */
 export type CommentMark = Prisma.CommentMarkModel
+/**
+ * Model DailyTip
+ * 
+ */
+export type DailyTip = Prisma.DailyTipModel
+/**
+ * Model UserTipServing
+ * 
+ */
+export type UserTipServing = Prisma.UserTipServingModel
+/**
+ * Model UserDailyTipsCache
+ * 
+ */
+export type UserDailyTipsCache = Prisma.UserDailyTipsCacheModel

@@ -17,6 +17,7 @@ import cropRouter from "./routes/cropRoutes.js";
 import ttsRouter from "./routes/ttsRoutes.js";
 import { startAlertCron } from "./utils/cron.js";
 import communityRouter from "./routes/communityRoutes.js";
+import tipRouter from "./routes/tipRoutes.js";
 // import { testTtsController } from "./contollers/testController.js";
 
 checkRequiredEnv();
@@ -71,6 +72,7 @@ app.use("/api/weather", weatherRouter);
 app.use("/api/notifications", notificationRouter);
 app.use("/api/tts", ttsRouter);
 app.use("/api/community", communityRouter);
+app.use("/api/tips", tipRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({

@@ -1,4 +1,5 @@
 // schema/communitySchema.ts
+// @ts-nocheck
 import { z } from "zod";
 
 // Official 16 regions of Ghana

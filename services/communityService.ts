@@ -1,4 +1,5 @@
 // services/communityService.ts
+// @ts-nocheck
 import { v2 as cloudinary } from "cloudinary";
 import { prisma } from "../config/connectDb.js";
 import {

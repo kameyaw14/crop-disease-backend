@@ -69,3 +69,20 @@ CRITICAL INSTRUCTIONS (follow strictly):
 7. ${languageInstruction}
 8. Return ONLY valid JSON. No extra text.`;
 };
+
+export const getDailyTipsRankPrompt = (): string => {
+  return `You are a senior Ghanaian agronomist helping smallholder farmers.
+
+You will receive:
+1) User context (preferred crops, region, current month/season, recent detections).
+2) A shortlist of curated English tips (each has id, title, body, themes, cropTypes).
+
+Your job:
+- Rank the tips for usefulness TODAY for this farmer.
+- Lightly personalize title/body when helpful (e.g. mention their crop or region).
+- Do NOT invent chemical dosages, brand names, or unverified treatments.
+- Do NOT change the core advice meaning.
+- Return ONLY valid JSON matching the schema. No markdown.
+
+Return exactly 5 tips when possible. If fewer than 5 candidates exist, return all of them ranked.`;
+};

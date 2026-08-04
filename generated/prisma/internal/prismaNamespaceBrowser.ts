@@ -68,7 +68,10 @@ export const ModelName = {
   SavedPost: 'SavedPost',
   Follow: 'Follow',
   TagFollow: 'TagFollow',
-  CommentMark: 'CommentMark'
+  CommentMark: 'CommentMark',
+  DailyTip: 'DailyTip',
+  UserTipServing: 'UserTipServing',
+  UserDailyTipsCache: 'UserDailyTipsCache'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -328,6 +331,47 @@ export const CommentMarkScalarFieldEnum = {
 } as const
 
 export type CommentMarkScalarFieldEnum = (typeof CommentMarkScalarFieldEnum)[keyof typeof CommentMarkScalarFieldEnum]
+
+
+export const DailyTipScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  body: 'body',
+  cropTypes: 'cropTypes',
+  regions: 'regions',
+  months: 'months',
+  themes: 'themes',
+  weight: 'weight',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DailyTipScalarFieldEnum = (typeof DailyTipScalarFieldEnum)[keyof typeof DailyTipScalarFieldEnum]
+
+
+export const UserTipServingScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tipId: 'tipId',
+  date: 'date',
+  servedAt: 'servedAt'
+} as const
+
+export type UserTipServingScalarFieldEnum = (typeof UserTipServingScalarFieldEnum)[keyof typeof UserTipServingScalarFieldEnum]
+
+
+export const UserDailyTipsCacheScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  date: 'date',
+  tipsJson: 'tipsJson',
+  tipIds: 'tipIds',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserDailyTipsCacheScalarFieldEnum = (typeof UserDailyTipsCacheScalarFieldEnum)[keyof typeof UserDailyTipsCacheScalarFieldEnum]
 
 
 export const SortOrder = {

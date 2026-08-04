@@ -401,7 +401,10 @@ export const ModelName = {
   SavedPost: 'SavedPost',
   Follow: 'Follow',
   TagFollow: 'TagFollow',
-  CommentMark: 'CommentMark'
+  CommentMark: 'CommentMark',
+  DailyTip: 'DailyTip',
+  UserTipServing: 'UserTipServing',
+  UserDailyTipsCache: 'UserDailyTipsCache'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -417,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "profile" | "userPreferredCrop" | "detection" | "cachedDiagnosis" | "weatherRequest" | "notification" | "pushToken" | "passwordResetOTP" | "tag" | "post" | "postTag" | "comment" | "postLike" | "savedPost" | "follow" | "tagFollow" | "commentMark"
+    modelProps: "user" | "profile" | "userPreferredCrop" | "detection" | "cachedDiagnosis" | "weatherRequest" | "notification" | "pushToken" | "passwordResetOTP" | "tag" | "post" | "postTag" | "comment" | "postLike" | "savedPost" | "follow" | "tagFollow" | "commentMark" | "dailyTip" | "userTipServing" | "userDailyTipsCache"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1753,6 +1756,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DailyTip: {
+      payload: Prisma.$DailyTipPayload<ExtArgs>
+      fields: Prisma.DailyTipFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DailyTipFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DailyTipFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload>
+        }
+        findFirst: {
+          args: Prisma.DailyTipFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DailyTipFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload>
+        }
+        findMany: {
+          args: Prisma.DailyTipFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload>[]
+        }
+        create: {
+          args: Prisma.DailyTipCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload>
+        }
+        createMany: {
+          args: Prisma.DailyTipCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DailyTipCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload>[]
+        }
+        delete: {
+          args: Prisma.DailyTipDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload>
+        }
+        update: {
+          args: Prisma.DailyTipUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload>
+        }
+        deleteMany: {
+          args: Prisma.DailyTipDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DailyTipUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DailyTipUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload>[]
+        }
+        upsert: {
+          args: Prisma.DailyTipUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DailyTipPayload>
+        }
+        aggregate: {
+          args: Prisma.DailyTipAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDailyTip>
+        }
+        groupBy: {
+          args: Prisma.DailyTipGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DailyTipGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DailyTipCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DailyTipCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserTipServing: {
+      payload: Prisma.$UserTipServingPayload<ExtArgs>
+      fields: Prisma.UserTipServingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserTipServingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserTipServingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload>
+        }
+        findFirst: {
+          args: Prisma.UserTipServingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserTipServingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload>
+        }
+        findMany: {
+          args: Prisma.UserTipServingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload>[]
+        }
+        create: {
+          args: Prisma.UserTipServingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload>
+        }
+        createMany: {
+          args: Prisma.UserTipServingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserTipServingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload>[]
+        }
+        delete: {
+          args: Prisma.UserTipServingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload>
+        }
+        update: {
+          args: Prisma.UserTipServingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserTipServingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserTipServingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserTipServingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserTipServingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTipServingPayload>
+        }
+        aggregate: {
+          args: Prisma.UserTipServingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserTipServing>
+        }
+        groupBy: {
+          args: Prisma.UserTipServingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserTipServingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserTipServingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserTipServingCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserDailyTipsCache: {
+      payload: Prisma.$UserDailyTipsCachePayload<ExtArgs>
+      fields: Prisma.UserDailyTipsCacheFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserDailyTipsCacheFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserDailyTipsCacheFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload>
+        }
+        findFirst: {
+          args: Prisma.UserDailyTipsCacheFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserDailyTipsCacheFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload>
+        }
+        findMany: {
+          args: Prisma.UserDailyTipsCacheFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload>[]
+        }
+        create: {
+          args: Prisma.UserDailyTipsCacheCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload>
+        }
+        createMany: {
+          args: Prisma.UserDailyTipsCacheCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserDailyTipsCacheCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload>[]
+        }
+        delete: {
+          args: Prisma.UserDailyTipsCacheDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload>
+        }
+        update: {
+          args: Prisma.UserDailyTipsCacheUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload>
+        }
+        deleteMany: {
+          args: Prisma.UserDailyTipsCacheDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserDailyTipsCacheUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserDailyTipsCacheUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload>[]
+        }
+        upsert: {
+          args: Prisma.UserDailyTipsCacheUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyTipsCachePayload>
+        }
+        aggregate: {
+          args: Prisma.UserDailyTipsCacheAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserDailyTipsCache>
+        }
+        groupBy: {
+          args: Prisma.UserDailyTipsCacheGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserDailyTipsCacheGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserDailyTipsCacheCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserDailyTipsCacheCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2033,6 +2258,47 @@ export const CommentMarkScalarFieldEnum = {
 } as const
 
 export type CommentMarkScalarFieldEnum = (typeof CommentMarkScalarFieldEnum)[keyof typeof CommentMarkScalarFieldEnum]
+
+
+export const DailyTipScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  body: 'body',
+  cropTypes: 'cropTypes',
+  regions: 'regions',
+  months: 'months',
+  themes: 'themes',
+  weight: 'weight',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DailyTipScalarFieldEnum = (typeof DailyTipScalarFieldEnum)[keyof typeof DailyTipScalarFieldEnum]
+
+
+export const UserTipServingScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tipId: 'tipId',
+  date: 'date',
+  servedAt: 'servedAt'
+} as const
+
+export type UserTipServingScalarFieldEnum = (typeof UserTipServingScalarFieldEnum)[keyof typeof UserTipServingScalarFieldEnum]
+
+
+export const UserDailyTipsCacheScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  date: 'date',
+  tipsJson: 'tipsJson',
+  tipIds: 'tipIds',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserDailyTipsCacheScalarFieldEnum = (typeof UserDailyTipsCacheScalarFieldEnum)[keyof typeof UserDailyTipsCacheScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2391,6 +2657,9 @@ export type GlobalOmitConfig = {
   follow?: Prisma.FollowOmit
   tagFollow?: Prisma.TagFollowOmit
   commentMark?: Prisma.CommentMarkOmit
+  dailyTip?: Prisma.DailyTipOmit
+  userTipServing?: Prisma.UserTipServingOmit
+  userDailyTipsCache?: Prisma.UserDailyTipsCacheOmit
 }
 
 /* Types for Logging */
