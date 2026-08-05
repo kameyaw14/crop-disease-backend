@@ -103,4 +103,23 @@ export const notificationController = {
       next(error);
     }
   },
+
+  async clearAllNotifications(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.userId;
+
+      // result.count tells us exactly how many rows were removed
+      const result = await prisma.notification.deleteMany({
+        where: { userId },
+      });
+
+      res.json({
+        success: true,
+        message: "All alerts cleared.",
+        count: result.count,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };

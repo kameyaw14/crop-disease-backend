@@ -31,4 +31,10 @@ notificationRouter.delete(
   notificationController.removePushToken,
 );
 
+notificationRouter.delete(
+  "/clear-all",
+  protect,
+  notificationController.clearAllNotifications,
+);
+
 export default notificationRouter;
