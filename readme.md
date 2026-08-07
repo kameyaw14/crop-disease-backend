@@ -1,6 +1,6 @@
 # Crop Guardian Backend, API Testing Guide
 
-This document was written by reading the actual source code in `kameyaw14/crop-disease-backend` (commit `23c3f8b`, verified 2026-07-26), not from assumptions. Every route, validation rule, and error case below was traced directly from `routes/`, `controllers/`, `services/`, `schema/`, and `prisma/schema.prisma`. This is an update of the previous version of this document (which was based on commit `1d5bba7`). Where the code disagreed with the old doc, the code wins, every change is called out inline below. If the backend changes again, this doc needs to be re-verified against the new code.
+This document was written by reading the actual source code in `kameyaw14/crop-disease-backend` (commit `b9cc592`, verified 2026-08-07), not from assumptions. Every route, validation rule, and error case below was traced directly from `routes/`, `controllers/`, `services/`, `schema/`, and `prisma/schema.prisma`. This is an update of the previous version of this document (which was based on commit `23c3f8b`). Where the code disagreed with the old doc, the code wins, every change is called out inline below. If the backend changes again, this doc needs to be re-verified against the new code.
 
 Give this whole file to your frontend developer. It is written so they can build the API client and Postman collection without needing to read the backend source themselves.
 
@@ -30,19 +30,43 @@ Give this whole file to your frontend developer. It is written so they can build
     - [`PATCH /api/crops/my-crops/:cropType`](#patch-apicropsmy-cropscroptype)
     - [`DELETE /api/crops/my-crops/:cropType`](#delete-apicropsmy-cropscroptype)
     - [`GET /api/crops/my-crops/:cropType/history`](#get-apicropsmy-cropscroptypehistory)
-  - [5.3 Disease Detection](#53-disease-detection)
+  - [5.3 Community (new)](#53-community-new)
+    - [`GET /api/community/tags`](#get-apicommunitytags)
+    - [`POST /api/community/posts`](#post-apicommunityposts)
+    - [`GET /api/community/posts`](#get-apicommunityposts)
+    - [`GET /api/community/posts/:postId`](#get-apicommunitypostspostid)
+    - [`GET /api/community/users/me/posts`](#get-apicommunityusersmeposts)
+    - [`DELETE /api/community/posts/:postId`](#delete-apicommunitypostspostid)
+    - [`POST /api/community/posts/:postId/comments`](#post-apicommunitypostspostidcomments)
+    - [`POST /api/community/comments/:commentId/replies`](#post-apicommunitycommentscommentidreplies)
+    - [`GET /api/community/posts/:postId/comments`](#get-apicommunitypostspostidcomments)
+    - [`DELETE /api/community/comments/:commentId`](#delete-apicommunitycommentscommentid)
+    - [`POST /api/community/comments/:commentId/helpful`](#post-apicommunitycommentscommentidhelpful)
+    - [`DELETE /api/community/comments/:commentId/helpful`](#delete-apicommunitycommentscommentidhelpful)
+    - [`POST /api/community/comments/:commentId/solved`](#post-apicommunitycommentscommentidsolved)
+    - [`DELETE /api/community/comments/:commentId/solved`](#delete-apicommunitycommentscommentidsolved)
+    - [`POST /api/community/posts/:postId/like`](#post-apicommunitypostspostidlike)
+    - [`DELETE /api/community/posts/:postId/like`](#delete-apicommunitypostspostidlike)
+    - [`GET /api/community/posts/:postId/likes`](#get-apicommunitypostspostidlikes)
+    - [`POST /api/community/posts/:postId/save`](#post-apicommunitypostspostidsave)
+    - [`DELETE /api/community/posts/:postId/save`](#delete-apicommunitypostspostidsave)
+    - [`GET /api/community/saved`](#get-apicommunitysaved)
+  - [5.4 Daily Tips (new)](#54-daily-tips-new)
+    - [`GET /api/tips/today`](#get-apitipstoday)
+  - [5.5 Disease Detection](#55-disease-detection)
     - [`POST /api/detect`](#post-apidetect)
-  - [5.4 Weather](#54-weather)
+  - [5.6 Weather](#56-weather)
     - [`GET /api/weather/forecast`](#get-apiweatherforecast)
-  - [5.5 Notifications](#55-notifications)
+  - [5.7 Notifications](#57-notifications)
     - [`GET /api/notifications`](#get-apinotifications)
     - [`PATCH /api/notifications/:id/read`](#patch-apinotificationsidread)
     - [`POST /api/notifications/trigger`](#post-apinotificationstrigger)
     - [`PUT /api/notifications/push-token`](#put-apinotificationspush-token)
     - [`DELETE /api/notifications/push-token`](#delete-apinotificationspush-token)
-  - [5.6 Text to Speech (Twi)](#56-text-to-speech-twi)
+    - [`DELETE /api/notifications/clear-all`](#delete-apinotificationsclear-all-new)
+  - [5.8 Text to Speech (Twi)](#58-text-to-speech-twi)
     - [`POST /api/tts/generate`](#post-apittsgenerate)
-  - [5.7 Health Check](#57-health-check)
+  - [5.9 Health Check](#59-health-check)
     - [`GET /`](#get-)
 - [6. Endpoint Quick Reference](#6-endpoint-quick-reference)
 - [7. Suggested Postman Setup](#7-suggested-postman-setup)
@@ -73,7 +97,14 @@ If you already built against the previous README, read this section first.
 
 13. 🆕 **Two new profile-editing endpoints exist: `PUT /api/auth/profile` and `PUT /api/auth/avatar`.** Together these let a user edit their `fullName`/`location` and upload/replace a profile picture after registration, instead of profile fields only ever being set once at sign-up. See section 5.1 for both.
 14. 🆕 **`PUT /api/auth/avatar` uploads to Cloudinary, same pattern as `/api/detect`.** It requires `multipart/form-data` with an `image` field (not JSON), automatically crops/resizes to a 400x400 face-focused square, and best-effort deletes the user's previous avatar image from Cloudinary storage (a failed delete never blocks the new upload from succeeding).
-15. There is still no community/social feature in this codebase, this remains scoped work only, see section 8.
+15. There is still no community/social feature in this codebase, this remains scoped work only, see section 8. **(No longer true, see item 16 below, this line is kept only for history.)**
+
+**Biggest changes in this newest version (since the section above was written, verified against commit `b9cc592`):**
+
+16. 🆕 **The community/social feature now exists.** This was previously listed as "not implemented yet", it is now a full feature, mounted at `/api/community`: posts (with up to 3 images, tags, optional crop/region/detection linking), threaded comments (one level of replies only), likes, saves, a "helpful/solved" marking system for comments that awards reputation points, and a tag directory. This is a large addition, see the brand-new section 5.3 for all 19 endpoints.
+17. 🆕 **A new "Daily Tips" feature exists, mounted at `/api/tips`.** A single endpoint, `GET /api/tips/today`, returns up to 5 personalized farming tips per day, scored against the user's preferred crops, saved region, the current month/season, and their recent detection history, then ranked and lightly rewritten by Gemini (with a rules-only fallback if Gemini is unavailable). Tips are cached per user per Africa/Accra calendar day and will not repeat for 14 days. See the new section 5.4.
+18. 🆕 **A new endpoint, `DELETE /api/notifications/clear-all`, deletes every notification for the logged-in user in one call.** Returns how many rows were removed. See section 5.7.
+19. ⚠️ **The weather risk model was completely rewritten.** `GET /api/weather/forecast` previously only had real disease-risk rules for `MAIZE`, `CASSAVA`, and `COCOA`, everything else fell back to a generic "conditions look manageable" message. All 10 real crop types (`MAIZE`, `TOMATO`, `CASSAVA`, `PLANTAIN`, `PEPPER`, `COCOA`, `RICE`, `YAM`, `GROUNDNUT`, `ONION`) now have their own disease-risk profile, built from a blended 3-day and 7-day humidity/rain/temperature analysis. The `riskInsights[].message` and `riskInsights[].factors` text is now also returned in Twi automatically when the user's saved `language` is `tw`, previously this was English-only regardless of the user's language setting. The response shape (`riskLevel`, `message`, `factors`) is unchanged, so existing UI code does not need to change, but the risk levels themselves will now be more accurate and, for `tw` users, will actually read in Twi. See the updated section 5.6.
 
 ---
 
@@ -178,6 +209,26 @@ These are real quirks in the current backend code that will save you debugging t
 
 25. 🆕 **Avatar deletion from Cloudinary is best-effort and never blocks the new upload.** When you upload a new avatar, the backend tries to delete the old one from Cloudinary storage by parsing its public ID out of the stored URL. If that parsing or delete call fails for any reason, the failure is only logged server-side (`⚠️ Failed to delete old avatar`), the new avatar still saves and the request still returns `200`. This means orphaned images can build up in Cloudinary's free tier storage over time, not something the frontend needs to handle, just flagging it so nobody is surprised by unused images sitting in the Cloudinary dashboard.
 
+26. 🆕 **`tagIds` on `POST /api/community/posts` must be a JSON-stringified array inside a multipart form field, not a normal repeated field or a real JSON body.** Because the endpoint is `multipart/form-data` (to support image uploads), every field arrives as a string. The backend explicitly `JSON.parse()`s the `tagIds` field before validating it as an array of `cuid`s. On the frontend, build the array normally (`["id1", "id2"]`), then call `JSON.stringify()` on it before appending it to your `FormData`, do not append each tag ID as a separate `tagIds` form field, that will not parse correctly.
+
+27. 🆕 **There is no endpoint to set `Profile.communityRegion`.** Community posts can be filtered/tagged by `region`, and the Daily Tips scoring uses `communityRegion` to match region-specific tips, but neither `PUT /api/auth/profile` nor any other current endpoint lets a user actually set this field, it can only be `null` for every user right now unless it's set directly in the database. Flag this to your backend dev, either `communityRegion` needs its own settings field (e.g. a region picker in onboarding or settings), or `updateProfile` needs to accept it.
+
+28. 🆕 **Replies are exactly one level deep, enforced server-side.** `POST /api/community/comments/:commentId/replies` checks whether the comment you're replying to already has a `parentId` itself, if it does, the request is rejected with `"Replies can only be added to a top-level comment, not to another reply."` Hide or disable the "Reply" action in your UI on any comment that is itself a reply (i.e. where `parentId !== null`), so users don't hit this error in the first place.
+
+29. 🆕 **Only the post's author can mark a comment Helpful or Solved, and never on their own comment.** Both `POST /api/community/comments/:commentId/helpful` and `.../solved` check `comment.post.userId === actingUserId` (must be true) and `comment.userId !== actingUserId` (must also be true). Show these mark buttons in your UI only when both conditions hold, otherwise you'll be showing a button that always 403s.
+
+30. 🆕 **Marking or unmarking a comment silently adjusts the comment author's reputation, this is not visible anywhere except `Profile.reputationScore`.** Helpful is worth 1 point, Solved is worth 2. Unmarking subtracts the same amount back, floored at 0 (it will never go negative). There is currently no activity feed or history of reputation changes, `reputationScore` is just a running total, if you want to show "why" a user's reputation changed, that has to be inferred from their marked comments, there is no dedicated audit endpoint for it.
+
+31. 🆕 **Commenting or replying on a post does not notify the post's author.** Only `POST_LIKED` and `COMMENT_MARKED` notifications are actually wired up right now (see the `NotificationType` note in section 4). If a "someone replied to your post" push notification is part of your final demo scope, flag this as outstanding backend work, the enum values (`POST_COMMENTED`, `COMMENT_REPLIED`) already exist in the schema but nothing creates them yet.
+
+32. 🆕 **Deleting a top-level comment also deletes all of its replies (via database cascade), and the post's `commentsCount` is decremented by the comment plus every reply it had**, all in one request. There is no way to delete a single reply while leaving its parent comment's other replies untouched from a different request, that already works fine independently, this note is just about the parent-comment-delete case cascading downward.
+
+33. 🆕 **`GET /api/community/posts` (the main feed) and `GET /api/community/users/me/posts` (my posts) use different max `limit` values.** The main feed caps `limit` at 20 (values above are rejected by Zod, not clamped), "my posts" caps at 50. Use the correct max for whichever screen you're paginating, sending `limit=30` to the main feed will fail validation even though it would succeed against "my posts".
+
+34. 🆕 **`GET /api/tips/today` is stable per Africa/Accra calendar day, not per 24-hour rolling window from first call.** If a user opens the app just before midnight Accra time, sees today's tips, then opens it again just after midnight, they will get a freshly computed, different set of tips, even though less than a minute of real time has passed. This is expected, the date the backend cares about is the Accra wall-clock calendar date, not elapsed time since the last fetch.
+
+35. 🆕 **Two concurrent first-of-the-day calls to `GET /api/tips/today` from the same user (e.g. a double-tap or a race between a background refresh and a foreground load) are now handled safely.** The backend re-checks for an existing cache row inside a transaction right before writing, so if two requests both compute a tip set at the same moment, only the first one's result is persisted and returned to both callers, they will never see two different tip sets for the same day.
+
 ---
 
 ## 4. Enum Reference
@@ -190,9 +241,12 @@ Use these exact values, they are enforced by the Postgres/Prisma enum types on t
 | `CropType` | `MAIZE`, `TOMATO`, `CASSAVA`, `PLANTAIN`, `PEPPER`, `COCOA`, `RICE`, `YAM`, `GROUNDNUT`, `ONION`, `FREE` | `RICE`, `YAM`, `GROUNDNUT`, `ONION` are new. `FREE` is detection-only, see Important Behavior Note 10, never send it to a crop-tracking endpoint |
 | `CropStatus` | `HEALTHY`, `MONITORING`, `AT_RISK`, `HARVEST_READY` | |
 | `Language` (not a DB enum, just accepted values) | `en`, `tw` | |
-| `NotificationType` (read-only, set by backend) | `DAILY_SUMMARY`, `HIGH_RISK`, `CROP_SPECIFIC`, `FAVORABLE_CONDITION`, `GENERAL_ADVICE` | |
+| `NotificationType` (read-only, set by backend) | `DAILY_SUMMARY`, `HIGH_RISK`, `CROP_SPECIFIC`, `FAVORABLE_CONDITION`, `GENERAL_ADVICE`, `POST_LIKED`, `POST_COMMENTED`, `COMMENT_REPLIED`, `USER_FOLLOWED`, `FOLLOWED_USER_POSTED`, `COMMENT_MARKED` | 🆕 The last six values were added for the community feature. As of this commit, only `POST_LIKED` (when someone likes your post) and `COMMENT_MARKED` (when someone marks your comment helpful/solved) are actually created anywhere in the code. `POST_COMMENTED`, `COMMENT_REPLIED`, `USER_FOLLOWED`, and `FOLLOWED_USER_POSTED` exist on the enum but nothing in the current codebase creates them yet, do not build UI that assumes you will receive a notification when someone comments/replies on your post, you will not, see section 8 |
 | `Priority` (read-only, set by backend) | `LOW`, `MEDIUM`, `HIGH` | |
 | `detectedCropEnum` values returned by `/api/detect` | Same ten real crop values as `CropType` minus `FREE`, plus `"UNKNOWN"` | `"UNKNOWN"` only appears for FREE scans where the identified plant does not map to a known crop |
+| 🆕 `CommentMarkType` (used internally by the mark/unmark endpoints, not sent in any request body, it's baked into the URL path instead) | `HELPFUL`, `SOLVED` | Drives which counter (`helpfulCount` / `solvedCount`) increments on a comment, and how much reputation the comment's author earns, 1 point for helpful, 2 for solved |
+| 🆕 `GHANA_REGIONS` (not a DB enum, a fixed string union used to validate the `region` field on posts) | `Ahafo`, `Ashanti`, `Bono`, `Bono East`, `Central`, `Eastern`, `Greater Accra`, `North East`, `Northern`, `Oti`, `Savannah`, `Upper East`, `Upper West`, `Volta`, `Western`, `Western North` | All 16 official regions of Ghana. Values are case-sensitive and must match exactly, including the space in multi-word regions (`"Western North"`, not `"western north"` or `"Western-North"`) |
+| 🆕 `riskLevel` values returned by `/api/weather/forecast` | `Low`, `Medium`, `High` | Title case, not uppercase, this is intentionally different casing from `Priority` above, copy it exactly when matching against it in the UI |
 
 ---
 
@@ -925,7 +979,596 @@ If there's no history yet, `history` is `[]` and the message becomes: `"No diagn
 
 ---
 
-### 5.3 Disease Detection
+### 5.3 Community (new)
+
+All routes here are mounted at `/api/community`. This is the Twitter-like feature: farmers post text (plus up to 3 photos), tag posts with topics, optionally link a post to a region, a crop, or a past detection, then the community comments, replies (one level deep only), likes, and saves posts. Comments can be marked "Helpful" or "Solved" by the post's author, which awards the commenter reputation points.
+
+Reading posts (`GET /api/community/posts`, `GET /api/community/posts/:postId`, `GET /api/community/posts/:postId/comments`) works for guests too, using `optionalAuth` instead of `protect`. Everything else (creating, deleting, liking, saving, commenting) requires a logged-in user.
+
+#### `GET /api/community/tags`
+
+Returns the fixed list of tags available to attach to a post (e.g. "Pest Alert", "Success Story", whatever was seeded into the `Tag` table). There is no endpoint to create a tag from the app, tags are backend-seeded only.
+
+- **Auth required:** No
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "Tags retrieved successfully",
+  "data": [
+    { "id": "cltag1...", "name": "Pest Alert", "slug": "pest-alert" }
+  ],
+  "total": 1
+}
+```
+
+**Use case:** Populate the tag picker checkboxes/chips on the "New Post" screen before the user can submit, since `tagIds` is a required field on post creation.
+
+---
+
+#### `POST /api/community/posts`
+
+Creates a new community post. At least one tag is required. Images are optional but capped at 3.
+
+- **Auth required:** Yes
+- **Content-Type:** `multipart/form-data` (not JSON, because of the optional image uploads)
+
+**Body (form-data):**
+
+| Field | Type | Required | Validation |
+|---|---|---|---|
+| `content` | string | Yes | 1 to 2000 characters |
+| `tagIds` | string | Yes | Must be a **JSON-stringified array** of tag IDs, e.g. `'["cltag1...","cltag2..."]'`, not a normal repeated form field. At least 1 tag ID, every ID must be a valid `cuid` and must exist in the `Tag` table |
+| `region` | string | No | Must be one of the 16 `GHANA_REGIONS` values, see section 4 |
+| `cropType` | string | No | One of the 10 real `CropType` values (not `FREE`) |
+| `detectionId` | string | No | A valid `cuid` belonging to a detection that this logged-in user actually ran, used to attach "I scanned this and here's what happened" context to a post |
+| `images` | file(s) | No | Up to 3 image files, same mimetype/size rules as other uploads (`MAX_IMAGE_SIZE_MB`, default 5MB, per file) |
+
+**Example request (as multipart form fields, not JSON):**
+
+```
+content: "My maize leaves have these gray-green streaks, anyone seen this before?"
+tagIds: ["cltag1abc", "cltag2xyz"]
+region: "Ashanti"
+cropType: "MAIZE"
+images: [photo1.jpg, photo2.jpg]
+```
+
+**Success response, `201`:**
+
+```json
+{
+  "success": true,
+  "message": "Post created successfully",
+  "data": {
+    "id": "clpost1...",
+    "content": "My maize leaves have these gray-green streaks, anyone seen this before?",
+    "imageUrls": ["https://res.cloudinary.com/xxx/image/upload/v123/crop-diagnose/community/abc.jpg"],
+    "region": "Ashanti",
+    "cropType": "MAIZE",
+    "detectionId": null,
+    "likesCount": 0,
+    "commentsCount": 0,
+    "savesCount": 0,
+    "createdAt": "2026-08-01T09:00:00.000Z",
+    "author": { "id": "cluser1...", "fullName": "Ama Boateng", "avatarUrl": null, "reputationScore": 0 },
+    "tags": [{ "id": "cltag1abc", "name": "Pest Alert", "slug": "pest-alert" }]
+  }
+}
+```
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `400` | `content` missing, empty, or over 2000 characters | Raw Zod message, do your own client-side character-count validation and show a friendly message |
+| `400` | More than 3 image files attached | `"You can only upload up to 3 images"` |
+| `400` | `tagIds` is not valid JSON, is not an array, or is empty | Raw Zod message, validate this shape client-side before submitting since it's an easy field to get wrong |
+| `400` | One or more `tagIds` do not exist in the `Tag` table | `"One or more selected tags are invalid"` |
+| `400` | `detectionId` provided but does not belong to the logged-in user (or doesn't exist) | `"This detection does not belong to you"` |
+| `400` | `region` not one of the 16 valid Ghana regions | `"Please select a valid Ghana region"` |
+| `401` | Missing/invalid token | Same as other protected routes |
+
+**Use case:** "New Post" / "Ask the Community" screen, likely reached from a "share this diagnosis" button on the detection result screen (via `detectionId`) as well as a standalone compose button.
+
+---
+
+#### `GET /api/community/posts`
+
+The main community feed. Public read, supports filtering and search, and returns `isLiked`/`isSaved` flags per post when the request is authenticated.
+
+- **Auth required:** No (send the `Authorization` header anyway if the user is logged in, so you get `isLiked`/`isSaved` back)
+
+**Query params (all optional):**
+
+| Param | Type | Default | Validation |
+|---|---|---|---|
+| `page` | string (numeric) | `1` | Integer, min 1 |
+| `limit` | string (numeric) | `10` | Integer, 1 to 20 (values above 20 are rejected, not clamped) |
+| `tag` | string | none | A tag `slug` (not an ID), e.g. `pest-alert` |
+| `region` | string | none | One of the 16 `GHANA_REGIONS` values |
+| `cropType` | string | none | One of the 10 real `CropType` values |
+| `q` | string | none | Free-text search, matched against `content` with a case-insensitive `contains` (not full-text search, so it will not stem or rank by relevance, just a plain substring match) |
+
+**Example request:** `GET /api/community/posts?cropType=MAIZE&region=Ashanti&page=1&limit=10`
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "Posts retrieved successfully",
+  "data": [
+    {
+      "id": "clpost1...",
+      "content": "My maize leaves have these gray-green streaks...",
+      "imageUrls": [],
+      "region": "Ashanti",
+      "cropType": "MAIZE",
+      "likesCount": 3,
+      "commentsCount": 1,
+      "savesCount": 0,
+      "createdAt": "2026-08-01T09:00:00.000Z",
+      "updatedAt": "2026-08-01T09:00:00.000Z",
+      "author": { "id": "cluser1...", "fullName": "Ama Boateng", "avatarUrl": null, "reputationScore": 2 },
+      "tags": [{ "id": "cltag1abc", "name": "Pest Alert", "slug": "pest-alert" }],
+      "isLiked": false,
+      "isSaved": true
+    }
+  ],
+  "pagination": { "page": 1, "limit": 10, "total": 1, "totalPages": 1 }
+}
+```
+
+Note `detectionId` is **not** included in this list response (it is included in `GET /api/community/posts/:postId` and `GET /api/community/users/me/posts`), and `isLiked`/`isSaved` are only present at all when the request was authenticated, so check for their existence before reading them if you support a logged-out feed view.
+
+If no posts match, `data` is `[]` and the message becomes `"No posts found. Be the first to share your experience!"`.
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `400` | Invalid query params (e.g. `limit=50`, unrecognized `region`) | Raw Zod message, validate filters client-side, especially `region` since it must match one of the 16 values exactly |
+
+**Use case:** Main community/feed tab, plus the same endpoint reused with different query params for a "filter by my crop" or "filter by my region" view.
+
+---
+
+#### `GET /api/community/posts/:postId`
+
+Full detail for a single post, including `updatedAt` and `detectionId` (both omitted from the list endpoint above).
+
+- **Auth required:** No (same `isLiked`/`isSaved` behavior as the list endpoint, only present when authenticated)
+
+**Success response, `200`:** Same shape as one item in the `GET /api/community/posts` array, plus `updatedAt` and `detectionId`.
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | Post does not exist (wrong ID, or already deleted) | `"Post not found"` |
+
+**Use case:** Post detail screen, reached by tapping a post in the feed. Pair this with `GET /api/community/posts/:postId/comments` to render the full thread below it.
+
+---
+
+#### `GET /api/community/users/me/posts`
+
+Returns the logged-in user's own posts (their "My Posts" tab on their own profile).
+
+- **Auth required:** Yes
+
+**Query params (all optional):** `page` (default `1`), `limit` (default `10`, max `50`, note this max is different from the main feed's max of 20).
+
+**Success response, `200`:** Same post shape as the main feed, plus `detectionId`, `isLiked`, and `isSaved` are always present (no author block, since it's always the current user).
+
+If the user has never posted, `data` is `[]` and the message becomes `"You have not created any posts yet"`.
+
+**Use case:** "My Posts" tab on the current user's own profile screen.
+
+---
+
+#### `DELETE /api/community/posts/:postId`
+
+Deletes a post the user owns. Cascades to its comments, likes, saves, and tag links at the database level. Also best-effort deletes any attached images from Cloudinary (a failed image delete never blocks the post deletion, same pattern as avatar replacement).
+
+- **Auth required:** Yes
+
+**Success response, `200`:**
+
+```json
+{ "success": true, "message": "Post deleted successfully" }
+```
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | Post does not exist | `"Post not found"` |
+| `403` | Post exists but belongs to someone else | `"You can only delete your own posts"` |
+
+**Use case:** "Delete post" option on a post the current user authored, typically behind a confirmation dialog since this is irreversible.
+
+---
+
+#### `POST /api/community/posts/:postId/comments`
+
+Adds a top-level comment to a post.
+
+- **Auth required:** Yes
+- **Content-Type:** `application/json`
+
+**Body:** `{ "content": string }`, 1 to 1000 characters.
+
+**Success response, `201`:**
+
+```json
+{
+  "success": true,
+  "message": "Comment posted successfully",
+  "data": {
+    "id": "clcomment1...",
+    "postId": "clpost1...",
+    "parentId": null,
+    "content": "This looks like Northern Leaf Blight, I had the same last season.",
+    "helpfulCount": 0,
+    "solvedCount": 0,
+    "createdAt": "2026-08-01T09:10:00.000Z",
+    "author": { "id": "cluser2...", "fullName": "Kofi Mensah", "avatarUrl": null, "reputationScore": 5 },
+    "replies": []
+  }
+}
+```
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | Post does not exist | `"Post not found"` |
+| `400` | `content` missing, empty, or over 1000 characters | Raw Zod message |
+
+**⚠️ Important:** commenting on someone else's post does **not** currently send that person a notification. Only likes and helpful/solved marks generate notifications right now (see the `NotificationType` note in section 4). If your UI implies "the post author will be notified" anywhere near the comment box, that is not accurate yet, flag it to the backend dev if this is needed for the demo.
+
+**Use case:** Comment box at the bottom of the post detail screen.
+
+---
+
+#### `POST /api/community/comments/:commentId/replies`
+
+Adds a reply to a top-level comment. Replies are exactly one level deep, you cannot reply to a reply.
+
+- **Auth required:** Yes
+- **Content-Type:** `application/json`
+
+**Body:** `{ "content": string }`, same 1 to 1000 character validation as a comment.
+
+**Success response, `201`:** Same shape as a comment response above, except `parentId` is the ID of the comment being replied to, and there is no `replies` field (replies cannot themselves have replies).
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | The comment being replied to does not exist | `"Comment not found"` |
+| `400` | The comment being replied to is itself a reply (already has a `parentId`) | `"Replies can only be added to a top-level comment, not to another reply"` |
+| `400` | `content` missing, empty, or over 1000 characters | Raw Zod message |
+
+**Use case:** "Reply" tap target under a comment. In your UI, only show the reply option on top-level comments, hide it on replies themselves, since the backend will reject a reply-to-a-reply.
+
+---
+
+#### `GET /api/community/posts/:postId/comments`
+
+Returns paginated top-level comments for a post, each with its replies nested inline (replies are **not** paginated separately, all replies for a fetched top-level comment come back at once).
+
+- **Auth required:** No
+
+**Query params (all optional):** `page` (default `1`), `limit` (default `10`, max `20`).
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "Comments retrieved successfully",
+  "data": [
+    {
+      "id": "clcomment1...",
+      "postId": "clpost1...",
+      "parentId": null,
+      "content": "This looks like Northern Leaf Blight, I had the same last season.",
+      "helpfulCount": 1,
+      "solvedCount": 0,
+      "createdAt": "2026-08-01T09:10:00.000Z",
+      "author": { "id": "cluser2...", "fullName": "Kofi Mensah", "avatarUrl": null, "reputationScore": 5 },
+      "replies": [
+        {
+          "id": "clreply1...",
+          "postId": "clpost1...",
+          "parentId": "clcomment1...",
+          "content": "Same here, neem spray helped a lot.",
+          "helpfulCount": 0,
+          "solvedCount": 0,
+          "createdAt": "2026-08-01T09:15:00.000Z",
+          "author": { "id": "cluser3...", "fullName": "Yaw Owusu", "avatarUrl": null, "reputationScore": 1 }
+        }
+      ]
+    }
+  ],
+  "pagination": { "page": 1, "limit": 10, "total": 1, "totalPages": 1 }
+}
+```
+
+Comments are ordered oldest-first (`createdAt: "asc"`) so a thread reads top to bottom naturally, this is the opposite order from the main post feed, which is newest-first.
+
+If there are no comments yet, `data` is `[]` and the message becomes `"No comments yet. Be the first to respond!"`.
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | Post does not exist | `"Post not found"` |
+
+**Use case:** Comment thread on the post detail screen.
+
+---
+
+#### `DELETE /api/community/comments/:commentId`
+
+Deletes a comment the user owns. If the comment has replies, those are counted and the post's `commentsCount` is decremented by the comment plus all its replies together (replies themselves are deleted via the database cascade, this endpoint does not let you delete a single reply independently while keeping the parent).
+
+- **Auth required:** Yes
+
+**Success response, `200`:**
+
+```json
+{ "success": true, "message": "Comment deleted successfully" }
+```
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | Comment does not exist | `"Comment not found"` |
+| `403` | Comment exists but belongs to someone else | `"You can only delete your own comments"` |
+
+**Use case:** "Delete" option on a comment or reply bubble the current user authored.
+
+---
+
+#### `POST /api/community/comments/:commentId/helpful`
+
+Marks another user's comment as "Helpful". **Only the post's author can do this**, and only on comments left by other people, not their own. Awards the comment's author 1 reputation point.
+
+- **Auth required:** Yes
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "Comment marked as helpful successfully",
+  "data": { "commentId": "clcomment1...", "helpfulCount": 1, "solvedCount": 0 }
+}
+```
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | Comment does not exist | `"Comment not found"` |
+| `403` | The logged-in user is not the author of the post this comment is on | `"Only the post author can mark comments as helpful or solved"` |
+| `403` | The logged-in user is trying to mark their own comment | `"You cannot mark your own comment"` |
+| `409` | This exact mark already exists for this comment | `"You have already marked this comment as helpful"` |
+
+**Use case:** "Mark as Helpful" button, shown only when `currentUserId === post.author.id` and the comment is not the post author's own comment, both checks worth doing client-side too so the button isn't shown where it will just 403.
+
+---
+
+#### `DELETE /api/community/comments/:commentId/helpful`
+
+Removes a previously-added "Helpful" mark, reversing the reputation point.
+
+- **Auth required:** Yes
+
+**Success response, `200`:**
+
+```json
+{ "success": true, "message": "Helpful mark removed successfully" }
+```
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | No existing "Helpful" mark from this user on this comment | `"You have not marked this comment, so there is nothing to remove"` |
+| `404` | Comment no longer exists | `"Comment not found"` |
+
+**Use case:** Toggling the "Helpful" button off after it was tapped on.
+
+---
+
+#### `POST /api/community/comments/:commentId/solved`
+
+Same rules as the Helpful endpoint above, marks a comment as the one that solved the post author's problem. Awards 2 reputation points (versus 1 for Helpful).
+
+- **Auth required:** Yes
+
+**Success/error responses:** Identical structure to `POST /api/community/comments/:commentId/helpful`, just with `"solved"` in place of `"helpful"` in every message, and `solvedCount` in the response data instead of `helpfulCount`.
+
+**Use case:** "Mark as Solution" button, same visibility rule as Helpful (post-author-only, not on their own comment).
+
+---
+
+#### `DELETE /api/community/comments/:commentId/solved`
+
+Removes a previously-added "Solved" mark, reversing the 2 reputation points.
+
+- **Auth required:** Yes
+
+**Success/error responses:** Same structure as `DELETE /api/community/comments/:commentId/helpful`, with `"Solved mark removed successfully"`.
+
+---
+
+#### `POST /api/community/posts/:postId/like`
+
+Likes a post. Liking your own post is allowed and does not error, it just never generates a notification to yourself (see the `POST_LIKED` notification, only sent when someone else likes your post).
+
+- **Auth required:** Yes
+
+**Success response, `200`:**
+
+```json
+{ "success": true, "message": "Post liked successfully" }
+```
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | Post does not exist | `"Post not found"` |
+| `409` | This user already liked this post | `"You have already liked this post"` |
+
+**Use case:** Heart/like icon on a post, in the feed or on the detail screen.
+
+---
+
+#### `DELETE /api/community/posts/:postId/like`
+
+Unlikes a previously-liked post.
+
+- **Auth required:** Yes
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | This user has not liked this post | `"You have not liked this post"` |
+| `404` | Post does not exist | `"Post not found"` |
+
+**Use case:** Toggling the like icon off.
+
+---
+
+#### `GET /api/community/posts/:postId/likes`
+
+Returns the list of users who liked a post, most recent first.
+
+- **Auth required:** No
+
+**Query params (all optional):** `page` (default `1`), `limit` (default `20`, max `50`).
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "Likes retrieved successfully",
+  "data": [
+    { "id": "cluser2...", "fullName": "Kofi Mensah", "avatarUrl": null, "reputationScore": 5 }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 1, "totalPages": 1 }
+}
+```
+
+**Use case:** "Liked by" list, shown when tapping the like count on a post.
+
+---
+
+#### `POST /api/community/posts/:postId/save`
+
+Bookmarks a post to the logged-in user's private saved list. Saving is private, other users cannot see who saved a post (unlike likes, which have a public `GET /likes` endpoint).
+
+- **Auth required:** Yes
+
+**Error responses:** Same pattern as like (`404` post not found, `409` already saved: `"You have already saved this post"`).
+
+---
+
+#### `DELETE /api/community/posts/:postId/save`
+
+Removes a post from the saved list.
+
+- **Auth required:** Yes
+
+**Error responses:** Same pattern as unlike (`404` post not found, `404` not saved: `"You have not saved this post"`).
+
+---
+
+#### `GET /api/community/saved`
+
+Returns the logged-in user's saved posts, most recently saved first.
+
+- **Auth required:** Yes
+
+**Query params (all optional):** `page` (default `1`), `limit` (default `10`, max `20`).
+
+**Success response, `200`:** Same post shape as the main feed, plus a `savedAt` timestamp on each entry showing when it was bookmarked (separate from the post's own `createdAt`). `isLiked`/`isSaved` are **not** included here (every post in this list is implicitly saved, and like status is not checked).
+
+If nothing is saved yet, `data` is `[]` and the message becomes `"You have not saved any posts yet"`.
+
+**Use case:** "Saved Posts" tab, typically on the user's own profile or a bookmarks icon in the main navigation.
+
+---
+
+### 5.4 Daily Tips (new)
+
+Mounted at `/api/tips`. A single endpoint that returns up to 5 short, personalized farming tips for "today" (using the Africa/Accra calendar day, not the server's local day or UTC). Tips are scored against the user's preferred crops, their saved community region, the current month/season, and any diseases they've recently been diagnosed with, then Gemini re-ranks and lightly rewrites the top candidates for relevance. If Gemini is unavailable, the backend falls back to its own rules-based ranking, so this endpoint should not go fully empty just because the AI call failed.
+
+#### `GET /api/tips/today`
+
+- **Auth required:** Yes
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "date": "2026-08-01",
+  "tips": [
+    {
+      "id": "cltip1...",
+      "title": "Watch for Northern Leaf Blight this week",
+      "body": "Humidity is high across the Ashanti region right now. Check the underside of maize leaves for long gray-green lesions and improve airflow between plants if you spot any.",
+      "order": 1,
+      "themes": ["fungal", "prevention"],
+      "cropTypes": ["MAIZE"],
+      "personalized": true
+    }
+  ],
+  "fromCache": false,
+  "message": "Today's tips ready."
+}
+```
+
+**Field notes:**
+
+| Field | Meaning |
+|---|---|
+| `date` | `YYYY-MM-DD`, always in the `Africa/Accra` timezone, this is the cache key, calling this endpoint again on the same Accra calendar day always returns the same tips |
+| `fromCache` | `true` if this exact response was already generated earlier today and is being replayed from the cache, `false` if it was just computed. Both cases return the same response shape, this is informational only, you do not need to branch your UI on it |
+| `personalized` | `true` if Gemini actually rewrote this tip's title/body specifically for this user, `false` if it's the original tip text served as-is (either because Gemini left it unchanged, or because the rules-only fallback was used) |
+| `themes` / `cropTypes` | Optional metadata you can use for a small badge or icon on the tip card, not guaranteed to be non-empty |
+
+**Behavior notes:**
+
+- Calling this endpoint multiple times on the same Accra day always returns the identical tip set (and the identical order), it is not re-randomized per request. A new set is only generated the first time it's called after the Accra date rolls over.
+- The backend tracks which tip IDs a user has already been served and avoids repeating the same tip for 14 days, so tips genuinely rotate over time rather than always showing the same 5.
+- `tips` can contain fewer than 5 items only if the seeded tip pool itself is smaller than 5 for that user's context, this should be rare after the pool is properly seeded.
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `404` | The seeded tip pool is completely empty (nothing to serve at all) | `"No tips available yet. Please seed the daily tips pool and try again."` |
+| `400` | User record not found for the token's `userId` (should not normally happen for a valid token) | `"User not found"` |
+
+**Use case:** A "Today's Tips" card on the home screen, ideally shown alongside or just below the weather risk summary, since both features already pull from the same preferred-crops and region context.
+
+---
+
+### 5.5 Disease Detection
 
 #### `POST /api/detect`
 
@@ -1036,11 +1679,13 @@ fetch("http://localhost:3100/api/detect", {
 
 ---
 
-### 5.4 Weather
+### 5.6 Weather
 
 #### `GET /api/weather/forecast`
 
 Returns a 7-day forecast (sourced from Open-Meteo, no API key required on their end) plus a rule-based disease risk assessment per crop the user has marked as preferred.
+
+**⚠️ The risk model behind this endpoint was rewritten since the last version of this doc, response shape is unchanged, but the content is significantly better. If you already built the weather screen, you do not need to change any code, just be aware the risk messages are now crop-specific and language-aware.**
 
 - **Auth required:** Yes
 
@@ -1095,7 +1740,11 @@ If neither is provided, the backend falls back to `profile.location` saved at re
 }
 ```
 
-A few field notes worth knowing for the UI: `weather_code` is the raw WMO numeric code (not all codes are mapped, unmapped codes like `95` show as `"Unknown"`, you may want to extend this map or handle `"Unknown"` gracefully in the UI). `riskLevel` is computed from a simple rule (humidity over 80% and rain probability over 50% equals High), it's not a machine-learning model, just a heuristic, present it as "today's risk estimate" rather than a guaranteed forecast. Rules are only defined for `MAIZE`, `CASSAVA`, and `COCOA` right now, other crops (including the newly added `RICE`, `YAM`, `GROUNDNUT`, `ONION`) fall back to a generic message like `"[Crop] conditions look manageable."` regardless of actual risk level, flag this to your backend dev if you want crop-specific messaging for the new crop types too.
+A few field notes worth knowing for the UI: `weather_code` is the raw WMO numeric code (not all codes are mapped, unmapped codes like `95` show as `"Unknown"`, you may want to extend this map or handle `"Unknown"` gracefully in the UI).
+
+**🆕 `riskLevel` is now computed by a dedicated risk profile for every one of the 10 real crop types**, not just `MAIZE`, `CASSAVA`, and `COCOA` as before. Each crop (`MAIZE`, `TOMATO`, `CASSAVA`, `PLANTAIN`, `PEPPER`, `COCOA`, `RICE`, `YAM`, `GROUNDNUT`, `ONION`) has its own thresholds for 3-day max humidity, number of "wet" days (rain probability 50%+) in the next 3 days, 3-day max rain probability, and for some crops an ideal temperature band, all tuned per crop against its own primary disease(s), e.g. Black Pod for cocoa, Black Sigatoka for plantain, blast/bacterial leaf blight for rice. It is still a rules-based heuristic, not a machine-learning model, present it as "today's risk estimate" rather than a guaranteed forecast, but it is meaningfully more accurate per crop than the old single-threshold version. `High` requires multiple factors to line up at once (deliberately conservative, so farmers trust the alert), `Medium` fires on a weaker single or partial signal, everything else is `Low`. `factors` is a short array of plain-language reasons contributing to the score (e.g. `"High humidity"`, `"Multiple wet days ahead"`), useful for showing "why" under the risk badge in the UI.
+
+**🆕 Risk messages and `factors` are now returned in the user's saved language automatically.** If the logged-in user's `language` field (see `PUT /api/auth/language`, section 5.1) is `"tw"`, every string inside `riskInsights[].message`, `riskInsights[].factors`, and the top-level `overallSummary` comes back in Twi instead of English, with no extra query param needed, the backend reads the user's saved preference server-side. Previously this entire endpoint was English-only regardless of the user's language setting.
 
 **Error responses:**
 
@@ -1108,7 +1757,7 @@ A few field notes worth knowing for the UI: `weather_code` is the raw WMO numeri
 
 ---
 
-### 5.5 Notifications
+### 5.7 Notifications
 
 All routes mounted at `/api/notifications`.
 
@@ -1283,7 +1932,32 @@ Note this deletes by token value only, not scoped to the logged-in user, any aut
 
 ---
 
-### 5.6 Text to Speech (Twi)
+#### `DELETE /api/notifications/clear-all` (new)
+
+🆕 **New endpoint.** Deletes every notification row belonging to the logged-in user, both read and unread. This is a hard delete, there is no "archive" or undo.
+
+- **Auth required:** Yes
+
+**Success response, `200`:**
+
+```json
+{ "success": true, "message": "All alerts cleared.", "count": 6 }
+```
+
+`count` tells you exactly how many notifications were removed, useful for a quick "6 notifications cleared" toast.
+
+**Error responses:**
+
+| Status | Scenario | Message |
+|---|---|---|
+| `401` | Missing/invalid token | Same as other protected routes |
+| `500` | Unexpected DB error | Passed through to the generic error handler |
+
+**Use case:** "Clear all" button on the notifications screen, typically behind a confirmation dialog since this cannot be undone. After a successful call, immediately clear the local notifications list and reset any unread badge count to 0 rather than waiting for a fresh `GET /api/notifications` round trip.
+
+---
+
+### 5.8 Text to Speech (Twi)
 
 #### `POST /api/tts/generate`
 
@@ -1333,7 +2007,7 @@ Proxies a request to the Ghana NLP translation API to synthesize Twi speech audi
 
 ---
 
-### 5.7 Health Check
+### 5.9 Health Check
 
 #### `GET /`
 
@@ -1374,6 +2048,27 @@ Not under `/api`, this is the server root.
 | PATCH | `/api/crops/my-crops/:cropType` | Yes | JSON |
 | DELETE | `/api/crops/my-crops/:cropType` | Yes | None |
 | GET | `/api/crops/my-crops/:cropType/history` | Yes | Query params only |
+| GET | `/api/community/tags` | No | None |
+| POST | `/api/community/posts` | Yes | multipart/form-data |
+| GET | `/api/community/posts` | No (isLiked/isSaved need auth) | Query params only |
+| GET | `/api/community/posts/:postId` | No (isLiked/isSaved need auth) | None |
+| GET | `/api/community/users/me/posts` | Yes | Query params only |
+| DELETE | `/api/community/posts/:postId` | Yes | None |
+| POST | `/api/community/posts/:postId/comments` | Yes | JSON |
+| POST | `/api/community/comments/:commentId/replies` | Yes | JSON |
+| GET | `/api/community/posts/:postId/comments` | No | Query params only |
+| DELETE | `/api/community/comments/:commentId` | Yes | None |
+| POST | `/api/community/comments/:commentId/helpful` | Yes | None |
+| DELETE | `/api/community/comments/:commentId/helpful` | Yes | None |
+| POST | `/api/community/comments/:commentId/solved` | Yes | None |
+| DELETE | `/api/community/comments/:commentId/solved` | Yes | None |
+| POST | `/api/community/posts/:postId/like` | Yes | None |
+| DELETE | `/api/community/posts/:postId/like` | Yes | None |
+| GET | `/api/community/posts/:postId/likes` | No | Query params only |
+| POST | `/api/community/posts/:postId/save` | Yes | None |
+| DELETE | `/api/community/posts/:postId/save` | Yes | None |
+| GET | `/api/community/saved` | Yes | Query params only |
+| GET | `/api/tips/today` | Yes | None |
 | POST | `/api/detect` | Yes | multipart/form-data |
 | GET | `/api/weather/forecast` | Yes | Query params only |
 | GET | `/api/notifications` | Yes | Query params only |
@@ -1381,10 +2076,11 @@ Not under `/api`, this is the server root.
 | POST | `/api/notifications/trigger` | Yes (dev only) | None |
 | PUT | `/api/notifications/push-token` | Yes | JSON |
 | DELETE | `/api/notifications/push-token` | Yes | JSON |
+| DELETE | `/api/notifications/clear-all` | Yes | None |
 | POST | `/api/tts/generate` | Yes | JSON |
 | GET | `/` | No | None |
 
-Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were added two versions ago. The two `push-token` rows were added in the previous version. The `profile` and `avatar` rows are new in this version.
+Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were added three versions ago. The two `push-token` rows and the `profile`/`avatar` rows were added two versions ago. **All 19 `/api/community/*` rows, the `/api/tips/today` row, and the `clear-all` row are new in this version.**
 
 ---
 
@@ -1419,11 +2115,14 @@ Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were added 
 - Whether the `500`-on-validation-error behavior for `POST /api/detect` (Important Behavior Note 1) will be fixed to return a proper `400`, since right now your client-side validation is the only thing protecting users from seeing a generic error message there.
 - Whether registration will be updated to normalize the phone number the same way password reset does (Important Behavior Note 4), this is worth prioritizing since it can silently lock users out of password reset.
 - Whether real SMS delivery (e.g. via Arkesel) will be wired up before your final demo, or whether the console-log OTP approach is acceptable to show your supervisor.
-- Whether weather risk messaging (section 5.4) will be extended to cover the four newly added crops (`RICE`, `YAM`, `GROUNDNUT`, `ONION`), which currently only get a generic message regardless of actual risk.
-- Whether a community/social feature (mentioned in the original project scope) has its own routes yet, none currently exist in this repository, only auth, crops, detection, weather, notifications, and TTS are implemented as of this commit.
 - 🆕 Whether the app-side Firebase (FCM V1) credentials and `expo-notifications` permission priming flow are ready. The backend's half of push delivery (token storage plus the Expo push send call in `pushService.ts`) is done, but it only works end to end once the app registers a real token, which requires Firebase set up in the EAS project on the frontend.
 - 🆕 Whether `PushToken` rows should ever be scoped to a specific installation vs. account, right now one physical device can only ever be linked to one user at a time (Important Behavior Note 20), confirm this matches the intended multi-user-per-device behavior (e.g. a shared family phone) before launch.
+- 🆕 **Whether a `communityRegion` setting field will be added anywhere in the app.** No current endpoint lets a user set `Profile.communityRegion` (Important Behavior Note 27), which means the region-based filtering on `GET /api/community/posts?region=...` and the region-based scoring in Daily Tips can never actually match for any real user unless this gets fixed. This is worth prioritizing since it silently weakens two features at once.
+- 🆕 **Whether comment/reply notifications (`POST_COMMENTED`, `COMMENT_REPLIED`) will be implemented before launch.** The enum values exist in `schema.prisma` but nothing in `communityService.ts` creates them yet (Important Behavior Note 31), only likes and helpful/solved marks currently notify anyone.
+- 🆕 **Whether there will be any content moderation on community posts or comments.** As of this commit there is no profanity filter, image moderation, or report/flag mechanism anywhere in `communityService.ts`, any logged-in user can post any text (up to 2000 characters) and up to 3 images. Confirm whether this is acceptable for a public-facing final-year demo, or whether at minimum a "Report post" endpoint and a basic word-filter are expected before other people outside your supervisor can see it.
+- 🆕 **Whether the Daily Tips pool (`DailyTip` table) has actually been seeded yet**, and with how many tips. `GET /api/tips/today` returns a `404` with `"No tips available yet. Please seed the daily tips pool and try again."` if the table is empty, this is a data/seeding task, not a code task, confirm someone owns writing and inserting the initial tip content (title, body, applicable crops, regions, months, themes) before you build the "Today's Tips" screen against it.
+- 🆕 Whether `POST /api/community/posts` should have any rate limiting. Right now a user can create posts back to back with no cooldown, worth flagging if spam is a concern for the demo, even a simple per-user per-minute limit would help.
 
 ---
 
-*Generated from a direct read of the source code in `kameyaw14/crop-disease-backend`, commit `23c3f8b`, 2026-07-26. Re-verify against the live code if the backend has been updated since.*
+*Generated from a direct read of the source code in `kameyaw14/crop-disease-backend`, commit `b9cc592`, 2026-08-07. Re-verify against the live code if the backend has been updated since.*
