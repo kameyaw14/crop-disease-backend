@@ -6,8 +6,10 @@ import { env } from "../utils/env.js";
 import { prisma } from "../config/connectDb.js";
 import {
   detectionResultSchema,
+  getMyDetectionsSchema,
   resultSchema,
   type DetectInput,
+  type GetMyDetectionsInput,
 } from "../schema/detectionSchema.js";
 import { v2 as cloudinary } from "cloudinary";
 import type { DetectionResponse, DetectionResult } from "../types/index.js";
@@ -31,6 +33,13 @@ function generateImageHash(buffer: Buffer): string {
 // Retry helper with exponential backoff
 async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function buildSymptomsSnippet(symptoms: string | null | undefined): string {
+  if (!symptoms || symptoms.trim().length === 0) return "";
+  const cleaned = symptoms.trim().replace(/\s+/g, " ");
+  if (cleaned.length <= 80) return cleaned;
+  return `${cleaned.slice(0, 80).trimEnd()}...`;
 }
 
 const ai = new GoogleGenAI({
@@ -612,5 +621,134 @@ export async function detectDisease(
       "Our AI service is currently experiencing high traffic. Please try again in a few moments.",
     suggestion:
       "Common diseases for this crop are available in the community section.",
+  };
+}
+
+export async function getMyDetections(userId: string, query: any) {
+  // Validate query string params (page, limit, cropType, q)
+  const validated: GetMyDetectionsInput = getMyDetectionsSchema.parse(query);
+
+  const page = validated.page || 1;
+  const limit = Math.min(validated.limit || 10, 20);
+  const skip = (page - 1) * limit;
+
+  // Build where clause: always scoped to the authenticated user
+  const where: any = {
+    userId,
+  };
+
+  if (validated.cropType) {
+    where.cropType = validated.cropType;
+  }
+
+  if (validated.q) {
+    // Case-insensitive disease name search (Postgres)
+    where.diseaseName = {
+      contains: validated.q,
+      mode: "insensitive",
+    };
+  }
+
+  // Parallel count + page fetch for one round-trip feel
+  const [detections, total] = await Promise.all([
+    prisma.detection.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+      // List stays light: no rawResponse, no long treatment fields
+      select: {
+        id: true,
+        imageUrl: true,
+        cropType: true,
+        diseaseName: true,
+        confidence: true,
+        symptoms: true,
+        createdAt: true,
+      },
+    }),
+    prisma.detection.count({ where }),
+  ]);
+
+  const data = detections.map((d) => ({
+    id: d.id,
+    imageUrl: d.imageUrl,
+    cropType: d.cropType,
+    diseaseName: d.diseaseName,
+    confidence: d.confidence,
+    // ~80 char symptoms snippet for history cards
+    symptomsSnippet: buildSymptomsSnippet(d.symptoms),
+    createdAt: d.createdAt,
+  }));
+
+  return {
+    success: true,
+    message:
+      total > 0
+        ? "Your detections retrieved successfully"
+        : "No scans yet. Take a photo of a leaf to get started.",
+    data,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit) || 0,
+    },
+  };
+}
+
+export async function getDetectionById(userId: string, detectionId: string) {
+  const detection = await prisma.detection.findFirst({
+    where: {
+      id: detectionId,
+      userId, // ownership filter in the query itself
+    },
+    select: {
+      id: true,
+      imageUrl: true,
+      cropType: true,
+      diseaseName: true,
+      confidence: true,
+      possibleDiseases: true,
+      symptoms: true,
+      causes: true,
+      organicTreatments: true,
+      chemicalOptions: true,
+      prevention: true,
+      localNotes: true,
+      aiProvider: true,
+      createdAt: true,
+      updatedAt: true,
+      // rawResponse intentionally excluded from client responses
+    },
+  });
+
+  if (!detection) {
+    return {
+      success: false,
+      message: "Detection not found",
+    };
+  }
+
+  return {
+    success: true,
+    message: "Detection retrieved successfully",
+    data: {
+      id: detection.id,
+      imageUrl: detection.imageUrl,
+      cropType: detection.cropType,
+      diseaseName: detection.diseaseName,
+      confidence: detection.confidence,
+      possibleDiseases: detection.possibleDiseases,
+      symptoms: detection.symptoms,
+      causes: detection.causes,
+      organicTreatments: detection.organicTreatments,
+      chemicalOptions: detection.chemicalOptions,
+      prevention: detection.prevention,
+      localNotes: detection.localNotes,
+      aiProvider: detection.aiProvider,
+      createdAt: detection.createdAt,
+      updatedAt: detection.updatedAt,
+    },
   };
 }

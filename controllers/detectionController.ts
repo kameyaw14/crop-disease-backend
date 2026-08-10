@@ -1,7 +1,11 @@
 // controllers/detectionController.ts
 //@ts-nocheck
 import type { Request, Response, NextFunction } from "express";
-import { detectDisease } from "../services/detectionService.js";
+import {
+  detectDisease,
+  getDetectionById,
+  getMyDetections,
+} from "../services/detectionService.js";
 import { detectSchema, type DetectInput } from "../schema/detectionSchema.js";
 import type { DetectionResponse } from "../types/index.js";
 
@@ -42,6 +46,38 @@ export const detectionController = {
 
       if (!result.success) {
         return res.status(400).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error: any) {
+      next(error);
+    }
+  },
+
+  async getMyDetections(req: Request, res: Response, next: NextFunction) {
+    try {
+      // TypeScript: req.user is set by protect middleware; non-null assertion is safe here
+      const userId = req.user!.userId;
+
+      const result = await getMyDetections(userId, req.query);
+
+      return res.status(200).json(result);
+    } catch (error: any) {
+      // Zod validation errors and unexpected failures go through the shared error handler
+      next(error);
+    }
+  },
+
+  async getDetectionById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.userId;
+      const { id } = req.params;
+
+      const result = await getDetectionById(userId, id as string);
+
+      // Same message for missing and non-owned ids (no existence leak)
+      if (!result.success) {
+        return res.status(404).json(result);
       }
 
       return res.status(200).json(result);

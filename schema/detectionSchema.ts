@@ -1,4 +1,5 @@
 // schemas/detectionSchema.ts
+//@ts-nocheck
 import { z } from "zod";
 
 // SELF NOTE (VERY IMPORTANT): whenever an enum is added, it should also be added to the "detectedCropEnum" field in the detectionResultSchema
@@ -106,3 +107,44 @@ export const resultSchema = z.object({
 });
 
 export type DetectionResult = z.infer<typeof resultSchema>;
+
+export const getMyDetectionsSchema = z.object({
+  page: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1, "Page can't be less than 1"))
+    .optional()
+    .default("1"),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1, "Limit can't be less than 1")
+        .max(20, "Limit can't be more than 20"),
+    )
+    .optional()
+    .default("10"),
+  cropType: z
+    .enum([
+      "MAIZE",
+      "CASSAVA",
+      "COCOA",
+      "PLANTAIN",
+      "TOMATO",
+      "PEPPER",
+      "RICE",
+      "YAM",
+      "GROUNDNUT",
+      "ONION",
+      "FREE",
+    ])
+    .optional(),
+  // optional free-text search on disease name
+  q: z.string().min(1).max(100).optional(),
+});
+
+//  TypeScript type inferred from the Zod schema above
+export type GetMyDetectionsInput = z.infer<typeof getMyDetectionsSchema>;

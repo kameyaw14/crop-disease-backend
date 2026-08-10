@@ -8,4 +8,8 @@ const router = express.Router();
 
 router.post("/detect", protect, uploadSingleImage, detectionController.detect);
 
+router.get("/detections/my", protect, detectionController.getMyDetections);
+
+router.get("/detection/:id", protect, detectionController.getDetectionById);
+
 export default router;
