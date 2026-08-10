@@ -12,7 +12,8 @@ export const startAlertCron = () => {
 
   // Runs every day at 5:30 AM (we handle per-user local time inside the service)
   cron.schedule(
-    "30 5 * * *",
+    "40 16 * * *", // Every 16:40
+    // "30 5 * * *",
     // "*/30 * * * * *", // Every 30 seconds
     async () => {
       try {

@@ -106,4 +106,47 @@ communityRouter.delete(
   protect,
   communityController.unsavePost,
 );
+
+communityRouter.post(
+  "/users/:userId/follow",
+  protect,
+  communityController.followUser,
+);
+
+communityRouter.delete(
+  "/users/:userId/follow",
+  protect,
+  communityController.unfollowUser,
+);
+
+communityRouter.post(
+  "/tags/:tagId/follow",
+  protect,
+  communityController.followTag,
+);
+
+communityRouter.delete(
+  "/tags/:tagId/follow",
+  protect,
+  communityController.unfollowTag,
+);
+
+communityRouter.get(
+  "/users/:userId/followers",
+  optionalAuth,
+  communityController.getFollowers,
+);
+
+communityRouter.get(
+  "/users/:userId/following",
+  optionalAuth,
+  communityController.getFollowing,
+);
+
+communityRouter.get(
+  "/users/me/following/tags",
+  protect,
+  communityController.getMyFollowingTags,
+);
+
 export default communityRouter;

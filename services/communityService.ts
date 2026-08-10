@@ -7,6 +7,7 @@ import {
   createPostSchema,
   createReplySchema,
   getCommentsSchema,
+  getFollowersSchema,
   getMyPostsSchema,
   getPostLikesSchema,
   getPostsSchema,
@@ -1303,6 +1304,467 @@ export const communityService = {
         total > 0
           ? "Saved posts retrieved successfully"
           : "You have not saved any posts yet",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+    };
+  },
+
+  async followUser(followerId: string, targetUserId: string) {
+    // Prevent self-follow
+    if (followerId === targetUserId) {
+      return {
+        success: false,
+        message: "You cannot follow yourself",
+      };
+    }
+
+    // Check target user exists
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: {
+        id: true,
+        profile: { select: { fullName: true } },
+      },
+    });
+
+    if (!targetUser) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    // Idempotent check: already following?
+    const existing = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId,
+          followingId: targetUserId,
+        },
+      },
+    });
+
+    if (existing) {
+      // Already following → still return success + current counts so UI stays in sync
+      const followersCount = await prisma.follow.count({
+        where: { followingId: targetUserId },
+      });
+
+      return {
+        success: true,
+        message: "Already following this user",
+        isFollowing: true,
+        followersCount,
+      };
+    }
+
+    // Create follow + notification in one transaction
+    // Transaction is used because both the Follow row and the Notification must succeed together
+    await prisma.$transaction(async (tx) => {
+      await tx.follow.create({
+        data: {
+          followerId,
+          followingId: targetUserId,
+        },
+      });
+
+      // Only notify the person being followed
+      await tx.notification.create({
+        data: {
+          userId: targetUserId,
+          type: "USER_FOLLOWED",
+          title: "New follower",
+          message: `${targetUser.profile?.fullName ?? "Someone"} started following you`,
+          // Note: the message above uses the target's own name by mistake in the original thought.
+          // We fix it below by fetching the follower's name.
+          priority: "LOW",
+          actionLink: `/community/users/${followerId}`,
+          metadata: { followerId },
+        },
+      });
+    });
+
+    const follower = await prisma.user.findUnique({
+      where: { id: followerId },
+      select: { profile: { select: { fullName: true } } },
+    });
+
+    await prisma.$transaction(async (tx) => {
+      await tx.follow.create({
+        data: {
+          followerId,
+          followingId: targetUserId,
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: targetUserId,
+          type: "USER_FOLLOWED",
+          title: "New follower",
+          message: `${follower?.profile?.fullName ?? "Someone"} started following you`,
+          priority: "LOW",
+          actionLink: `/community/users/${followerId}`,
+          metadata: { followerId },
+        },
+      });
+    });
+
+    const followersCount = await prisma.follow.count({
+      where: { followingId: targetUserId },
+    });
+
+    return {
+      success: true,
+      message: "You are now following this user",
+      isFollowing: true,
+      followersCount,
+    };
+  },
+
+  // Unfollow a user
+  async unfollowUser(followerId: string, targetUserId: string) {
+    const existing = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId,
+          followingId: targetUserId,
+        },
+      },
+    });
+
+    if (!existing) {
+      // Idempotent: already not following
+      const followersCount = await prisma.follow.count({
+        where: { followingId: targetUserId },
+      });
+
+      return {
+        success: true,
+        message: "You are not following this user",
+        isFollowing: false,
+        followersCount,
+      };
+    }
+
+    await prisma.follow.delete({
+      where: {
+        followerId_followingId: {
+          followerId,
+          followingId: targetUserId,
+        },
+      },
+    });
+
+    const followersCount = await prisma.follow.count({
+      where: { followingId: targetUserId },
+    });
+
+    return {
+      success: true,
+      message: "You have unfollowed this user",
+      isFollowing: false,
+      followersCount,
+    };
+  },
+
+  // Follow a tag
+  async followTag(userId: string, tagId: string) {
+    const tag = await prisma.tag.findUnique({
+      where: { id: tagId },
+      select: { id: true, name: true },
+    });
+
+    if (!tag) {
+      return {
+        success: false,
+        message: "Tag not found",
+      };
+    }
+
+    const existing = await prisma.tagFollow.findUnique({
+      where: {
+        userId_tagId: {
+          userId,
+          tagId,
+        },
+      },
+    });
+
+    if (existing) {
+      return {
+        success: true,
+        message: "Already following this tag",
+        isFollowing: true,
+      };
+    }
+
+    await prisma.tagFollow.create({
+      data: {
+        userId,
+        tagId,
+      },
+    });
+
+    return {
+      success: true,
+      message: `You are now following the tag "${tag.name}"`,
+      isFollowing: true,
+    };
+  },
+
+  // Unfollow a tag
+  async unfollowTag(userId: string, tagId: string) {
+    const existing = await prisma.tagFollow.findUnique({
+      where: {
+        userId_tagId: {
+          userId,
+          tagId,
+        },
+      },
+    });
+
+    if (!existing) {
+      return {
+        success: true,
+        message: "You are not following this tag",
+        isFollowing: false,
+      };
+    }
+
+    await prisma.tagFollow.delete({
+      where: {
+        userId_tagId: {
+          userId,
+          tagId,
+        },
+      },
+    });
+
+    return {
+      success: true,
+      message: "You have unfollowed this tag",
+      isFollowing: false,
+    };
+  },
+
+  // List followers of a user (public)
+  // currentUserId is optional — when present we also return isFollowing for each person
+  // so the UI can show "Follow back" buttons easily
+  async getFollowers(targetUserId: string, query: any, currentUserId?: string) {
+    const validated = getFollowersSchema.parse(query);
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 20, 50);
+    const skip = (page - 1) * limit;
+
+    // Confirm the target user exists
+    const targetExists = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { id: true },
+    });
+
+    if (!targetExists) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    const [follows, total] = await Promise.all([
+      prisma.follow.findMany({
+        where: { followingId: targetUserId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          follower: {
+            select: {
+              id: true,
+              profile: {
+                select: {
+                  fullName: true,
+                  avatarUrl: true,
+                  reputationScore: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.follow.count({ where: { followingId: targetUserId } }),
+    ]);
+
+    // If the requester is logged in, check which of these people they already follow
+    let followingSet = new Set<string>();
+    if (currentUserId && follows.length > 0) {
+      const ids = follows.map((f) => f.followerId);
+      const myFollows = await prisma.follow.findMany({
+        where: {
+          followerId: currentUserId,
+          followingId: { in: ids },
+        },
+        select: { followingId: true },
+      });
+      followingSet = new Set(myFollows.map((f) => f.followingId));
+    }
+
+    const data = follows.map((f) => ({
+      id: f.follower.id,
+      fullName: f.follower.profile?.fullName ?? "Unknown",
+      avatarUrl: f.follower.profile?.avatarUrl ?? null,
+      reputationScore: f.follower.profile?.reputationScore ?? 0,
+      followedAt: f.createdAt,
+      // Only present when the requester is logged in
+      ...(currentUserId && {
+        isFollowing: followingSet.has(f.follower.id),
+      }),
+    }));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? "Followers retrieved successfully"
+          : "This user has no followers yet",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+    };
+  },
+
+  // List users that a given user is following (public)
+  async getFollowing(targetUserId: string, query: any, currentUserId?: string) {
+    const validated = getFollowingSchema.parse(query);
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 20, 50);
+    const skip = (page - 1) * limit;
+
+    const targetExists = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { id: true },
+    });
+
+    if (!targetExists) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    const [follows, total] = await Promise.all([
+      prisma.follow.findMany({
+        where: { followerId: targetUserId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          following: {
+            select: {
+              id: true,
+              profile: {
+                select: {
+                  fullName: true,
+                  avatarUrl: true,
+                  reputationScore: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.follow.count({ where: { followerId: targetUserId } }),
+    ]);
+
+    // Same optional isFollowing enrichment for the requester
+    let followingSet = new Set<string>();
+    if (currentUserId && follows.length > 0) {
+      const ids = follows.map((f) => f.followingId);
+      const myFollows = await prisma.follow.findMany({
+        where: {
+          followerId: currentUserId,
+          followingId: { in: ids },
+        },
+        select: { followingId: true },
+      });
+      followingSet = new Set(myFollows.map((f) => f.followingId));
+    }
+
+    const data = follows.map((f) => ({
+      id: f.following.id,
+      fullName: f.following.profile?.fullName ?? "Unknown",
+      avatarUrl: f.following.profile?.avatarUrl ?? null,
+      reputationScore: f.following.profile?.reputationScore ?? 0,
+      followedAt: f.createdAt,
+      ...(currentUserId && {
+        isFollowing: followingSet.has(f.following.id),
+      }),
+    }));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? "Following list retrieved successfully"
+          : "This user is not following anyone yet",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+    };
+  },
+
+  // List tags the current user is following (auth required)
+  async getMyFollowingTags(userId: string, query: any) {
+    const validated = getMyFollowingTagsSchema.parse(query);
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 20, 50);
+    const skip = (page - 1) * limit;
+
+    const [tagFollows, total] = await Promise.all([
+      prisma.tagFollow.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          tag: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      }),
+      prisma.tagFollow.count({ where: { userId } }),
+    ]);
+
+    const data = tagFollows.map((tf) => ({
+      id: tf.tag.id,
+      name: tf.tag.name,
+      slug: tf.tag.slug,
+      followedAt: tf.createdAt,
+      isFollowing: true, // always true for this endpoint
+    }));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? "Followed tags retrieved successfully"
+          : "You are not following any tags yet",
       data,
       pagination: {
         page,

@@ -502,6 +502,189 @@ export const communityController = {
       });
     }
   },
+
+  async followUser(req: Request, res: Response) {
+    try {
+      const followerId = req.user!.userId;
+      const { userId: targetUserId } = req.params;
+
+      const result = await communityService.followUser(
+        followerId,
+        targetUserId as string,
+      );
+
+      if (!result.success) {
+        // 400 for self-follow, 404 for user not found
+        const status = result.message === "User not found" ? 404 : 400;
+        return res.status(status).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in followUser:",
+        error.message || "followUser failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to follow user. Please try again.",
+      });
+    }
+  },
+
+  //  Unfollow a user
+  async unfollowUser(req: Request, res: Response) {
+    try {
+      const followerId = req.user!.userId;
+      const { userId: targetUserId } = req.params;
+
+      const result = await communityService.unfollowUser(
+        followerId,
+        targetUserId as string,
+      );
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in unfollowUser:",
+        error.message || "unfollowUser failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to unfollow user. Please try again.",
+      });
+    }
+  },
+
+  //  Follow a tag
+  async followTag(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { tagId } = req.params;
+
+      const result = await communityService.followTag(userId, tagId as string);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in followTag:",
+        error.message || "followTag failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to follow tag. Please try again.",
+      });
+    }
+  },
+
+  //  Unfollow a tag
+  async unfollowTag(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+      const { tagId } = req.params;
+
+      const result = await communityService.unfollowTag(
+        userId,
+        tagId as string,
+      );
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in unfollowTag:",
+        error.message || "unfollowTag failed",
+      );
+      res.status(500).json({
+        success: false,
+        message: "Failed to unfollow tag. Please try again.",
+      });
+    }
+  },
+
+  //  Get followers of a user (public + optional auth for isFollowing)
+  async getFollowers(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+      const currentUserId = req.user?.userId; // undefined when guest
+
+      const result = await communityService.getFollowers(
+        userId as string,
+        req.query,
+        currentUserId,
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getFollowers:",
+        error.message || "getFollowers failed",
+      );
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to retrieve followers",
+      });
+    }
+  },
+
+  //  Get users that a user is following (public)
+  async getFollowing(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+      const currentUserId = req.user?.userId;
+
+      const result = await communityService.getFollowing(
+        userId as string,
+        req.query,
+        currentUserId,
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getFollowing:",
+        error.message || "getFollowing failed",
+      );
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to retrieve following list",
+      });
+    }
+  },
+
+  //  Get tags the current user is following
+  async getMyFollowingTags(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+
+      const result = await communityService.getMyFollowingTags(
+        userId,
+        req.query,
+      );
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getMyFollowingTags:",
+        error.message || "getMyFollowingTags failed",
+      );
+      res.status(400).json({
+        success: false,
+        message: error.message || "Failed to retrieve followed tags",
+      });
+    }
+  },
 };
 
 // small helper (not part of the exported object) that maps a

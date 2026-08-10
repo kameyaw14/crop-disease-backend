@@ -234,3 +234,36 @@ export const getSavedPostsSchema = z.object({
 });
 
 export type GetSavedPostsInput = z.infer<typeof getSavedPostsSchema>;
+
+export const paginationSchema = z.object({
+  page: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1, "Page can't be less than 1"))
+    .optional()
+    .default("1"),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1, "Limit can't be less than 1")
+        .max(50, "Limit can't be more than 50"),
+    )
+    .optional()
+    .default("20"),
+});
+
+export type PaginationInput = z.infer<typeof paginationSchema>;
+
+//  Same shape is reused for the three list endpoints
+export const getFollowersSchema = paginationSchema;
+export type GetFollowersInput = PaginationInput;
+
+export const getFollowingSchema = paginationSchema;
+export type GetFollowingInput = PaginationInput;
+
+export const getMyFollowingTagsSchema = paginationSchema;
+export type GetMyFollowingTagsInput = PaginationInput;
