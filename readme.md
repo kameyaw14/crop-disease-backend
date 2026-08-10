@@ -1,6 +1,6 @@
 # Crop Guardian Backend, API Testing Guide
 
-This document was written by reading the actual source code in `kameyaw14/crop-disease-backend` (commit `b9cc592`, verified 2026-08-07), not from assumptions. Every route, validation rule, and error case below was traced directly from `routes/`, `controllers/`, `services/`, `schema/`, and `prisma/schema.prisma`. This is an update of the previous version of this document (which was based on commit `23c3f8b`). Where the code disagreed with the old doc, the code wins, every change is called out inline below. If the backend changes again, this doc needs to be re-verified against the new code.
+This document was written by reading the actual source code in `kameyaw14/crop-disease-backend` (verified 2026-08-10), not from assumptions. Every route, validation rule, and error case below was traced directly from `routes/`, `controllers/`, `services/`, `schema/`, and `prisma/schema.prisma`. This is an update of the previous version of this document (which was based on commit `b9cc592`, verified 2026-08-07). Where the code disagreed with the old doc, the code wins, every change is called out inline below. If the backend changes again, this doc needs to be re-verified against the new code.
 
 Give this whole file to your frontend developer. It is written so they can build the API client and Postman collection without needing to read the backend source themselves.
 
@@ -51,6 +51,13 @@ Give this whole file to your frontend developer. It is written so they can build
     - [`POST /api/community/posts/:postId/save`](#post-apicommunitypostspostidsave)
     - [`DELETE /api/community/posts/:postId/save`](#delete-apicommunitypostspostidsave)
     - [`GET /api/community/saved`](#get-apicommunitysaved)
+    - [`POST /api/community/users/:userId/follow`](#post-apicommunityusersuseridfollow-new)
+    - [`DELETE /api/community/users/:userId/follow`](#delete-apicommunityusersuseridfollow-new)
+    - [`GET /api/community/users/:userId/followers`](#get-apicommunityusersuseridfollowers-new)
+    - [`GET /api/community/users/:userId/following`](#get-apicommunityusersuseridfollowing-new)
+    - [`POST /api/community/tags/:tagId/follow`](#post-apicommunitytagstagidfollow-new)
+    - [`DELETE /api/community/tags/:tagId/follow`](#delete-apicommunitytagstagidfollow-new)
+    - [`GET /api/community/users/me/following/tags`](#get-apicommunityusersmefollowingtags-new)
   - [5.4 Daily Tips (new)](#54-daily-tips-new)
     - [`GET /api/tips/today`](#get-apitipstoday)
   - [5.5 Disease Detection](#55-disease-detection)
@@ -86,6 +93,12 @@ If you already built against the previous README, read this section first.
 6. **Four new crop types were added to the `CropType` enum:** `RICE`, `YAM`, `GROUNDNUT`, `ONION`. Update your crop picker UI and any hardcoded enum lists on the frontend.
 7. **A new `detectedCropEnum` field is now present on every successful `/api/detect` response**, not just FREE scans. For normal scans it just echoes back the `cropType` you submitted, for FREE scans it is the crop Gemini identified, mapped to a known enum value (or `"UNKNOWN"`).
 8. **A new error type, `NO_PLANT_DETECTED`, exists for FREE scans** where no recognizable plant is in the image at all (distinct from `CROP_MISMATCH`, which is for normal scans where the plant is real but does not match the crop you selected).
+
+**Newest changes in this version (since the `b9cc592` doc above was written):**
+
+9. **A full follow system now exists, 7 new endpoints, all mounted under `/api/community`.** Users can follow/unfollow other users, follow/unfollow tags, and list a user's followers or following. See the new section 5.3.1 below.
+10. **`USER_FOLLOWED` is now a real, working notification.** The old version of this doc (and Important Behavior Note 31, and the `NotificationType` row in section 4) said only `POST_LIKED` and `COMMENT_MARKED` were wired up. That is no longer accurate, following a user now creates both an in-app `Notification` row and a real Expo push notification. `FOLLOWED_USER_POSTED` still is not implemented, see the updated note 31 and section 8.
+11. **Follow and unfollow are idempotent.** Calling follow on someone you already follow, or unfollow on someone you don't follow, returns `200` with `success: true` rather than an error, this is deliberate so the frontend can fire the request without first checking current state.
 
 **Biggest changes in this version (since the section above was written):**
 
@@ -219,7 +232,7 @@ These are real quirks in the current backend code that will save you debugging t
 
 30. 🆕 **Marking or unmarking a comment silently adjusts the comment author's reputation, this is not visible anywhere except `Profile.reputationScore`.** Helpful is worth 1 point, Solved is worth 2. Unmarking subtracts the same amount back, floored at 0 (it will never go negative). There is currently no activity feed or history of reputation changes, `reputationScore` is just a running total, if you want to show "why" a user's reputation changed, that has to be inferred from their marked comments, there is no dedicated audit endpoint for it.
 
-31. 🆕 **Commenting or replying on a post does not notify the post's author.** Only `POST_LIKED` and `COMMENT_MARKED` notifications are actually wired up right now (see the `NotificationType` note in section 4). If a "someone replied to your post" push notification is part of your final demo scope, flag this as outstanding backend work, the enum values (`POST_COMMENTED`, `COMMENT_REPLIED`) already exist in the schema but nothing creates them yet.
+31. **Commenting or replying on a post does not notify the post's author, but following a user now does.** `POST_LIKED`, `COMMENT_MARKED`, and 🆕 `USER_FOLLOWED` notifications are wired up (see the `NotificationType` note in section 4). If a "someone replied to your post" push notification is part of your final demo scope, flag this as outstanding backend work, the enum values (`POST_COMMENTED`, `COMMENT_REPLIED`) already exist in the schema but nothing creates them yet. The same is true for `FOLLOWED_USER_POSTED`, the enum value exists but nothing fires it when someone you follow creates a new post, see note 38.
 
 32. 🆕 **Deleting a top-level comment also deletes all of its replies (via database cascade), and the post's `commentsCount` is decremented by the comment plus every reply it had**, all in one request. There is no way to delete a single reply while leaving its parent comment's other replies untouched from a different request, that already works fine independently, this note is just about the parent-comment-delete case cascading downward.
 
@@ -228,6 +241,18 @@ These are real quirks in the current backend code that will save you debugging t
 34. 🆕 **`GET /api/tips/today` is stable per Africa/Accra calendar day, not per 24-hour rolling window from first call.** If a user opens the app just before midnight Accra time, sees today's tips, then opens it again just after midnight, they will get a freshly computed, different set of tips, even though less than a minute of real time has passed. This is expected, the date the backend cares about is the Accra wall-clock calendar date, not elapsed time since the last fetch.
 
 35. 🆕 **Two concurrent first-of-the-day calls to `GET /api/tips/today` from the same user (e.g. a double-tap or a race between a background refresh and a foreground load) are now handled safely.** The backend re-checks for an existing cache row inside a transaction right before writing, so if two requests both compute a tip set at the same moment, only the first one's result is persisted and returned to both callers, they will never see two different tip sets for the same day.
+
+36. 🆕 **Follow and unfollow a user, and follow and unfollow a tag, are both idempotent.** Following someone you already follow returns `200` with `"Already following this user"` (or the tag equivalent), not an error. Unfollowing someone you don't follow returns `200` with `"You are not following this user"`, not a `404`. Design your follow button as a simple toggle, you never need to check current state before firing the request.
+
+37. 🆕 **`followersCount` and `followingCount` are only returned by the follow/unfollow endpoints themselves, nowhere else.** `GET /api/auth/me`, `PUT /api/auth/profile`, and post author objects returned by the community endpoints do not include a follower or following count. If you want to show "128 followers" on a profile screen, call `GET /api/community/users/:userId/followers` and read `pagination.total` (same pattern for following, via `GET /api/community/users/:userId/following`), the follow/unfollow response bodies only give you `followersCount`, not `followingCount`.
+
+38. 🆕 **Nobody is notified when a user they follow creates a new post.** The `FOLLOWED_USER_POSTED` enum value exists in `schema.prisma` but nothing in `communityService.ts` creates it when a post is made. If a "someone you follow just posted" notification or a personalized "following" feed tab is part of your final demo scope, flag this as outstanding backend work, see section 8.
+
+39. 🆕 **`GET /api/community/users/:userId/followers` and `.../following` accept an optional Bearer token but do not require one.** They use `optionalAuth`, not `protect`. When called with a valid token, each entry in the response gets an extra `isFollowing` boolean (whether the requester already follows that person), useful for showing "Follow back" buttons. When called with no token, `isFollowing` is omitted entirely from every entry, not set to `false`, check for the key's presence rather than assuming a boolean.
+
+40. 🆕 **Self-follow is explicitly blocked.** `POST /api/community/users/:userId/follow` returns `400` with `"You cannot follow yourself"` if `userId` in the URL matches the logged-in user's own ID. Hide or disable the follow button on a user's own profile screen so nobody hits this.
+
+41. 🆕 **Deleting a `User` cascades and removes their `Follow` and `TagFollow` rows automatically.** Both models are defined with `onDelete: Cascade` in `schema.prisma`, so if an account is ever deleted, all follow relationships involving that account (as follower or as followed) are cleaned up by Postgres itself, there is no orphaned-follow cleanup job needed on the backend or frontend.
 
 ---
 
@@ -241,7 +266,7 @@ Use these exact values, they are enforced by the Postgres/Prisma enum types on t
 | `CropType` | `MAIZE`, `TOMATO`, `CASSAVA`, `PLANTAIN`, `PEPPER`, `COCOA`, `RICE`, `YAM`, `GROUNDNUT`, `ONION`, `FREE` | `RICE`, `YAM`, `GROUNDNUT`, `ONION` are new. `FREE` is detection-only, see Important Behavior Note 10, never send it to a crop-tracking endpoint |
 | `CropStatus` | `HEALTHY`, `MONITORING`, `AT_RISK`, `HARVEST_READY` | |
 | `Language` (not a DB enum, just accepted values) | `en`, `tw` | |
-| `NotificationType` (read-only, set by backend) | `DAILY_SUMMARY`, `HIGH_RISK`, `CROP_SPECIFIC`, `FAVORABLE_CONDITION`, `GENERAL_ADVICE`, `POST_LIKED`, `POST_COMMENTED`, `COMMENT_REPLIED`, `USER_FOLLOWED`, `FOLLOWED_USER_POSTED`, `COMMENT_MARKED` | 🆕 The last six values were added for the community feature. As of this commit, only `POST_LIKED` (when someone likes your post) and `COMMENT_MARKED` (when someone marks your comment helpful/solved) are actually created anywhere in the code. `POST_COMMENTED`, `COMMENT_REPLIED`, `USER_FOLLOWED`, and `FOLLOWED_USER_POSTED` exist on the enum but nothing in the current codebase creates them yet, do not build UI that assumes you will receive a notification when someone comments/replies on your post, you will not, see section 8 |
+| `NotificationType` (read-only, set by backend) | `DAILY_SUMMARY`, `HIGH_RISK`, `CROP_SPECIFIC`, `FAVORABLE_CONDITION`, `GENERAL_ADVICE`, `POST_LIKED`, `POST_COMMENTED`, `COMMENT_REPLIED`, `USER_FOLLOWED`, `FOLLOWED_USER_POSTED`, `COMMENT_MARKED` | The last six values were added for the community feature. As of this version, `POST_LIKED` (someone likes your post), `COMMENT_MARKED` (someone marks your comment helpful/solved), and 🆕 `USER_FOLLOWED` (someone follows you, both an in-app row and a real Expo push are sent) are actually created in the code. `POST_COMMENTED`, `COMMENT_REPLIED`, and `FOLLOWED_USER_POSTED` still exist only on the enum, nothing creates them yet, do not build UI that assumes you will receive a notification when someone comments/replies on your post or when someone you follow posts, see section 8 |
 | `Priority` (read-only, set by backend) | `LOW`, `MEDIUM`, `HIGH` | |
 | `detectedCropEnum` values returned by `/api/detect` | Same ten real crop values as `CropType` minus `FREE`, plus `"UNKNOWN"` | `"UNKNOWN"` only appears for FREE scans where the identified plant does not map to a known crop |
 | 🆕 `CommentMarkType` (used internally by the mark/unmark endpoints, not sent in any request body, it's baked into the URL path instead) | `HELPFUL`, `SOLVED` | Drives which counter (`helpfulCount` / `solvedCount`) increments on a comment, and how much reputation the comment's author earns, 1 point for helpful, 2 for solved |
@@ -1512,6 +1537,152 @@ If nothing is saved yet, `data` is `[]` and the message becomes `"You have not s
 
 ---
 
+#### `POST /api/community/users/:userId/follow` (new)
+
+Follows another user. Creates a `Follow` row, an in-app `USER_FOLLOWED` notification for the target user, and attempts a real Expo push notification (a push failure never fails the follow itself, see Important Behavior Note 10).
+
+- **Auth required:** Yes
+
+**URL param:** `userId`, the `cuid` of the user to follow.
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "You are now following this user",
+  "isFollowing": true,
+  "followersCount": 13
+}
+```
+
+If already following, the same shape is returned with `"message": "Already following this user"`, see Important Behavior Note 36.
+
+**Error responses:**
+- `400`, `"You cannot follow yourself"`, if `userId` matches your own ID (Important Behavior Note 40).
+- `404`, `"User not found"`, if `userId` does not exist.
+
+**Use case:** Follow button on another user's profile or on a post/comment author's name.
+
+---
+
+#### `DELETE /api/community/users/:userId/follow` (new)
+
+Unfollows a user.
+
+- **Auth required:** Yes
+
+**Success response, `200`:** Same shape as follow, `"message": "You have unfollowed this user"`, `isFollowing: false`. If you were not already following them, it still returns `200` with `"You are not following this user"` rather than an error (idempotent, Important Behavior Note 36).
+
+---
+
+#### `GET /api/community/users/:userId/followers` (new)
+
+Lists the people who follow a given user, most recent first.
+
+- **Auth required:** No (`optionalAuth`, see Important Behavior Note 39)
+
+**Query params (all optional):** `page` (default `1`), `limit` (default `20`, max `50`).
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "Followers retrieved successfully",
+  "data": [
+    {
+      "id": "cluser1...",
+      "fullName": "Ama Owusu",
+      "avatarUrl": null,
+      "reputationScore": 8,
+      "followedAt": "2026-08-01T10:12:00.000Z",
+      "isFollowing": true
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 13, "totalPages": 1 }
+}
+```
+
+`isFollowing` (whether you already follow that person) is only present when your request includes a valid Bearer token, it is omitted from every entry for a guest request, not set to `false`. If `userId` does not exist, returns `404` with `"User not found"`. If the user has no followers, `data` is `[]` and the message becomes `"This user has no followers yet"`.
+
+**Use case:** "Followers" tab on a profile screen, and reading `pagination.total` to show a follower count anywhere (Important Behavior Note 37).
+
+---
+
+#### `GET /api/community/users/:userId/following` (new)
+
+Lists the people a given user follows, most recently followed first. Same shape, params, and auth behavior as the followers endpoint above, just the reverse direction.
+
+- **Auth required:** No (`optionalAuth`)
+
+**Query params (all optional):** `page` (default `1`), `limit` (default `20`, max `50`).
+
+**Success response, `200`:** Same entry shape as followers. Empty-state message is `"This user is not following anyone yet"`.
+
+**Use case:** "Following" tab on a profile screen, and reading `pagination.total` for a following count.
+
+---
+
+#### `POST /api/community/tags/:tagId/follow` (new)
+
+Follows a tag, so posts using that tag can be prioritized in a personalized feed later.
+
+- **Auth required:** Yes
+
+**URL param:** `tagId`, the `cuid` of the tag (get this from `GET /api/community/tags`).
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "You are now following the tag \"maize\"",
+  "isFollowing": true
+}
+```
+
+Idempotent, following an already-followed tag returns `200` with `"Already following this tag"`.
+
+**Error responses:** `404`, `"Tag not found"`, if `tagId` does not exist.
+
+---
+
+#### `DELETE /api/community/tags/:tagId/follow` (new)
+
+Unfollows a tag. Same idempotent pattern, `200` either way, `"You have unfollowed this tag"` or `"You are not following this tag"` if it was never followed.
+
+- **Auth required:** Yes
+
+---
+
+#### `GET /api/community/users/me/following/tags` (new)
+
+Lists the tags the logged-in user currently follows, most recently followed first.
+
+- **Auth required:** Yes
+
+**Query params (all optional):** `page` (default `1`), `limit` (default `20`, max `50`).
+
+**Success response, `200`:**
+
+```json
+{
+  "success": true,
+  "message": "Followed tags retrieved successfully",
+  "data": [
+    { "id": "cltag1...", "name": "maize", "slug": "maize", "followedAt": "2026-08-01T10:12:00.000Z", "isFollowing": true }
+  ],
+  "pagination": { "page": 1, "limit": 20, "total": 1, "totalPages": 1 }
+}
+```
+
+`isFollowing` is always `true` here since this endpoint only ever lists tags you follow. If you follow none, `data` is `[]` and the message becomes `"You are not following any tags yet"`.
+
+**Use case:** A "Followed topics" settings screen, or to pre-select tags the user cares about when building a personalized feed filter.
+
+---
+
 ### 5.4 Daily Tips (new)
 
 Mounted at `/api/tips`. A single endpoint that returns up to 5 short, personalized farming tips for "today" (using the Africa/Accra calendar day, not the server's local day or UTC). Tips are scored against the user's preferred crops, their saved community region, the current month/season, and any diseases they've recently been diagnosed with, then Gemini re-ranks and lightly rewrites the top candidates for relevance. If Gemini is unavailable, the backend falls back to its own rules-based ranking, so this endpoint should not go fully empty just because the AI call failed.
@@ -2068,6 +2239,13 @@ Not under `/api`, this is the server root.
 | POST | `/api/community/posts/:postId/save` | Yes | None |
 | DELETE | `/api/community/posts/:postId/save` | Yes | None |
 | GET | `/api/community/saved` | Yes | Query params only |
+| POST | `/api/community/users/:userId/follow` | Yes | None |
+| DELETE | `/api/community/users/:userId/follow` | Yes | None |
+| GET | `/api/community/users/:userId/followers` | No (isFollowing needs auth) | Query params only |
+| GET | `/api/community/users/:userId/following` | No (isFollowing needs auth) | Query params only |
+| POST | `/api/community/tags/:tagId/follow` | Yes | None |
+| DELETE | `/api/community/tags/:tagId/follow` | Yes | None |
+| GET | `/api/community/users/me/following/tags` | Yes | Query params only |
 | GET | `/api/tips/today` | Yes | None |
 | POST | `/api/detect` | Yes | multipart/form-data |
 | GET | `/api/weather/forecast` | Yes | Query params only |
@@ -2080,7 +2258,7 @@ Not under `/api`, this is the server root.
 | POST | `/api/tts/generate` | Yes | JSON |
 | GET | `/` | No | None |
 
-Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were added three versions ago. The two `push-token` rows and the `profile`/`avatar` rows were added two versions ago. **All 19 `/api/community/*` rows, the `/api/tips/today` row, and the `clear-all` row are new in this version.**
+Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were added four versions ago. The two `push-token` rows and the `profile`/`avatar` rows were added three versions ago. The first 19 `/api/community/*` rows, the `/api/tips/today` row, and the `clear-all` row were added two versions ago. **The 7 follow-system rows (`users/:userId/follow`, `users/:userId/followers`, `users/:userId/following`, `tags/:tagId/follow`, `users/me/following/tags`) are new in this version**, bringing the total `/api/community/*` rows to 26.
 
 ---
 
@@ -2102,7 +2280,7 @@ Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were added 
    }
    ```
 4. On every protected request, set the Authorization header to `Bearer {{token}}` (Postman's "Bearer Token" auth type works too, just paste `{{token}}` as the value).
-5. Suggested test order for a full end-to-end pass: register, login, get me, update profile, upload avatar, add a crop, get my crops, run a normal detection on that crop, run a FREE scan detection, get crop history, get weather forecast, get notifications, generate TTS audio, then separately walk through forgot-password, verify-reset-otp, and reset-password with a test account.
+5. Suggested test order for a full end-to-end pass: register, login, get me, update profile, upload avatar, add a crop, get my crops, run a normal detection on that crop, run a FREE scan detection, get crop history, get weather forecast, get notifications, generate TTS audio, follow a second test account and confirm they receive a `USER_FOLLOWED` notification, follow a tag, list your followed tags, then separately walk through forgot-password, verify-reset-otp, and reset-password with a test account.
 6. For `POST /api/detect`, use Postman's `form-data` body type (not `raw` or `x-www-form-urlencoded`), set the `image` field type to "File" and pick a real plant photo, and add a text field for `cropType` (try both a real crop like `MAIZE` and the value `FREE` to test both modes).
 7. For the password reset flow, since OTPs are only logged to the server console right now (Important Behavior Note 16), you will need terminal access to the running backend to read the OTP code during testing, it will not be delivered anywhere else yet.
 
@@ -2122,7 +2300,9 @@ Rows for `forgot-password`, `verify-reset-otp`, and `reset-password` were added 
 - 🆕 **Whether there will be any content moderation on community posts or comments.** As of this commit there is no profanity filter, image moderation, or report/flag mechanism anywhere in `communityService.ts`, any logged-in user can post any text (up to 2000 characters) and up to 3 images. Confirm whether this is acceptable for a public-facing final-year demo, or whether at minimum a "Report post" endpoint and a basic word-filter are expected before other people outside your supervisor can see it.
 - 🆕 **Whether the Daily Tips pool (`DailyTip` table) has actually been seeded yet**, and with how many tips. `GET /api/tips/today` returns a `404` with `"No tips available yet. Please seed the daily tips pool and try again."` if the table is empty, this is a data/seeding task, not a code task, confirm someone owns writing and inserting the initial tip content (title, body, applicable crops, regions, months, themes) before you build the "Today's Tips" screen against it.
 - 🆕 Whether `POST /api/community/posts` should have any rate limiting. Right now a user can create posts back to back with no cooldown, worth flagging if spam is a concern for the demo, even a simple per-user per-minute limit would help.
+- 🆕 **Whether `FOLLOWED_USER_POSTED` will be implemented before launch.** The follow system itself (follow/unfollow user, follow/unfollow tag, followers/following lists) is fully working end to end, including a real `USER_FOLLOWED` push notification (Important Behavior Note 10). But nothing currently notifies a user, or surfaces a personalized feed, when someone they follow creates a new post (Important Behavior Note 38). Confirm whether a "Following" feed tab and/or a new-post notification is expected for the demo, since right now following someone has no visible effect beyond the follower/following counts.
+- 🆕 **Whether `followingCount` should be added to the follow/unfollow response bodies.** Right now those endpoints only return `followersCount` for the target user, not the acting user's own `followingCount` (Important Behavior Note 37). Minor, but worth a quick ask if the profile screen needs both numbers without a second request.
 
 ---
 
-*Generated from a direct read of the source code in `kameyaw14/crop-disease-backend`, commit `b9cc592`, 2026-08-07. Re-verify against the live code if the backend has been updated since.*
+*Generated from a direct read of the source code in `kameyaw14/crop-disease-backend`, `main` branch, verified 2026-08-10. Re-verify against the live code if the backend has been updated since.*
