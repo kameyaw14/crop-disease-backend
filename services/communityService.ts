@@ -20,6 +20,7 @@ import {
   type GetPostsInput,
   type GetSavedPostsInput,
 } from "../schema/communitySchema.js";
+import { pushService } from "./pushService.js";
 
 type CommentMarkType = "HELPFUL" | "SOLVED";
 
@@ -1363,7 +1364,17 @@ export const communityService = {
       };
     }
 
-    // Create follow + notification in one transaction
+    // Fetch follower name first so both the DB notification and the push have the correct name
+    const follower = await prisma.user.findUnique({
+      where: { id: followerId },
+      select: { profile: { select: { fullName: true } } },
+    });
+
+    const followerName = follower?.profile?.fullName ?? "Someone";
+    const notificationTitle = "New follower";
+    const notificationMessage = `${followerName} started following you`;
+
+    // Create follow + in-app notification in one transaction
     // Transaction is used because both the Follow row and the Notification must succeed together
     await prisma.$transaction(async (tx) => {
       await tx.follow.create({
@@ -1373,15 +1384,12 @@ export const communityService = {
         },
       });
 
-      // Only notify the person being followed
       await tx.notification.create({
         data: {
           userId: targetUserId,
           type: "USER_FOLLOWED",
-          title: "New follower",
-          message: `${targetUser.profile?.fullName ?? "Someone"} started following you`,
-          // Note: the message above uses the target's own name by mistake in the original thought.
-          // We fix it below by fetching the follower's name.
+          title: notificationTitle,
+          message: notificationMessage,
           priority: "LOW",
           actionLink: `/community/users/${followerId}`,
           metadata: { followerId },
@@ -1389,31 +1397,26 @@ export const communityService = {
       });
     });
 
-    const follower = await prisma.user.findUnique({
-      where: { id: followerId },
-      select: { profile: { select: { fullName: true } } },
-    });
-
-    await prisma.$transaction(async (tx) => {
-      await tx.follow.create({
+    // Send real Expo push notification (outside the transaction so a push failure never rolls back the follow)
+    // TypeScript: we intentionally do not await in a way that blocks the response; fire-and-forget is acceptable here
+    // but we still await so any error is logged properly
+    try {
+      await pushService.sendToUser(targetUserId, {
+        title: notificationTitle,
+        body: notificationMessage,
         data: {
+          type: "USER_FOLLOWED",
+          actionLink: `/community/users/${followerId}`,
           followerId,
-          followingId: targetUserId,
         },
       });
-
-      await tx.notification.create({
-        data: {
-          userId: targetUserId,
-          type: "USER_FOLLOWED",
-          title: "New follower",
-          message: `${follower?.profile?.fullName ?? "Someone"} started following you`,
-          priority: "LOW",
-          actionLink: `/community/users/${followerId}`,
-          metadata: { followerId },
-        },
-      });
-    });
+    } catch (pushError: any) {
+      // Never fail the whole follow action just because push failed
+      console.error(
+        "⚠️ Failed to send follow push notification:",
+        pushError.message,
+      );
+    }
 
     const followersCount = await prisma.follow.count({
       where: { followingId: targetUserId },
