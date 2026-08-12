@@ -592,6 +592,9 @@ export const weatherService = {
               "No location found. Please update your farm location in your profile.",
             errorType: "LOCATION_MISSING",
           };
+          console.error(
+            "Weather Error : No location found. Please update your farm location in your profile.",
+          );
         }
 
         latitude = profile.location.latitude as number;
@@ -674,6 +677,9 @@ export const weatherService = {
           "Unable to fetch weather data at the moment. Please try again later.",
         errorType: "WEATHER_FETCH_FAILED",
       };
+      console.error(
+        "Unable to fetch weather data at the moment. Please try again later.",
+      );
     }
   },
 };
