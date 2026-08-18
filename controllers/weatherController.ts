@@ -31,4 +31,27 @@ export const weatherController = {
       next(error);
     }
   },
+
+  async enrichForecast(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.userId;
+      const { latitude, longitude, rawData } = req.body;
+
+      const result: WeatherForecastResponse =
+        await weatherService.enrichForecast(
+          userId,
+          Number(latitude),
+          Number(longitude),
+          rawData,
+        );
+
+      if (!result.success) {
+        return res.status(400).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error: any) {
+      next(error);
+    }
+  },
 };

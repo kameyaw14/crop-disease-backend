@@ -4,10 +4,8 @@ import axios from "axios";
 import { prisma } from "../config/connectDb.js";
 import type { WeatherForecastResponse } from "../types/index.js";
 
-// NO CHANGES
 const OPEN_METEO_BASE = "https://api.open-meteo.com/v1/forecast";
 
-// NO CHANGES
 const weatherCodeMap: Record<number, string> = {
   0: "Clear Sky",
   1: "Mainly Clear",
@@ -488,7 +486,7 @@ function scoreCropRisk(
   return { riskLevel, message, factors };
 }
 
-// UPDATED: Now accepts language and uses the new feature + profile engine
+//  Now accepts language and uses the new feature + profile engine
 function generateDiseaseRiskInsights(
   weatherData: any,
   userCrops: string[],
@@ -523,7 +521,7 @@ function generateDiseaseRiskInsights(
   return insights;
 }
 
-// UPDATED: overall summary now language-aware and uses richer features
+//  overall summary now language-aware and uses richer features
 function generateOverallSummary(
   weatherData: any,
   riskInsights: any[],
@@ -574,7 +572,7 @@ function generateOverallSummary(
 }
 
 export const weatherService = {
-  // UPDATED: prefers UserPreferredCrop, falls back to profile.preferredCrops; passes language
+  //  prefers UserPreferredCrop, falls back to profile.preferredCrops; passes language
   async getForecast(
     userId: string,
     lat?: number,
@@ -584,7 +582,7 @@ export const weatherService = {
       let latitude = lat;
       let longitude = lon;
 
-      // UPDATED: also fetch language + UserPreferredCrop list
+      //  also fetch language + UserPreferredCrop list
       const [profile, preferredCropsRows, user] = await Promise.all([
         prisma.profile.findUnique({
           where: { userId },
@@ -620,7 +618,6 @@ export const weatherService = {
         longitude = profile.location.longitude as number;
       }
 
-      // NO CHANGES to the Open-Meteo request itself
       const params = new URLSearchParams({
         latitude: latitude.toString(),
         longitude: longitude.toString(),
@@ -638,7 +635,7 @@ export const weatherService = {
 
       const rawData = response.data;
 
-      // UPDATED: Prefer richer UserPreferredCrop list; fall back to profile.preferredCrops
+      //  Prefer richer UserPreferredCrop list; fall back to profile.preferredCrops
       const userCropsFromJunction = preferredCropsRows.map((r) => r.cropType);
       const userCrops =
         userCropsFromJunction.length > 0
@@ -647,7 +644,7 @@ export const weatherService = {
 
       const language = (user?.language === "tw" ? "tw" : "en") as "en" | "tw";
 
-      // UPDATED: pass language into generators
+      //  pass language into generators
       const riskInsights = generateDiseaseRiskInsights(
         rawData,
         userCrops,
@@ -701,6 +698,114 @@ export const weatherService = {
         message:
           "Unable to fetch weather data at the moment. Please try again later.",
         errorType: "WEATHER_FETCH_FAILED",
+      };
+    }
+  },
+
+  async enrichForecast(
+    userId: string,
+    latitude: number,
+    longitude: number,
+    rawData: any,
+  ): Promise<WeatherForecastResponse> {
+    try {
+      //  basic shape check so we do not process garbage payloads
+      if (
+        !rawData ||
+        typeof latitude !== "number" ||
+        typeof longitude !== "number" ||
+        Number.isNaN(latitude) ||
+        Number.isNaN(longitude)
+      ) {
+        return {
+          success: false,
+          message: "Invalid weather payload. Please try again.",
+          errorType: "INVALID_PAYLOAD",
+        };
+      }
+
+      //  load user crops + language (same sources as getForecast)
+      const [profile, preferredCropsRows, user] = await Promise.all([
+        prisma.profile.findUnique({
+          where: { userId },
+          select: {
+            preferredCrops: true,
+          },
+        }),
+        prisma.userPreferredCrop.findMany({
+          where: { userId },
+          select: { cropType: true },
+        }),
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: { language: true },
+        }),
+      ]);
+
+      //  prefer junction table, fall back to profile.preferredCrops
+      const userCropsFromJunction = preferredCropsRows.map((r) => r.cropType);
+      const userCrops =
+        userCropsFromJunction.length > 0
+          ? userCropsFromJunction
+          : profile?.preferredCrops || [];
+
+      const language = (user?.language === "tw" ? "tw" : "en") as "en" | "tw";
+
+      //  reuse existing risk helpers (no Open-Meteo call)
+      const riskInsights = generateDiseaseRiskInsights(
+        rawData,
+        userCrops,
+        language,
+      );
+      const overallSummary = generateOverallSummary(
+        rawData,
+        riskInsights,
+        language,
+      );
+
+      //  still log for history / analytics (not used as a cache for responses)
+      await prisma.weatherRequest.create({
+        data: {
+          userId,
+          latitude,
+          longitude,
+          rawData,
+          riskSummary: { riskInsights, overallSummary },
+        },
+      });
+
+      //  same response shape the app already expects
+      return {
+        success: true,
+        data: {
+          location: { latitude, longitude },
+          current: {
+            ...rawData.current,
+            weatherDescription:
+              weatherCodeMap[rawData.current?.weather_code] || "Unknown",
+          },
+          daily: {
+            ...rawData.daily,
+            weatherDescriptions: (rawData.daily?.weather_code || []).map(
+              (code: number) => weatherCodeMap[code] || "Unknown",
+            ),
+          },
+          riskInsights,
+          overallSummary,
+        },
+      };
+    } catch (error: any) {
+      //  secure client message, detailed log for debugging
+      console.error("Weather enrich error:", {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+      });
+      return {
+        success: false,
+        message:
+          "Unable to process weather data at the moment. Please try again later.",
+        errorType: "WEATHER_ENRICH_FAILED",
       };
     }
   },
