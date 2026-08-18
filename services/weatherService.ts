@@ -30,9 +30,6 @@ const weatherCodeMap: Record<number, string> = {
   // Add more as needed
 };
 
-// NEW ADDITION: Crop-specific risk profiles grounded in Ghana disease literature.
-// Thresholds use a 3-day weighted + 7-day context blend. High is moderately
-// conservative (needs multi-factor evidence) so farmers trust the alerts.
 type RiskLevel = "Low" | "Medium" | "High";
 
 type CropRiskProfile = {
@@ -57,7 +54,7 @@ type CropRiskProfile = {
   };
 };
 
-// NEW ADDITION: Full profiles for all 10 supported crops
+// Full profiles for all 10 supported crops
 const CROP_RISK_PROFILES: Record<string, CropRiskProfile> = {
   MAIZE: {
     primaryDiseases: "Northern Leaf Blight / Gray Leaf Spot / Common Rust",
@@ -341,7 +338,7 @@ const CROP_RISK_PROFILES: Record<string, CropRiskProfile> = {
   },
 };
 
-// NEW ADDITION: Derive multi-day weather features from Open-Meteo daily arrays.
+// Derive multi-day weather features from Open-Meteo daily arrays.
 // Uses a 3-day action window (weighted) plus 7-day context.
 function extractWeatherFeatures(weatherData: any) {
   const daily = weatherData.daily || {};
@@ -389,7 +386,29 @@ function extractWeatherFeatures(weatherData: any) {
   };
 }
 
-// NEW ADDITION: Score a single crop against its profile using the blended features.
+async function fetchOpenMeteo(url: string, retries = 3) {
+  let lastError: any;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await axios.get(url, {
+        timeout: 12000,
+        headers: {
+          "User-Agent": "CropDiseaseApp/1.0 (Ghana farmer weather)",
+          Accept: "application/json",
+        },
+      });
+    } catch (err: any) {
+      lastError = err;
+      console.error(`Open-Meteo attempt ${attempt}/${retries}:`, err.message);
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 800 * attempt)); // simple backoff
+      }
+    }
+  }
+  throw lastError;
+}
+
+// Score a single crop against its profile using the blended features.
 function scoreCropRisk(
   crop: string,
   features: ReturnType<typeof extractWeatherFeatures>,
@@ -613,9 +632,10 @@ export const weatherService = {
         timezone: "auto",
       });
 
-      const response = await axios.get(
+      const response = await fetchOpenMeteo(
         `${OPEN_METEO_BASE}?${params.toString()}`,
       );
+
       const rawData = response.data;
 
       // UPDATED: Prefer richer UserPreferredCrop list; fall back to profile.preferredCrops
@@ -670,16 +690,18 @@ export const weatherService = {
         },
       };
     } catch (error: any) {
-      console.error("Weather service error:", error.message);
+      console.error("Weather service error:", {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
       return {
         success: false,
         message:
           "Unable to fetch weather data at the moment. Please try again later.",
         errorType: "WEATHER_FETCH_FAILED",
       };
-      console.error(
-        "Unable to fetch weather data at the moment. Please try again later.",
-      );
     }
   },
 };
