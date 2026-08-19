@@ -258,12 +258,12 @@ export const communityService = {
       };
     }
 
-    // Check if the current user has liked / saved this post (only if logged in)
     let isLiked = false;
     let isSaved = false;
+    let isFollowingAuthor = false;
 
     if (currentUserId) {
-      const [like, saved] = await Promise.all([
+      const [like, saved, follow] = await Promise.all([
         prisma.postLike.findUnique({
           where: {
             userId_postId: {
@@ -280,10 +280,19 @@ export const communityService = {
             },
           },
         }),
+        prisma.follow.findUnique({
+          where: {
+            followerId_followingId: {
+              followerId: currentUserId,
+              followingId: post.user.id,
+            },
+          },
+        }),
       ]);
 
       isLiked = !!like;
       isSaved = !!saved;
+      isFollowingAuthor = !!follow;
     }
 
     return {
@@ -306,6 +315,9 @@ export const communityService = {
           fullName: post.user.profile?.fullName ?? "Unknown",
           avatarUrl: post.user.profile?.avatarUrl ?? null,
           reputationScore: post.user.profile?.reputationScore ?? 0,
+          ...(currentUserId && {
+            isFollowing: isFollowingAuthor,
+          }),
         },
         tags: post.tags.map((pt) => ({
           id: pt.tag.id,
@@ -546,11 +558,14 @@ export const communityService = {
 
     let likedSet = new Set<string>();
     let savedSet = new Set<string>();
+    let followingSet = new Set<string>();
 
     if (currentUserId && posts.length > 0) {
       const postIds = posts.map((p) => p.id);
+      // unique author ids on this page for one follow query
+      const authorIds = [...new Set(posts.map((p) => p.user.id))];
 
-      const [likes, saves] = await Promise.all([
+      const [likes, saves, follows] = await Promise.all([
         prisma.postLike.findMany({
           where: {
             userId: currentUserId,
@@ -565,15 +580,24 @@ export const communityService = {
           },
           select: { postId: true },
         }),
+        // follows for authors on this page only
+        prisma.follow.findMany({
+          where: {
+            followerId: currentUserId,
+            followingId: { in: authorIds },
+          },
+          select: { followingId: true },
+        }),
       ]);
 
       likedSet = new Set(likes.map((l) => l.postId));
       savedSet = new Set(saves.map((s) => s.postId));
+      followingSet = new Set(follows.map((f) => f.followingId));
     }
 
     const data = posts.map((post) => ({
       id: post.id,
-      content: post.content, // full content - frontend truncates if needed
+      content: post.content,
       imageUrls: post.imageUrls,
       region: post.region,
       cropType: post.cropType,
@@ -587,6 +611,9 @@ export const communityService = {
         fullName: post.user.profile?.fullName ?? "Unknown",
         avatarUrl: post.user.profile?.avatarUrl ?? null,
         reputationScore: post.user.profile?.reputationScore ?? 0,
+        ...(currentUserId && {
+          isFollowing: followingSet.has(post.user.id),
+        }),
       },
       tags: post.tags.map((pt) => ({
         id: pt.tag.id,
