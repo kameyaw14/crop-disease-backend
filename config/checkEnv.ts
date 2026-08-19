@@ -30,6 +30,7 @@ const requiredVars = [
   // "MAGIC_LINK_EXPIRY_MINUTES",
   "MAX_IMAGE_SIZE_MB",
   "GHANANLP_API_KEY",
+  "ARKESEL_API_KEY",
 ];
 
 export function checkRequiredEnv() {

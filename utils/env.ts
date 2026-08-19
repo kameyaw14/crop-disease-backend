@@ -62,6 +62,8 @@ export const env = {
   INTRON_API_KEY: process.env.INTRON_API_KEY,
   GHANANLP_API_KEY: process.env.GHANANLP_API_KEY,
 
+  ARKESEL_API_KEY: process.env.ARKESEL_API_KEY,
+
   //   //paystack
   //   PAYSTACK_TEST_SECRET_KEY: process.env.PAYSTACK_TEST_SECRET_KEY,
   //   PAYSTACK_TEST_PUBLIC_KEY: process.env.PAYSTACK_TEST_PUBLIC_KEY,

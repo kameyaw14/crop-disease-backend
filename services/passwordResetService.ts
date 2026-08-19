@@ -1,5 +1,5 @@
 // services/passwordResetService.ts
-// @ts-nocheck
+//// @ts-nocheck
 
 import bcrypt from "bcrypt";
 import { prisma } from "../config/connectDb.js";
@@ -10,16 +10,12 @@ import {
   verifyResetOtpSchema,
   resetPasswordSchema,
 } from "../schema/authSchema.js";
+import { smsService } from "./smsService.js";
 
 // How long an OTP stays valid after it is issued
 const OTP_EXPIRY_MINUTES = 10;
 
 export const passwordResetService = {
-  // ----------------------------------------------------------
-  // Step 1: user submits their phone number.
-  // Doubles as "resend OTP" — calling this again invalidates all
-  // previous unused OTPs and issues a fresh one.
-  // ----------------------------------------------------------
   async forgotPassword(data: any) {
     const validated = forgotPasswordSchema.parse(data);
 
@@ -72,11 +68,19 @@ export const passwordResetService = {
       },
     });
 
-    // TODO: replace this with an Arkesel SMS API call.
     // OTP is logged to server console only during development.
     console.log(
       `📱 OTP for ${normalizedPhone}: ${otp} (expires in ${OTP_EXPIRY_MINUTES} min)`,
     );
+
+    try {
+      await smsService.sendSms({
+        to: normalizedPhone,
+        message: `Your Crop Guardian verification code is ${otp}. It expires in ${OTP_EXPIRY_MINUTES} minutes. Do not share this code.`,
+      });
+    } catch (smsError: any) {
+      console.error("Failed to send OTP SMS via Arkesel:", smsError.message);
+    }
 
     return {
       success: true,
@@ -84,11 +88,6 @@ export const passwordResetService = {
     };
   },
 
-  // ----------------------------------------------------------
-  // Step 2: user submits phone number + the 6-digit OTP they received.
-  // On success, marks the user as verified and returns a short-lived
-  // reset token that step 3 requires.
-  // ----------------------------------------------------------
   async verifyResetOtp(data: any) {
     const validated = verifyResetOtpSchema.parse(data);
 
@@ -155,9 +154,6 @@ export const passwordResetService = {
     };
   },
 
-  // ----------------------------------------------------------
-  // Step 3: user submits the reset token (from step 2) + new password.
-  // ----------------------------------------------------------
   async resetPassword(data: any) {
     const validated = resetPasswordSchema.parse(data);
 
