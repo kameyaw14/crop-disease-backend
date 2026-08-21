@@ -3,6 +3,7 @@
 import axios from "axios";
 import { prisma } from "../config/connectDb.js";
 import type { WeatherForecastResponse } from "../types/index.js";
+import { subscriptionService } from "./subscriptionService.js";
 
 const OPEN_METEO_BASE = "https://api.open-meteo.com/v1/forecast";
 
@@ -656,7 +657,6 @@ export const weatherService = {
         language,
       );
 
-      // NO CHANGES to logging shape
       await prisma.weatherRequest.create({
         data: {
           userId,
@@ -666,6 +666,38 @@ export const weatherService = {
           riskSummary: { riskInsights, overallSummary },
         },
       });
+
+      const hasInsights = await subscriptionService.canSeeCropInsights(userId);
+
+      if (!hasInsights) {
+        // weather-only summary without crop disease risk names
+        const temp = Math.round(rawData.current?.temperature_2m ?? 0);
+        const humidity = rawData.current?.relative_humidity_2m ?? 0;
+        const weatherOnlySummary =
+          language === "tw"
+            ? `Seesei temperature yɛ bɛyɛ ${temp}°C na humidity yɛ ${humidity}%. Hwɛ wɔ weather forecast no so.`
+            : `Current temperature is around ${temp}°C with ${humidity}% humidity. See the forecast for the next days.`;
+
+        return {
+          success: true,
+          data: {
+            location: { latitude, longitude },
+            current: {
+              ...rawData.current,
+              weatherDescription:
+                weatherCodeMap[rawData.current?.weather_code] || "Unknown",
+            },
+            daily: {
+              ...rawData.daily,
+              weatherDescriptions: rawData.daily.weather_code.map(
+                (code: number) => weatherCodeMap[code] || "Unknown",
+              ),
+            },
+            // riskInsights intentionally omitted for free users
+            overallSummary: weatherOnlySummary,
+          },
+        };
+      }
 
       return {
         success: true,
@@ -773,6 +805,38 @@ export const weatherService = {
           riskSummary: { riskInsights, overallSummary },
         },
       });
+
+      const hasInsights = await subscriptionService.canSeeCropInsights(userId);
+
+      if (!hasInsights) {
+        //  weather-only summary without crop disease risk names
+        const temp = Math.round(rawData.current?.temperature_2m ?? 0);
+        const humidity = rawData.current?.relative_humidity_2m ?? 0;
+        const weatherOnlySummary =
+          language === "tw"
+            ? `Seesei temperature yɛ bɛyɛ ${temp}°C na humidity yɛ ${humidity}%. Hwɛ wɔ weather forecast no so.`
+            : `Current temperature is around ${temp}°C with ${humidity}% humidity. See the forecast for the next days.`;
+
+        return {
+          success: true,
+          data: {
+            location: { latitude, longitude },
+            current: {
+              ...rawData.current,
+              weatherDescription:
+                weatherCodeMap[rawData.current?.weather_code] || "Unknown",
+            },
+            daily: {
+              ...rawData.daily,
+              weatherDescriptions: (rawData.daily?.weather_code || []).map(
+                (code: number) => weatherCodeMap[code] || "Unknown",
+              ),
+            },
+            // riskInsights intentionally omitted for free users
+            overallSummary: weatherOnlySummary,
+          },
+        };
+      }
 
       //  same response shape the app already expects
       return {

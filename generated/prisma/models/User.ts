@@ -240,6 +240,7 @@ export type UserWhereInput = {
   commentMarks?: Prisma.CommentMarkListRelationFilter
   tipServings?: Prisma.UserTipServingListRelationFilter
   dailyTipsCaches?: Prisma.UserDailyTipsCacheListRelationFilter
+  subscriptions?: Prisma.UserSubscriptionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -271,6 +272,7 @@ export type UserOrderByWithRelationInput = {
   commentMarks?: Prisma.CommentMarkOrderByRelationAggregateInput
   tipServings?: Prisma.UserTipServingOrderByRelationAggregateInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheOrderByRelationAggregateInput
+  subscriptions?: Prisma.UserSubscriptionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -305,6 +307,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   commentMarks?: Prisma.CommentMarkListRelationFilter
   tipServings?: Prisma.UserTipServingListRelationFilter
   dailyTipsCaches?: Prisma.UserDailyTipsCacheListRelationFilter
+  subscriptions?: Prisma.UserSubscriptionListRelationFilter
 }, "id" | "email" | "phoneNumber">
 
 export type UserOrderByWithAggregationInput = {
@@ -368,6 +371,7 @@ export type UserCreateInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -399,6 +403,7 @@ export type UserUncheckedCreateInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -430,6 +435,7 @@ export type UserUpdateInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -461,6 +467,7 @@ export type UserUncheckedUpdateInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -825,6 +832,20 @@ export type UserUpdateOneRequiredWithoutDailyTipsCachesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDailyTipsCachesInput, Prisma.UserUpdateWithoutDailyTipsCachesInput>, Prisma.UserUncheckedUpdateWithoutDailyTipsCachesInput>
 }
 
+export type UserCreateNestedOneWithoutSubscriptionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSubscriptionsInput, Prisma.UserUncheckedCreateWithoutSubscriptionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubscriptionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSubscriptionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSubscriptionsInput, Prisma.UserUncheckedCreateWithoutSubscriptionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubscriptionsInput
+  upsert?: Prisma.UserUpsertWithoutSubscriptionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSubscriptionsInput, Prisma.UserUpdateWithoutSubscriptionsInput>, Prisma.UserUncheckedUpdateWithoutSubscriptionsInput>
+}
+
 export type UserCreateWithoutProfileInput = {
   id?: string
   email: string
@@ -853,6 +874,7 @@ export type UserCreateWithoutProfileInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProfileInput = {
@@ -883,6 +905,7 @@ export type UserUncheckedCreateWithoutProfileInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProfileInput = {
@@ -929,6 +952,7 @@ export type UserUpdateWithoutProfileInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProfileInput = {
@@ -959,6 +983,7 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserPreferredCropsInput = {
@@ -989,6 +1014,7 @@ export type UserCreateWithoutUserPreferredCropsInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserPreferredCropsInput = {
@@ -1019,6 +1045,7 @@ export type UserUncheckedCreateWithoutUserPreferredCropsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserPreferredCropsInput = {
@@ -1065,6 +1092,7 @@ export type UserUpdateWithoutUserPreferredCropsInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserPreferredCropsInput = {
@@ -1095,6 +1123,7 @@ export type UserUncheckedUpdateWithoutUserPreferredCropsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDetectionsInput = {
@@ -1125,6 +1154,7 @@ export type UserCreateWithoutDetectionsInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDetectionsInput = {
@@ -1155,6 +1185,7 @@ export type UserUncheckedCreateWithoutDetectionsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDetectionsInput = {
@@ -1201,6 +1232,7 @@ export type UserUpdateWithoutDetectionsInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDetectionsInput = {
@@ -1231,6 +1263,7 @@ export type UserUncheckedUpdateWithoutDetectionsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCachedDiagnosesInput = {
@@ -1261,6 +1294,7 @@ export type UserCreateWithoutCachedDiagnosesInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCachedDiagnosesInput = {
@@ -1291,6 +1325,7 @@ export type UserUncheckedCreateWithoutCachedDiagnosesInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCachedDiagnosesInput = {
@@ -1337,6 +1372,7 @@ export type UserUpdateWithoutCachedDiagnosesInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCachedDiagnosesInput = {
@@ -1367,6 +1403,7 @@ export type UserUncheckedUpdateWithoutCachedDiagnosesInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWeatherRequestsInput = {
@@ -1397,6 +1434,7 @@ export type UserCreateWithoutWeatherRequestsInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWeatherRequestsInput = {
@@ -1427,6 +1465,7 @@ export type UserUncheckedCreateWithoutWeatherRequestsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWeatherRequestsInput = {
@@ -1473,6 +1512,7 @@ export type UserUpdateWithoutWeatherRequestsInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWeatherRequestsInput = {
@@ -1503,6 +1543,7 @@ export type UserUncheckedUpdateWithoutWeatherRequestsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1533,6 +1574,7 @@ export type UserCreateWithoutNotificationsInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1563,6 +1605,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1609,6 +1652,7 @@ export type UserUpdateWithoutNotificationsInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1639,6 +1683,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPushTokensInput = {
@@ -1669,6 +1714,7 @@ export type UserCreateWithoutPushTokensInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPushTokensInput = {
@@ -1699,6 +1745,7 @@ export type UserUncheckedCreateWithoutPushTokensInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPushTokensInput = {
@@ -1745,6 +1792,7 @@ export type UserUpdateWithoutPushTokensInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushTokensInput = {
@@ -1775,6 +1823,7 @@ export type UserUncheckedUpdateWithoutPushTokensInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetOTPsInput = {
@@ -1805,6 +1854,7 @@ export type UserCreateWithoutPasswordResetOTPsInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetOTPsInput = {
@@ -1835,6 +1885,7 @@ export type UserUncheckedCreateWithoutPasswordResetOTPsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetOTPsInput = {
@@ -1881,6 +1932,7 @@ export type UserUpdateWithoutPasswordResetOTPsInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetOTPsInput = {
@@ -1911,6 +1963,7 @@ export type UserUncheckedUpdateWithoutPasswordResetOTPsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPostsInput = {
@@ -1941,6 +1994,7 @@ export type UserCreateWithoutPostsInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPostsInput = {
@@ -1971,6 +2025,7 @@ export type UserUncheckedCreateWithoutPostsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPostsInput = {
@@ -2017,6 +2072,7 @@ export type UserUpdateWithoutPostsInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPostsInput = {
@@ -2047,6 +2103,7 @@ export type UserUncheckedUpdateWithoutPostsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCommentsInput = {
@@ -2077,6 +2134,7 @@ export type UserCreateWithoutCommentsInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCommentsInput = {
@@ -2107,6 +2165,7 @@ export type UserUncheckedCreateWithoutCommentsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCommentsInput = {
@@ -2153,6 +2212,7 @@ export type UserUpdateWithoutCommentsInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommentsInput = {
@@ -2183,6 +2243,7 @@ export type UserUncheckedUpdateWithoutCommentsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPostLikesInput = {
@@ -2213,6 +2274,7 @@ export type UserCreateWithoutPostLikesInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPostLikesInput = {
@@ -2243,6 +2305,7 @@ export type UserUncheckedCreateWithoutPostLikesInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPostLikesInput = {
@@ -2289,6 +2352,7 @@ export type UserUpdateWithoutPostLikesInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPostLikesInput = {
@@ -2319,6 +2383,7 @@ export type UserUncheckedUpdateWithoutPostLikesInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSavedPostsInput = {
@@ -2349,6 +2414,7 @@ export type UserCreateWithoutSavedPostsInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSavedPostsInput = {
@@ -2379,6 +2445,7 @@ export type UserUncheckedCreateWithoutSavedPostsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSavedPostsInput = {
@@ -2425,6 +2492,7 @@ export type UserUpdateWithoutSavedPostsInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSavedPostsInput = {
@@ -2455,6 +2523,7 @@ export type UserUncheckedUpdateWithoutSavedPostsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFollowingInput = {
@@ -2485,6 +2554,7 @@ export type UserCreateWithoutFollowingInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFollowingInput = {
@@ -2515,6 +2585,7 @@ export type UserUncheckedCreateWithoutFollowingInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFollowingInput = {
@@ -2550,6 +2621,7 @@ export type UserCreateWithoutFollowersInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFollowersInput = {
@@ -2580,6 +2652,7 @@ export type UserUncheckedCreateWithoutFollowersInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFollowersInput = {
@@ -2626,6 +2699,7 @@ export type UserUpdateWithoutFollowingInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowingInput = {
@@ -2656,6 +2730,7 @@ export type UserUncheckedUpdateWithoutFollowingInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutFollowersInput = {
@@ -2697,6 +2772,7 @@ export type UserUpdateWithoutFollowersInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowersInput = {
@@ -2727,6 +2803,7 @@ export type UserUncheckedUpdateWithoutFollowersInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTagFollowsInput = {
@@ -2757,6 +2834,7 @@ export type UserCreateWithoutTagFollowsInput = {
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTagFollowsInput = {
@@ -2787,6 +2865,7 @@ export type UserUncheckedCreateWithoutTagFollowsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTagFollowsInput = {
@@ -2833,6 +2912,7 @@ export type UserUpdateWithoutTagFollowsInput = {
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTagFollowsInput = {
@@ -2863,6 +2943,7 @@ export type UserUncheckedUpdateWithoutTagFollowsInput = {
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCommentMarksInput = {
@@ -2893,6 +2974,7 @@ export type UserCreateWithoutCommentMarksInput = {
   tagFollows?: Prisma.TagFollowCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCommentMarksInput = {
@@ -2923,6 +3005,7 @@ export type UserUncheckedCreateWithoutCommentMarksInput = {
   tagFollows?: Prisma.TagFollowUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCommentMarksInput = {
@@ -2969,6 +3052,7 @@ export type UserUpdateWithoutCommentMarksInput = {
   tagFollows?: Prisma.TagFollowUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommentMarksInput = {
@@ -2999,6 +3083,7 @@ export type UserUncheckedUpdateWithoutCommentMarksInput = {
   tagFollows?: Prisma.TagFollowUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTipServingsInput = {
@@ -3029,6 +3114,7 @@ export type UserCreateWithoutTipServingsInput = {
   tagFollows?: Prisma.TagFollowCreateNestedManyWithoutUserInput
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTipServingsInput = {
@@ -3059,6 +3145,7 @@ export type UserUncheckedCreateWithoutTipServingsInput = {
   tagFollows?: Prisma.TagFollowUncheckedCreateNestedManyWithoutUserInput
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTipServingsInput = {
@@ -3105,6 +3192,7 @@ export type UserUpdateWithoutTipServingsInput = {
   tagFollows?: Prisma.TagFollowUpdateManyWithoutUserNestedInput
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTipServingsInput = {
@@ -3135,6 +3223,7 @@ export type UserUncheckedUpdateWithoutTipServingsInput = {
   tagFollows?: Prisma.TagFollowUncheckedUpdateManyWithoutUserNestedInput
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDailyTipsCachesInput = {
@@ -3165,6 +3254,7 @@ export type UserCreateWithoutDailyTipsCachesInput = {
   tagFollows?: Prisma.TagFollowCreateNestedManyWithoutUserInput
   commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDailyTipsCachesInput = {
@@ -3195,6 +3285,7 @@ export type UserUncheckedCreateWithoutDailyTipsCachesInput = {
   tagFollows?: Prisma.TagFollowUncheckedCreateNestedManyWithoutUserInput
   commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
   tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDailyTipsCachesInput = {
@@ -3241,6 +3332,7 @@ export type UserUpdateWithoutDailyTipsCachesInput = {
   tagFollows?: Prisma.TagFollowUpdateManyWithoutUserNestedInput
   commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDailyTipsCachesInput = {
@@ -3271,6 +3363,147 @@ export type UserUncheckedUpdateWithoutDailyTipsCachesInput = {
   tagFollows?: Prisma.TagFollowUncheckedUpdateManyWithoutUserNestedInput
   commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
   tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.UserSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSubscriptionsInput = {
+  id?: string
+  email: string
+  password: string
+  role?: $Enums.UserRole
+  phoneNumber: string
+  isOnboarded?: boolean
+  isEmailVerified?: boolean
+  language?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
+  detections?: Prisma.DetectionCreateNestedManyWithoutUserInput
+  userPreferredCrops?: Prisma.UserPreferredCropCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  cachedDiagnoses?: Prisma.CachedDiagnosisCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenCreateNestedManyWithoutUserInput
+  posts?: Prisma.PostCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentCreateNestedManyWithoutUserInput
+  postLikes?: Prisma.PostLikeCreateNestedManyWithoutUserInput
+  savedPosts?: Prisma.SavedPostCreateNestedManyWithoutUserInput
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  tagFollows?: Prisma.TagFollowCreateNestedManyWithoutUserInput
+  commentMarks?: Prisma.CommentMarkCreateNestedManyWithoutUserInput
+  tipServings?: Prisma.UserTipServingCreateNestedManyWithoutUserInput
+  dailyTipsCaches?: Prisma.UserDailyTipsCacheCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSubscriptionsInput = {
+  id?: string
+  email: string
+  password: string
+  role?: $Enums.UserRole
+  phoneNumber: string
+  isOnboarded?: boolean
+  isEmailVerified?: boolean
+  language?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
+  detections?: Prisma.DetectionUncheckedCreateNestedManyWithoutUserInput
+  userPreferredCrops?: Prisma.UserPreferredCropUncheckedCreateNestedManyWithoutUserInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedCreateNestedManyWithoutUserInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenUncheckedCreateNestedManyWithoutUserInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutUserInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutUserInput
+  postLikes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutUserInput
+  savedPosts?: Prisma.SavedPostUncheckedCreateNestedManyWithoutUserInput
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  tagFollows?: Prisma.TagFollowUncheckedCreateNestedManyWithoutUserInput
+  commentMarks?: Prisma.CommentMarkUncheckedCreateNestedManyWithoutUserInput
+  tipServings?: Prisma.UserTipServingUncheckedCreateNestedManyWithoutUserInput
+  dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSubscriptionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSubscriptionsInput, Prisma.UserUncheckedCreateWithoutSubscriptionsInput>
+}
+
+export type UserUpsertWithoutSubscriptionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSubscriptionsInput, Prisma.UserUncheckedUpdateWithoutSubscriptionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSubscriptionsInput, Prisma.UserUncheckedCreateWithoutSubscriptionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSubscriptionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSubscriptionsInput, Prisma.UserUncheckedUpdateWithoutSubscriptionsInput>
+}
+
+export type UserUpdateWithoutSubscriptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
+  detections?: Prisma.DetectionUpdateManyWithoutUserNestedInput
+  userPreferredCrops?: Prisma.UserPreferredCropUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  cachedDiagnoses?: Prisma.CachedDiagnosisUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUpdateManyWithoutUserNestedInput
+  posts?: Prisma.PostUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutUserNestedInput
+  postLikes?: Prisma.PostLikeUpdateManyWithoutUserNestedInput
+  savedPosts?: Prisma.SavedPostUpdateManyWithoutUserNestedInput
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  tagFollows?: Prisma.TagFollowUpdateManyWithoutUserNestedInput
+  commentMarks?: Prisma.CommentMarkUpdateManyWithoutUserNestedInput
+  tipServings?: Prisma.UserTipServingUpdateManyWithoutUserNestedInput
+  dailyTipsCaches?: Prisma.UserDailyTipsCacheUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSubscriptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
+  detections?: Prisma.DetectionUncheckedUpdateManyWithoutUserNestedInput
+  userPreferredCrops?: Prisma.UserPreferredCropUncheckedUpdateManyWithoutUserNestedInput
+  weatherRequests?: Prisma.WeatherRequestUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  cachedDiagnoses?: Prisma.CachedDiagnosisUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetOTPs?: Prisma.PasswordResetOTPUncheckedUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUncheckedUpdateManyWithoutUserNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutUserNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutUserNestedInput
+  postLikes?: Prisma.PostLikeUncheckedUpdateManyWithoutUserNestedInput
+  savedPosts?: Prisma.SavedPostUncheckedUpdateManyWithoutUserNestedInput
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  tagFollows?: Prisma.TagFollowUncheckedUpdateManyWithoutUserNestedInput
+  commentMarks?: Prisma.CommentMarkUncheckedUpdateManyWithoutUserNestedInput
+  tipServings?: Prisma.UserTipServingUncheckedUpdateManyWithoutUserNestedInput
+  dailyTipsCaches?: Prisma.UserDailyTipsCacheUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -3296,6 +3529,7 @@ export type UserCountOutputType = {
   commentMarks: number
   tipServings: number
   dailyTipsCaches: number
+  subscriptions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3316,6 +3550,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   commentMarks?: boolean | UserCountOutputTypeCountCommentMarksArgs
   tipServings?: boolean | UserCountOutputTypeCountTipServingsArgs
   dailyTipsCaches?: boolean | UserCountOutputTypeCountDailyTipsCachesArgs
+  subscriptions?: boolean | UserCountOutputTypeCountSubscriptionsArgs
 }
 
 /**
@@ -3447,6 +3682,13 @@ export type UserCountOutputTypeCountDailyTipsCachesArgs<ExtArgs extends runtime.
   where?: Prisma.UserDailyTipsCacheWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserSubscriptionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3477,6 +3719,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   commentMarks?: boolean | Prisma.User$commentMarksArgs<ExtArgs>
   tipServings?: boolean | Prisma.User$tipServingsArgs<ExtArgs>
   dailyTipsCaches?: boolean | Prisma.User$dailyTipsCachesArgs<ExtArgs>
+  subscriptions?: boolean | Prisma.User$subscriptionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -3539,6 +3782,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   commentMarks?: boolean | Prisma.User$commentMarksArgs<ExtArgs>
   tipServings?: boolean | Prisma.User$tipServingsArgs<ExtArgs>
   dailyTipsCaches?: boolean | Prisma.User$dailyTipsCachesArgs<ExtArgs>
+  subscriptions?: boolean | Prisma.User$subscriptionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -3565,6 +3809,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     commentMarks: Prisma.$CommentMarkPayload<ExtArgs>[]
     tipServings: Prisma.$UserTipServingPayload<ExtArgs>[]
     dailyTipsCaches: Prisma.$UserDailyTipsCachePayload<ExtArgs>[]
+    subscriptions: Prisma.$UserSubscriptionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3989,6 +4234,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   commentMarks<T extends Prisma.User$commentMarksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$commentMarksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentMarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tipServings<T extends Prisma.User$tipServingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tipServingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserTipServingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dailyTipsCaches<T extends Prisma.User$dailyTipsCachesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$dailyTipsCachesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserDailyTipsCachePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  subscriptions<T extends Prisma.User$subscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4845,6 +5091,30 @@ export type User$dailyTipsCachesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.UserDailyTipsCacheScalarFieldEnum | Prisma.UserDailyTipsCacheScalarFieldEnum[]
+}
+
+/**
+ * User.subscriptions
+ */
+export type User$subscriptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserSubscription
+   */
+  select?: Prisma.UserSubscriptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserSubscription
+   */
+  omit?: Prisma.UserSubscriptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserSubscriptionInclude<ExtArgs> | null
+  where?: Prisma.UserSubscriptionWhereInput
+  orderBy?: Prisma.UserSubscriptionOrderByWithRelationInput | Prisma.UserSubscriptionOrderByWithRelationInput[]
+  cursor?: Prisma.UserSubscriptionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserSubscriptionScalarFieldEnum | Prisma.UserSubscriptionScalarFieldEnum[]
 }
 
 /**

@@ -71,7 +71,9 @@ export const ModelName = {
   CommentMark: 'CommentMark',
   DailyTip: 'DailyTip',
   UserTipServing: 'UserTipServing',
-  UserDailyTipsCache: 'UserDailyTipsCache'
+  UserDailyTipsCache: 'UserDailyTipsCache',
+  SubscriptionPlan: 'SubscriptionPlan',
+  UserSubscription: 'UserSubscription'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -372,6 +374,39 @@ export const UserDailyTipsCacheScalarFieldEnum = {
 } as const
 
 export type UserDailyTipsCacheScalarFieldEnum = (typeof UserDailyTipsCacheScalarFieldEnum)[keyof typeof UserDailyTipsCacheScalarFieldEnum]
+
+
+export const SubscriptionPlanScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  priceGhs: 'priceGhs',
+  durationDays: 'durationDays',
+  scanLimit: 'scanLimit',
+  hasCropInsights: 'hasCropInsights',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SubscriptionPlanScalarFieldEnum = (typeof SubscriptionPlanScalarFieldEnum)[keyof typeof SubscriptionPlanScalarFieldEnum]
+
+
+export const UserSubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  planId: 'planId',
+  status: 'status',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  source: 'source',
+  externalRef: 'externalRef',
+  amountGhs: 'amountGhs',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserSubscriptionScalarFieldEnum = (typeof UserSubscriptionScalarFieldEnum)[keyof typeof UserSubscriptionScalarFieldEnum]
 
 
 export const SortOrder = {

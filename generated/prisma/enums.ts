@@ -79,3 +79,21 @@ export const CommentMarkType = {
 } as const
 
 export type CommentMarkType = (typeof CommentMarkType)[keyof typeof CommentMarkType]
+
+
+export const SubscriptionStatus = {
+  ACTIVE: 'ACTIVE',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
+
+
+export const SubscriptionSource = {
+  DEMO: 'DEMO',
+  PAYSTACK: 'PAYSTACK',
+  MANUAL: 'MANUAL'
+} as const
+
+export type SubscriptionSource = (typeof SubscriptionSource)[keyof typeof SubscriptionSource]

@@ -53,10 +53,11 @@ export type DetectionError = {
     | "INVALID_IMAGE"
     | "DEMO_MODE"
     | "AI_UNAVAILABLE"
-    | "NO_PLANT_DETECTED";
+    | "NO_PLANT_DETECTED"
+    | "SCAN_LIMIT_REACHED";
   message: string;
   detectedCrop?: string;
-  reason: string;
+  reason?: string;
 };
 
 export type DetectionResponse = DetectionSuccess | DetectionError;

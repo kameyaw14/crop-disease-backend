@@ -404,7 +404,9 @@ export const ModelName = {
   CommentMark: 'CommentMark',
   DailyTip: 'DailyTip',
   UserTipServing: 'UserTipServing',
-  UserDailyTipsCache: 'UserDailyTipsCache'
+  UserDailyTipsCache: 'UserDailyTipsCache',
+  SubscriptionPlan: 'SubscriptionPlan',
+  UserSubscription: 'UserSubscription'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -420,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "profile" | "userPreferredCrop" | "detection" | "cachedDiagnosis" | "weatherRequest" | "notification" | "pushToken" | "passwordResetOTP" | "tag" | "post" | "postTag" | "comment" | "postLike" | "savedPost" | "follow" | "tagFollow" | "commentMark" | "dailyTip" | "userTipServing" | "userDailyTipsCache"
+    modelProps: "user" | "profile" | "userPreferredCrop" | "detection" | "cachedDiagnosis" | "weatherRequest" | "notification" | "pushToken" | "passwordResetOTP" | "tag" | "post" | "postTag" | "comment" | "postLike" | "savedPost" | "follow" | "tagFollow" | "commentMark" | "dailyTip" | "userTipServing" | "userDailyTipsCache" | "subscriptionPlan" | "userSubscription"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1978,6 +1980,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SubscriptionPlan: {
+      payload: Prisma.$SubscriptionPlanPayload<ExtArgs>
+      fields: Prisma.SubscriptionPlanFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SubscriptionPlanFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SubscriptionPlanFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        findFirst: {
+          args: Prisma.SubscriptionPlanFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SubscriptionPlanFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        findMany: {
+          args: Prisma.SubscriptionPlanFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>[]
+        }
+        create: {
+          args: Prisma.SubscriptionPlanCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        createMany: {
+          args: Prisma.SubscriptionPlanCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SubscriptionPlanCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>[]
+        }
+        delete: {
+          args: Prisma.SubscriptionPlanDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        update: {
+          args: Prisma.SubscriptionPlanUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        deleteMany: {
+          args: Prisma.SubscriptionPlanDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SubscriptionPlanUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SubscriptionPlanUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>[]
+        }
+        upsert: {
+          args: Prisma.SubscriptionPlanUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        aggregate: {
+          args: Prisma.SubscriptionPlanAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSubscriptionPlan>
+        }
+        groupBy: {
+          args: Prisma.SubscriptionPlanGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SubscriptionPlanGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SubscriptionPlanCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SubscriptionPlanCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserSubscription: {
+      payload: Prisma.$UserSubscriptionPayload<ExtArgs>
+      fields: Prisma.UserSubscriptionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserSubscriptionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserSubscriptionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload>
+        }
+        findFirst: {
+          args: Prisma.UserSubscriptionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserSubscriptionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload>
+        }
+        findMany: {
+          args: Prisma.UserSubscriptionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload>[]
+        }
+        create: {
+          args: Prisma.UserSubscriptionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload>
+        }
+        createMany: {
+          args: Prisma.UserSubscriptionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserSubscriptionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload>[]
+        }
+        delete: {
+          args: Prisma.UserSubscriptionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload>
+        }
+        update: {
+          args: Prisma.UserSubscriptionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserSubscriptionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserSubscriptionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserSubscriptionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserSubscriptionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSubscriptionPayload>
+        }
+        aggregate: {
+          args: Prisma.UserSubscriptionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserSubscription>
+        }
+        groupBy: {
+          args: Prisma.UserSubscriptionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserSubscriptionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserSubscriptionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserSubscriptionCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2301,6 +2451,39 @@ export const UserDailyTipsCacheScalarFieldEnum = {
 export type UserDailyTipsCacheScalarFieldEnum = (typeof UserDailyTipsCacheScalarFieldEnum)[keyof typeof UserDailyTipsCacheScalarFieldEnum]
 
 
+export const SubscriptionPlanScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  priceGhs: 'priceGhs',
+  durationDays: 'durationDays',
+  scanLimit: 'scanLimit',
+  hasCropInsights: 'hasCropInsights',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SubscriptionPlanScalarFieldEnum = (typeof SubscriptionPlanScalarFieldEnum)[keyof typeof SubscriptionPlanScalarFieldEnum]
+
+
+export const UserSubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  planId: 'planId',
+  status: 'status',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  source: 'source',
+  externalRef: 'externalRef',
+  amountGhs: 'amountGhs',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserSubscriptionScalarFieldEnum = (typeof UserSubscriptionScalarFieldEnum)[keyof typeof UserSubscriptionScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2529,6 +2712,34 @@ export type EnumCommentMarkTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$
 export type ListEnumCommentMarkTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CommentMarkType[]'>
     
 
+
+/**
+ * Reference to a field of type 'SubscriptionStatus'
+ */
+export type EnumSubscriptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'SubscriptionStatus[]'
+ */
+export type ListEnumSubscriptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SubscriptionSource'
+ */
+export type EnumSubscriptionSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionSource'>
+    
+
+
+/**
+ * Reference to a field of type 'SubscriptionSource[]'
+ */
+export type ListEnumSubscriptionSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionSource[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -2660,6 +2871,8 @@ export type GlobalOmitConfig = {
   dailyTip?: Prisma.DailyTipOmit
   userTipServing?: Prisma.UserTipServingOmit
   userDailyTipsCache?: Prisma.UserDailyTipsCacheOmit
+  subscriptionPlan?: Prisma.SubscriptionPlanOmit
+  userSubscription?: Prisma.UserSubscriptionOmit
 }
 
 /* Types for Logging */

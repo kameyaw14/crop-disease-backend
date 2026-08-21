@@ -18,6 +18,7 @@ import ttsRouter from "./routes/ttsRoutes.js";
 import { startAlertCron } from "./utils/cron.js";
 import communityRouter from "./routes/communityRoutes.js";
 import tipRouter from "./routes/tipRoutes.js";
+import subscriptionRouter from "./routes/subscriptionRoutes.js";
 // import { testTtsController } from "./contollers/testController.js";
 
 checkRequiredEnv();
@@ -73,6 +74,7 @@ app.use("/api/notifications", notificationRouter);
 app.use("/api/tts", ttsRouter);
 app.use("/api/community", communityRouter);
 app.use("/api/tips", tipRouter);
+app.use("/api/subscribe", subscriptionRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -105,7 +107,7 @@ const startServer = async () => {
       console.log(`Server running in ${env.MODE || "dev"} mode`);
       console.log(`Server is running on http://localhost:${PORT}`);
       console.log(`Allowed client URL: ${env.CLIENT_URL}`);
-      
+
       startAlertCron();
     });
   } catch (error) {

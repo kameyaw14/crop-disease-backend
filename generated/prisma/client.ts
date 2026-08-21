@@ -146,3 +146,13 @@ export type UserTipServing = Prisma.UserTipServingModel
  * 
  */
 export type UserDailyTipsCache = Prisma.UserDailyTipsCacheModel
+/**
+ * Model SubscriptionPlan
+ * 
+ */
+export type SubscriptionPlan = Prisma.SubscriptionPlanModel
+/**
+ * Model UserSubscription
+ * 
+ */
+export type UserSubscription = Prisma.UserSubscriptionModel

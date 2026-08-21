@@ -24,6 +24,7 @@ import {
   PHASH_SIMILARITY_THRESHOLD,
 } from "../utils/pHash.js";
 import { cropService } from "./cropService.js";
+import { subscriptionService } from "./subscriptionService.js";
 
 //Helper to create SHA-256 hash
 function generateImageHash(buffer: Buffer): string {
@@ -105,6 +106,18 @@ export async function detectDisease(
   isDemoMode: boolean = false,
   isFreeScan: boolean = false,
 ): Promise<DetectionResponse> {
+  const access = await subscriptionService.canDetect(userId);
+  if (!access.allowed) {
+    return {
+      success: false,
+      errorType: "SCAN_LIMIT_REACHED",
+      message:
+        access.message ||
+        "You have used your 5 free scans for this month. Upgrade to continue.",
+      reason: "FREE_SCAN_QUOTA_EXCEEDED",
+    };
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { language: true },

@@ -68,6 +68,18 @@ enum CommentMarkType {
   SOLVED
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum SubscriptionSource {
+  DEMO
+  PAYSTACK
+  MANUAL
+}
+
 model User {
   id              String   @id @default(cuid())
   email           String   @unique
@@ -103,6 +115,7 @@ model User {
   commentMarks    CommentMark[]
   tipServings     UserTipServing[]
   dailyTipsCaches UserDailyTipsCache[]
+  subscriptions   UserSubscription[]
 
   @@index([email])
   @@map("users")
@@ -476,4 +489,45 @@ model UserDailyTipsCache {
   @@unique([userId, date])
   @@index([userId])
   @@map("user_daily_tips_cache")
+}
+
+model SubscriptionPlan {
+  id              String  @id @default(cuid())
+  code            String  @unique // FREE | FARMER_MONTHLY
+  name            String
+  priceGhs        Decimal @default(0) // 50 for Farmer; Paystack amount = priceGhs * 100 (pesewas)
+  durationDays    Int     @default(30) // informational; real end date uses same-day-next-month logic
+  scanLimit       Int? // null = unlimited (paid); 5 for FREE
+  hasCropInsights Boolean @default(false)
+  isActive        Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions UserSubscription[]
+
+  @@map("subscription_plans")
+}
+
+model UserSubscription {
+  id          String             @id @default(cuid())
+  userId      String
+  planId      String
+  status      SubscriptionStatus @default(ACTIVE)
+  startsAt    DateTime
+  endsAt      DateTime
+  source      SubscriptionSource @default(DEMO)
+  externalRef String? // future Paystack reference
+  amountGhs   Decimal? // stored amount at activation (e.g. 50)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([endsAt])
+  @@map("user_subscriptions")
 }
