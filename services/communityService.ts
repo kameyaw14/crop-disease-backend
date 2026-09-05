@@ -8,6 +8,7 @@ import {
   createReplySchema,
   getCommentsSchema,
   getFollowersSchema,
+  getFollowingSchema,
   getMyPostsSchema,
   getPostLikesSchema,
   getPostsSchema,
