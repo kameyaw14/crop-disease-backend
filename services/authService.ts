@@ -108,28 +108,37 @@ export const authService = {
   },
 
   async getMe(userId: string) {
-    const [user, unreadNotificationsCount] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-          profile: true,
-          _count: {
-            select: {
-              userPreferredCrops: true,
-              detections: true,
-              notifications: true,
+    const [user, unreadNotificationsCount, followersCount, followingCount] =
+      await Promise.all([
+        prisma.user.findUnique({
+          where: { id: userId },
+          include: {
+            profile: true,
+            _count: {
+              select: {
+                userPreferredCrops: true,
+                detections: true,
+                notifications: true,
+              },
             },
           },
-        },
-        omit: { password: true },
-      }),
-      prisma.notification.count({
-        where: {
-          userId,
-          isRead: false,
-        },
-      }),
-    ]);
+          omit: { password: true },
+        }),
+        prisma.notification.count({
+          where: {
+            userId,
+            isRead: false,
+          },
+        }),
+        //  people who follow this user
+        prisma.follow.count({
+          where: { followingId: userId },
+        }),
+        //  people this user follows
+        prisma.follow.count({
+          where: { followerId: userId },
+        }),
+      ]);
 
     if (!user) {
       return null;
@@ -142,6 +151,8 @@ export const authService = {
       detectionsCount: _count.detections,
       notificationsCount: _count.notifications,
       unreadNotificationsCount,
+      followersCount,
+      followingCount,
     };
 
     return {
