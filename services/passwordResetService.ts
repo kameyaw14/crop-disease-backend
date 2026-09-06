@@ -49,6 +49,7 @@ export async function issueAndSendOtp(params: {
       to: phoneNumber,
       message: `Your Crop Guardian verification code is ${otp}. It expires in ${OTP_EXPIRY_MINUTES} minutes. Do not share this code.`,
     });
+    console.log("OTP sent 2");
     return { otpSent: true };
   } catch (smsError: any) {
     console.error(
@@ -88,7 +89,7 @@ export const passwordResetService = {
       userId: user.id,
       phoneNumber: normalizedPhone,
     });
-
+    console.log("OTP sent 3");
     // still return a generic success message for security,
     // but log whether Arkesel actually accepted the message
     if (!otpSent) {
