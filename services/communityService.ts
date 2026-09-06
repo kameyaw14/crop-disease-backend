@@ -1805,4 +1805,397 @@ export const communityService = {
       },
     };
   },
+
+    async getFollowingPosts(userId: string, query: any) {
+    const validated: GetPostsInput = getPostsSchema.parse(query);
+
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 10, 20);
+    const skip = (page - 1) * limit;
+
+    // Get who I follow + which tags I follow
+    const [followedUsers, followedTags] = await Promise.all([
+      prisma.follow.findMany({
+        where: { followerId: userId },
+        select: { followingId: true },
+      }),
+      prisma.tagFollow.findMany({
+        where: { userId },
+        select: { tagId: true },
+      }),
+    ]);
+
+    const followedUserIds = followedUsers.map((f) => f.followingId);
+    const followedTagIds = followedTags.map((t) => t.tagId);
+
+    // Base OR: author is followed OR post has a followed tag
+    // Own posts are included automatically if user follows themselves is false,
+    // but we still allow own posts when they match via tags or if they appear in the graph.
+    // User asked to include own posts when they match the OR condition.
+    const where: any = {
+      OR: [
+        ...(followedUserIds.length > 0
+          ? [{ userId: { in: followedUserIds } }]
+          : []),
+        ...(followedTagIds.length > 0
+          ? [{ tags: { some: { tagId: { in: followedTagIds } } } }]
+          : []),
+      ],
+    };
+
+    // If user follows nobody and no tags, return empty early
+    if (where.OR.length === 0) {
+      return {
+        success: true,
+        message:
+          "You're not following anyone or any tags yet. Follow farmers or tags to see their posts here.",
+        data: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+        },
+      };
+    }
+
+    // Apply the same filters as Latest
+    if (validated.region) {
+      where.region = validated.region;
+    }
+    if (validated.cropType) {
+      where.cropType = validated.cropType;
+    }
+    if (validated.q) {
+      where.content = {
+        contains: validated.q,
+        mode: "insensitive",
+      };
+    }
+    if (validated.tag) {
+      // Extra tag filter on top of followed tags
+      where.AND = [
+        ...(where.AND || []),
+        {
+          tags: {
+            some: {
+              tag: {
+                slug: validated.tag,
+              },
+            },
+          },
+        },
+      ];
+    }
+
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          user: {
+            select: {
+              id: true,
+              profile: {
+                select: {
+                  fullName: true,
+                  avatarUrl: true,
+                  reputationScore: true,
+                },
+              },
+            },
+          },
+          tags: {
+            include: {
+              tag: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.post.count({ where }),
+    ]);
+
+    // Attach isLiked / isSaved / isFollowing (same pattern as getPosts)
+    let likedSet = new Set<string>();
+    let savedSet = new Set<string>();
+    let followingSet = new Set<string>();
+
+    if (posts.length > 0) {
+      const postIds = posts.map((p) => p.id);
+      const authorIds = [...new Set(posts.map((p) => p.user.id))];
+
+      const [likes, saves, follows] = await Promise.all([
+        prisma.postLike.findMany({
+          where: {
+            userId,
+            postId: { in: postIds },
+          },
+          select: { postId: true },
+        }),
+        prisma.savedPost.findMany({
+          where: {
+            userId,
+            postId: { in: postIds },
+          },
+          select: { postId: true },
+        }),
+        prisma.follow.findMany({
+          where: {
+            followerId: userId,
+            followingId: { in: authorIds },
+          },
+          select: { followingId: true },
+        }),
+      ]);
+
+      likedSet = new Set(likes.map((l) => l.postId));
+      savedSet = new Set(saves.map((s) => s.postId));
+      followingSet = new Set(follows.map((f) => f.followingId));
+    }
+
+    const data = posts.map((post) => ({
+      id: post.id,
+      content: post.content,
+      imageUrls: post.imageUrls,
+      region: post.region,
+      cropType: post.cropType,
+      likesCount: post.likesCount,
+      commentsCount: post.commentsCount,
+      savesCount: post.savesCount,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      author: {
+        id: post.user.id,
+        fullName: post.user.profile?.fullName ?? "Unknown",
+        avatarUrl: post.user.profile?.avatarUrl ?? null,
+        reputationScore: post.user.profile?.reputationScore ?? 0,
+        isFollowing: followingSet.has(post.user.id),
+      },
+      tags: post.tags.map((pt) => ({
+        id: pt.tag.id,
+        name: pt.tag.name,
+        slug: pt.tag.slug,
+      })),
+      isLiked: likedSet.has(post.id),
+      isSaved: savedSet.has(post.id),
+    }));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? "Following feed retrieved successfully"
+          : "No posts from people or tags you follow yet.",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+    };
+  },
+  async getPopularPosts(query: any, currentUserId?: string) {
+    const validated: GetPostsInput = getPostsSchema.parse(query);
+
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 10, 20);
+    const skip = (page - 1) * limit;
+
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // Build shared filters (region, crop, search, tag)
+    const baseWhere: any = {};
+
+    if (validated.region) {
+      baseWhere.region = validated.region;
+    }
+    if (validated.cropType) {
+      baseWhere.cropType = validated.cropType;
+    }
+    if (validated.q) {
+      baseWhere.content = {
+        contains: validated.q,
+        mode: "insensitive",
+      };
+    }
+    if (validated.tag) {
+      baseWhere.tags = {
+        some: {
+          tag: {
+            slug: validated.tag,
+          },
+        },
+      };
+    }
+
+    // First try last 7 days
+    const sevenDayWhere = {
+      ...baseWhere,
+      createdAt: { gte: sevenDaysAgo },
+    };
+
+    const sevenDayCount = await prisma.post.count({ where: sevenDayWhere });
+
+    // Fall back to 30 days if fewer than 5 posts in the 7-day window
+    const useThirtyDayFallback = sevenDayCount < 5;
+    const dateWhere = useThirtyDayFallback
+      ? { createdAt: { gte: thirtyDaysAgo } }
+      : { createdAt: { gte: sevenDaysAgo } };
+
+    const where = {
+      ...baseWhere,
+      ...dateWhere,
+    };
+
+    // Fetch candidates for scoring. Cap at a reasonable number so we don't load the whole table.
+    // For a final-year project this is safe; we score then paginate in memory.
+    const candidates = await prisma.post.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: 200, // safety cap
+      include: {
+        user: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                fullName: true,
+                avatarUrl: true,
+                reputationScore: true,
+              },
+            },
+          },
+        },
+        tags: {
+          include: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Score: likes×2 + comments×3 + saves×1.5
+    const scored = candidates
+      .map((post) => ({
+        post,
+        score:
+          post.likesCount * 2 +
+          post.commentsCount * 3 +
+          post.savesCount * 1.5,
+      }))
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return b.post.createdAt.getTime() - a.post.createdAt.getTime();
+      });
+
+    const total = scored.length;
+    const pageSlice = scored.slice(skip, skip + limit);
+    const posts = pageSlice.map((s) => s.post);
+
+    let likedSet = new Set<string>();
+    let savedSet = new Set<string>();
+    let followingSet = new Set<string>();
+
+    if (currentUserId && posts.length > 0) {
+      const postIds = posts.map((p) => p.id);
+      const authorIds = [...new Set(posts.map((p) => p.user.id))];
+
+      const [likes, saves, follows] = await Promise.all([
+        prisma.postLike.findMany({
+          where: {
+            userId: currentUserId,
+            postId: { in: postIds },
+          },
+          select: { postId: true },
+        }),
+        prisma.savedPost.findMany({
+          where: {
+            userId: currentUserId,
+            postId: { in: postIds },
+          },
+          select: { postId: true },
+        }),
+        prisma.follow.findMany({
+          where: {
+            followerId: currentUserId,
+            followingId: { in: authorIds },
+          },
+          select: { followingId: true },
+        }),
+      ]);
+
+      likedSet = new Set(likes.map((l) => l.postId));
+      savedSet = new Set(saves.map((s) => s.postId));
+      followingSet = new Set(follows.map((f) => f.followingId));
+    }
+
+    const data = posts.map((post) => ({
+      id: post.id,
+      content: post.content,
+      imageUrls: post.imageUrls,
+      region: post.region,
+      cropType: post.cropType,
+      likesCount: post.likesCount,
+      commentsCount: post.commentsCount,
+      savesCount: post.savesCount,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      author: {
+        id: post.user.id,
+        fullName: post.user.profile?.fullName ?? "Unknown",
+        avatarUrl: post.user.profile?.avatarUrl ?? null,
+        reputationScore: post.user.profile?.reputationScore ?? 0,
+        ...(currentUserId && {
+          isFollowing: followingSet.has(post.user.id),
+        }),
+      },
+      tags: post.tags.map((pt) => ({
+        id: pt.tag.id,
+        name: pt.tag.name,
+        slug: pt.tag.slug,
+      })),
+      ...(currentUserId && {
+        isLiked: likedSet.has(post.id),
+        isSaved: savedSet.has(post.id),
+      }),
+    }));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? useThirtyDayFallback
+            ? "Popular posts (last 30 days) retrieved successfully"
+            : "Popular posts this week retrieved successfully"
+          : "Not enough activity yet. Be the first to share!",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+      // helpful for debugging / UI if you want to show "showing last 30 days"
+      meta: {
+        windowDays: useThirtyDayFallback ? 30 : 7,
+      },
+    };
+  },
 };

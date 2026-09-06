@@ -685,12 +685,55 @@ export const communityController = {
       });
     }
   },
+
+  async getFollowingPosts(req: Request, res: Response) {
+    try {
+      const userId = req.user!.userId;
+
+      const result = await communityService.getFollowingPosts(
+        userId,
+        req.query,
+      );
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getFollowingPosts:",
+        error.message || "getFollowingPosts failed",
+      );
+      res.status(400).json({
+        success: false,
+        message:
+          error.message ||
+          "Failed to retrieve following feed. Please try again.",
+      });
+    }
+  },
+  async getPopularPosts(req: Request, res: Response) {
+    try {
+      const currentUserId = req.user?.userId;
+
+      const result = await communityService.getPopularPosts(
+        req.query,
+        currentUserId,
+      );
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getPopularPosts:",
+        error.message || "getPopularPosts failed",
+      );
+      res.status(400).json({
+        success: false,
+        message:
+          error.message ||
+          "Failed to retrieve popular posts. Please try again.",
+      });
+    }
+  },
 };
 
-// small helper (not part of the exported object) that maps a
-// markComment failure message to the right HTTP status code. Declaring it as
-// a plain function outside the object avoids repeating this if/else chain in
-// both markCommentHelpful and markCommentSolved.
 function getMarkErrorStatus(message: string): number {
   if (message === "Comment not found") return 404;
   if (message.startsWith("Only the post author")) return 403;

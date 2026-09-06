@@ -21,6 +21,18 @@ communityRouter.get(
   communityController.getPosts,
 );
 
+communityRouter.get(
+  "/posts/following",
+  protect,
+  communityController.getFollowingPosts,
+);
+
+communityRouter.get(
+  "/posts/popular",
+  optionalAuth,
+  communityController.getPopularPosts,
+);
+
 communityRouter.get("/saved", protect, communityController.getSavedPosts);
 
 communityRouter.get(
