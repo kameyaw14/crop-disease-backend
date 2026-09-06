@@ -10,17 +10,27 @@ import {
 } from "../schema/authSchema.js";
 import bcrypt from "bcrypt";
 import { jwtUtils } from "../utils/jwtUtils.js";
+import { normalizePhoneNumber } from "../utils/phoneUtils.js";
+import { issueAndSendOtp } from "./passwordResetService.js";
 
 export const authService = {
   async register(data: any) {
     const validated = registerSchema.parse(data);
+
+    const normalizedPhone = normalizePhoneNumber(validated.phoneNumber);
+    if (!normalizedPhone) {
+      throw new Error(
+        "Please enter a valid Ghana phone number (e.g. 0244123456 or +233244123456)",
+      );
+    }
 
     // Check if user exists
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
           { email: validated.email },
-          { phoneNumber: validated.phoneNumber },
+          // lookup by normalized phone so duplicates match correctly
+          { phoneNumber: normalizedPhone },
         ],
       },
     });
@@ -39,7 +49,8 @@ export const authService = {
         email: validated.email,
         password: hashedPassword,
         role: validated.role as any,
-        phoneNumber: validated.phoneNumber,
+        // store canonical +233XXXXXXXXX so forgot-password lookup always hits
+        phoneNumber: normalizedPhone,
         isOnboarded: true,
       },
     });
@@ -71,8 +82,19 @@ export const authService = {
       role: user.role,
     });
 
-    // Simulate email verification
-    console.log(`📧 Verification email would be sent to: ${user.email}`);
+    // send verification OTP via Arkesel right after account creation
+    // instead of relying on a fragile second frontend call to forgot-password
+    const { otpSent } = await issueAndSendOtp({
+      userId: user.id,
+      phoneNumber: normalizedPhone,
+    });
+
+    if (!otpSent) {
+      //  log clearly so Render logs show Arkesel failures after register
+      console.warn(
+        `⚠️ Account created for ${normalizedPhone} but verification SMS was not sent`,
+      );
+    }
 
     return {
       user: {
@@ -83,6 +105,8 @@ export const authService = {
         isEmailVerified: user.isEmailVerified,
       },
       token,
+      //  frontend can skip a second forgot-password call when true
+      otpSent,
     };
   },
 

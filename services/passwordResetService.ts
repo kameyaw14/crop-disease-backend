@@ -15,12 +15,54 @@ import { smsService } from "./smsService.js";
 // How long an OTP stays valid after it is issued
 const OTP_EXPIRY_MINUTES = 10;
 
+export async function issueAndSendOtp(params: {
+  userId: string;
+  phoneNumber: string;
+}): Promise<{ otpSent: boolean }> {
+  const { userId, phoneNumber } = params;
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  const otpHash = await bcrypt.hash(otp, 12);
+
+  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+  await prisma.passwordResetOTP.updateMany({
+    where: { userId, isUsed: false },
+    data: { isUsed: true },
+  });
+
+  await prisma.passwordResetOTP.create({
+    data: {
+      userId,
+      otpHash,
+      expiresAt,
+    },
+  });
+
+  console.log(
+    `📱 OTP for ${phoneNumber}: ${otp} (expires in ${OTP_EXPIRY_MINUTES} min)`,
+  );
+
+  try {
+    await smsService.sendSms({
+      to: phoneNumber,
+      message: `Your Crop Guardian verification code is ${otp}. It expires in ${OTP_EXPIRY_MINUTES} minutes. Do not share this code.`,
+    });
+    return { otpSent: true };
+  } catch (smsError: any) {
+    console.error(
+      "Failed to send OTP SMS via Arkesel:",
+      smsError?.message || smsError,
+    );
+    return { otpSent: false };
+  }
+}
+
 export const passwordResetService = {
   async forgotPassword(data: any) {
     const validated = forgotPasswordSchema.parse(data);
 
-    // normalizePhoneNumber now returns +233XXXXXXXXX (international),
-    // which matches exactly how phoneNumber is stored in the DB.
     const normalizedPhone = normalizePhoneNumber(validated.phoneNumber);
 
     if (!normalizedPhone) {
@@ -34,52 +76,25 @@ export const passwordResetService = {
       where: { phoneNumber: normalizedPhone },
     });
 
-    // SECURITY: return the same success shape whether or not the user
-    // exists, so this endpoint cannot be used to enumerate registered numbers.
     if (!user) {
       return {
         success: true,
         message: "If this number is registered, an OTP has been sent.",
-        // message: "No User",
       };
     }
 
-    // Generate a 6-digit numeric OTP, zero-padded (e.g. "048213")
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Hash the OTP before storing — same pattern as password hashing.
-    // A database leak will not expose usable raw OTPs.
-    const otpHash = await bcrypt.hash(otp, 12);
-
-    const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
-
-    // Invalidate all previous unused OTPs for this user so only the
-    // newest one can ever succeed.
-    await prisma.passwordResetOTP.updateMany({
-      where: { userId: user.id, isUsed: false },
-      data: { isUsed: true },
+    // use shared helper instead of inlined OTP + SMS logic
+    const { otpSent } = await issueAndSendOtp({
+      userId: user.id,
+      phoneNumber: normalizedPhone,
     });
 
-    await prisma.passwordResetOTP.create({
-      data: {
-        userId: user.id,
-        otpHash,
-        expiresAt,
-      },
-    });
-
-    // OTP is logged to server console only during development.
-    console.log(
-      `📱 OTP for ${normalizedPhone}: ${otp} (expires in ${OTP_EXPIRY_MINUTES} min)`,
-    );
-
-    try {
-      await smsService.sendSms({
-        to: normalizedPhone,
-        message: `Your Crop Guardian verification code is ${otp}. It expires in ${OTP_EXPIRY_MINUTES} minutes. Do not share this code.`,
-      });
-    } catch (smsError: any) {
-      console.error("Failed to send OTP SMS via Arkesel:", smsError.message);
+    // still return a generic success message for security,
+    // but log whether Arkesel actually accepted the message
+    if (!otpSent) {
+      console.warn(
+        `⚠️ OTP created for ${normalizedPhone} but Arkesel send failed`,
+      );
     }
 
     return {
@@ -91,7 +106,6 @@ export const passwordResetService = {
   async verifyResetOtp(data: any) {
     const validated = verifyResetOtpSchema.parse(data);
 
-    // Must normalize here too, for the same reason as step 1
     const normalizedPhone = normalizePhoneNumber(validated.phoneNumber);
 
     if (!normalizedPhone) {
@@ -102,12 +116,10 @@ export const passwordResetService = {
       where: { phoneNumber: normalizedPhone },
     });
 
-    // Generic error — intentionally doesn't confirm whether the number exists
     if (!user) {
       throw new Error("Invalid or expired OTP");
     }
 
-    // Find the most recent unused, non-expired OTP record for this user
     const otpRecord = await prisma.passwordResetOTP.findFirst({
       where: {
         userId: user.id,
@@ -121,18 +133,12 @@ export const passwordResetService = {
       throw new Error("Invalid or expired OTP");
     }
 
-    // Compare the submitted raw OTP against the stored hash
     const isMatch = await bcrypt.compare(validated.otp, otpRecord.otpHash);
 
     if (!isMatch) {
       throw new Error("Invalid or expired OTP");
     }
 
-    // Mark this OTP record as used — prevents replay attacks where the
-    // same OTP code is submitted a second time after a successful verify.
-    // Also flip isEmailVerified to true since the user has now proven
-    // ownership of their registered contact number.
-    // `Promise.all` runs both writes in parallel since they are independent.
     await Promise.all([
       prisma.passwordResetOTP.update({
         where: { id: otpRecord.id },
@@ -140,11 +146,10 @@ export const passwordResetService = {
       }),
       prisma.user.update({
         where: { id: user.id },
-        data: { isEmailVerified: true }, // UPDATED: mark account as verified on successful OTP
+        data: { isEmailVerified: true },
       }),
     ]);
 
-    // Issue the short-lived reset token required by step 3
     const resetToken = jwtUtils.generateResetToken({ userId: user.id });
 
     return {
@@ -161,7 +166,6 @@ export const passwordResetService = {
     try {
       decoded = jwtUtils.verifyResetToken(validated.resetToken);
     } catch (error) {
-      // Covers both expired tokens and tampered/wrong-type tokens
       throw new Error("Reset session expired. Please request a new OTP.");
     }
 
