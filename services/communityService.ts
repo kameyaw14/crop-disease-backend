@@ -2198,4 +2198,223 @@ export const communityService = {
       },
     };
   },
+
+    async getUserProfile(targetUserId: string, currentUserId?: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: {
+        id: true,
+        role: true,
+        profile: {
+          select: {
+            fullName: true,
+            avatarUrl: true,
+            preferredCrops: true,
+            reputationScore: true,
+            helpfulAnswersCount: true,
+            solvedAnswersCount: true,
+          },
+        },
+        _count: {
+          select: {
+            posts: true,
+            followers: true, // UserFollowers relation name in schema is followers
+            following: true, // UserFollowing
+          },
+        },
+      },
+    });
+
+    if (!user || !user.profile) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    let isFollowing = false;
+    if (currentUserId && currentUserId !== targetUserId) {
+      const follow = await prisma.follow.findUnique({
+        where: {
+          followerId_followingId: {
+            followerId: currentUserId,
+            followingId: targetUserId,
+          },
+        },
+      });
+      isFollowing = !!follow;
+    }
+
+    const isSelf = currentUserId === targetUserId;
+
+    return {
+      success: true,
+      message: "User profile retrieved successfully",
+      data: {
+        id: user.id,
+        role: user.role,
+        profile: {
+          fullName: user.profile.fullName,
+          avatarUrl: user.profile.avatarUrl,
+          preferredCrops: user.profile.preferredCrops,
+          reputationScore: user.profile.reputationScore ?? 0,
+          helpfulAnswersCount: user.profile.helpfulAnswersCount ?? 0,
+          solvedAnswersCount: user.profile.solvedAnswersCount ?? 0,
+        },
+        stats: {
+          postsCount: user._count.posts,
+          followersCount: user._count.followers,
+          followingCount: user._count.following,
+        },
+        ...(currentUserId && {
+          isFollowing,
+          isSelf,
+        }),
+      },
+    };
+  },
+
+   async getUserPosts(
+    targetUserId: string,
+    query: any,
+    currentUserId?: string,
+  ) {
+    const validated = getUserPostsSchema.parse(query);
+
+    const page = validated.page || 1;
+    const limit = Math.min(validated.limit || 10, 20);
+    const skip = (page - 1) * limit;
+
+    const target = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { id: true },
+    });
+
+    if (!target) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    const where = { userId: targetUserId };
+
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          user: {
+            select: {
+              id: true,
+              profile: {
+                select: {
+                  fullName: true,
+                  avatarUrl: true,
+                  reputationScore: true,
+                },
+              },
+            },
+          },
+          tags: {
+            include: {
+              tag: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.post.count({ where }),
+    ]);
+
+    let likedSet = new Set<string>();
+    let savedSet = new Set<string>();
+    let followingSet = new Set<string>();
+
+    if (currentUserId && posts.length > 0) {
+      const postIds = posts.map((p) => p.id);
+      const authorIds = [...new Set(posts.map((p) => p.user.id))];
+
+      const [likes, saves, follows] = await Promise.all([
+        prisma.postLike.findMany({
+          where: {
+            userId: currentUserId,
+            postId: { in: postIds },
+          },
+          select: { postId: true },
+        }),
+        prisma.savedPost.findMany({
+          where: {
+            userId: currentUserId,
+            postId: { in: postIds },
+          },
+          select: { postId: true },
+        }),
+        prisma.follow.findMany({
+          where: {
+            followerId: currentUserId,
+            followingId: { in: authorIds },
+          },
+          select: { followingId: true },
+        }),
+      ]);
+
+      likedSet = new Set(likes.map((l) => l.postId));
+      savedSet = new Set(saves.map((s) => s.postId));
+      followingSet = new Set(follows.map((f) => f.followingId));
+    }
+
+    const data = posts.map((post) => ({
+      id: post.id,
+      content: post.content,
+      imageUrls: post.imageUrls,
+      region: post.region,
+      cropType: post.cropType,
+      likesCount: post.likesCount,
+      commentsCount: post.commentsCount,
+      savesCount: post.savesCount,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      author: {
+        id: post.user.id,
+        fullName: post.user.profile?.fullName ?? "Unknown",
+        avatarUrl: post.user.profile?.avatarUrl ?? null,
+        reputationScore: post.user.profile?.reputationScore ?? 0,
+        ...(currentUserId && {
+          isFollowing: followingSet.has(post.user.id),
+        }),
+      },
+      tags: post.tags.map((pt) => ({
+        id: pt.tag.id,
+        name: pt.tag.name,
+        slug: pt.tag.slug,
+      })),
+      ...(currentUserId && {
+        isLiked: likedSet.has(post.id),
+        isSaved: savedSet.has(post.id),
+      }),
+    }));
+
+    return {
+      success: true,
+      message:
+        total > 0
+          ? "User posts retrieved successfully"
+          : "This user has not shared any posts yet",
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+    };
+  },
 };

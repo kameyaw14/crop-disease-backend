@@ -41,8 +41,6 @@ communityRouter.get(
   communityController.getPostById,
 );
 
-communityRouter.get("/users/me/posts", protect, communityController.getMyPosts);
-
 communityRouter.delete(
   "/posts/:postId",
   protect,
@@ -117,6 +115,20 @@ communityRouter.delete(
   "/posts/:postId/save",
   protect,
   communityController.unsavePost,
+);
+
+communityRouter.get("/users/me/posts", protect, communityController.getMyPosts);
+
+communityRouter.get(
+  "/users/:userId",
+  optionalAuth,
+  communityController.getUserProfile,
+);
+
+communityRouter.get(
+  "/users/:userId/posts",
+  optionalAuth,
+  communityController.getUserPosts,
 );
 
 communityRouter.post(

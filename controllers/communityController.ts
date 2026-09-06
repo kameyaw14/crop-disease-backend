@@ -709,6 +709,7 @@ export const communityController = {
       });
     }
   },
+
   async getPopularPosts(req: Request, res: Response) {
     try {
       const currentUserId = req.user?.userId;
@@ -729,6 +730,62 @@ export const communityController = {
         message:
           error.message ||
           "Failed to retrieve popular posts. Please try again.",
+      });
+    }
+  },
+
+  async getUserProfile(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+      const currentUserId = req.user?.userId;
+
+      const result = await communityService.getUserProfile(
+        userId as string,
+        currentUserId,
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getUserProfile:",
+        error.message || "getUserProfile failed",
+      );
+      res.status(400).json({
+        success: false,
+        message:
+          error.message || "Failed to retrieve user profile. Please try again.",
+      });
+    }
+  },
+  async getUserPosts(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+      const currentUserId = req.user?.userId;
+
+      const result = await communityService.getUserPosts(
+        userId as string,
+        req.query,
+        currentUserId,
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(
+        "❗Error in getUserPosts:",
+        error.message || "getUserPosts failed",
+      );
+      res.status(400).json({
+        success: false,
+        message:
+          error.message || "Failed to retrieve user posts. Please try again.",
       });
     }
   },

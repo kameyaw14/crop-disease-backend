@@ -267,3 +267,26 @@ export type GetFollowingInput = PaginationInput;
 
 export const getMyFollowingTagsSchema = paginationSchema;
 export type GetMyFollowingTagsInput = PaginationInput;
+
+export const getUserPostsSchema = z.object({
+  page: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().min(1, "Page can't be less than 1"))
+    .optional()
+    .default("1"),
+  limit: z
+    .string()
+    .transform(Number)
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1, "Limit can't be less than 1")
+        .max(20, "Limit can't be more than 20"),
+    )
+    .optional()
+    .default("10"),
+});
+
+export type GetUserPostsInput = z.infer<typeof getUserPostsSchema>;
