@@ -88,6 +88,7 @@ export const authService = {
       userId: user.id,
       phoneNumber: normalizedPhone,
     });
+    console.log("OTP sent")
 
     if (!otpSent) {
       //  log clearly so Render logs show Arkesel failures after register
