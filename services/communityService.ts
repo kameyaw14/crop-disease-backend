@@ -13,6 +13,7 @@ import {
   getPostLikesSchema,
   getPostsSchema,
   getSavedPostsSchema,
+  getUserPostsSchema,
   type CreateCommentInput,
   type CreatePostInput,
   type CreateReplyInput,
