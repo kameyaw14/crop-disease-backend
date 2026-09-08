@@ -10,7 +10,7 @@ interface SendSmsParams {
 export const smsService = {
 
   async sendSms({ to, message }: SendSmsParams): Promise<void> {
-    // NEW ADDITION: Guard - never send if API key is missing (should already be caught by checkEnv)
+    //Guard - never send if API key is missing (should already be caught by checkEnv)
     if (!env.ARKESEL_API_KEY) {
       throw new Error("ARKESEL_API_KEY is not configured");
     }
@@ -18,7 +18,7 @@ export const smsService = {
     const url = "https://sms.arkesel.com/api/v2/sms/send";
 
     const payload = {
-      sender: "CropDoc", // NEW ADDITION: Registered Sender ID
+      sender: "FarmDoc", //Registered Sender ID
       message,
       recipients: [to], // Arkesel expects an array
     };
@@ -26,7 +26,7 @@ export const smsService = {
     const response = await fetch(url, {
       method: "POST",
       headers: {
-        "api-key": env.ARKESEL_API_KEY, // NEW ADDITION: Authentication header required by Arkesel
+        "api-key": env.ARKESEL_API_KEY, //Authentication header required by Arkesel
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
@@ -34,7 +34,7 @@ export const smsService = {
 
     const data = await response.json();
 
-    // NEW ADDITION: Basic success check (Arkesel returns status: "success" on success)
+    //Basic success check (Arkesel returns status: "success" on success)
     if (!response.ok || data.status !== "success") {
       console.error("Arkesel SMS error:", data);
       // We throw so the caller can decide what to do (we still return generic success to user for security)

@@ -1,8 +1,5 @@
 // utils/prompts.ts
-/**
- * Generates system prompt based on user's selected language
- * Explanatory fields will be in Twi when language="tw", but technical names stay in English
- */
+
 export const getDetectionSystemPrompt = (language: string = "en"): string => {
   const basePrompt = `You are a senior Ghanaian agronomist with 20+ years of field experience working with farmers in Ghana.`;
 
@@ -37,9 +34,7 @@ export const getFreeScanSystemPrompt = (language: string = "en"): string => {
          Example: "diseaseName" must remain "Common Rust (Puccinia sorghi)" even when other fields are in Twi.`
       : `Respond in clear, simple, and professional English.`;
 
-  // NEW ADDITION: Supported enum values list is embedded in the prompt so Gemini
-  // knows exactly what values to use when filling "detectedCropEnum".
-  // This prevents Gemini from inventing values not in our Prisma enum.
+
   const supportedCrops = [
     "MAIZE",
     "CASSAVA",

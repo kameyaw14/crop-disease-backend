@@ -265,9 +265,7 @@ export async function detectDisease(
   }
 
   // ─── LAYER 2: pHash Similarity Cache
-  // FREE scans skip Layer 2 entirely.
-  // Reason: Layer 2 filters candidates by cropType, but for FREE scans we don't
-  // know the crop yet — scanning all crop types would be noisy and expensive.
+
   if (!isDemoMode && !isFreeScan && imagePerceptualHash) {
     console.log("🔎 Layer 1 missed. Checking Layer 2 (pHash similarity)...");
 
