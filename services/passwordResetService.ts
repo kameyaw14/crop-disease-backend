@@ -47,7 +47,7 @@ export async function issueAndSendOtp(params: {
   try {
     await smsService.sendSms({
       to: phoneNumber,
-      message: `Your Crop Guardian verification code is ${otp}. It expires in ${OTP_EXPIRY_MINUTES} minutes. Do not share this code.`,
+      message: `Your FarmDoc verification code is ${otp}. It expires in ${OTP_EXPIRY_MINUTES} minutes. Do not share this code.`,
     });
     console.log("OTP sent 2");
     return { otpSent: true };
