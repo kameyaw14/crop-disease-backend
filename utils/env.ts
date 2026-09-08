@@ -65,6 +65,6 @@ export const env = {
   ARKESEL_API_KEY: process.env.ARKESEL_API_KEY,
 
   //   //paystack
-  //   PAYSTACK_TEST_SECRET_KEY: process.env.PAYSTACK_TEST_SECRET_KEY,
-  //   PAYSTACK_TEST_PUBLIC_KEY: process.env.PAYSTACK_TEST_PUBLIC_KEY,
+  PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
+  PAYSTACK_PUBLIC_KEY: process.env.PAYSTACK_PUBLIC_KEY,
 } as const;

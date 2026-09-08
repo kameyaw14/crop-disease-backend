@@ -244,12 +244,19 @@ export const subscriptionService = {
     };
   },
 
-  //  Hook for future Paystack success — same activation path, different source
   async activateFromPayment(params: {
     userId: string;
     reference: string;
     amountGhs: number;
   }) {
+    const alreadyUsed = await prisma.userSubscription.findFirst({
+      where: { externalRef: params.reference },
+      include: { plan: true },
+    });
+    if (alreadyUsed) {
+      return alreadyUsed;
+    }
+
     const existing = await this.getActivePaidSubscription(params.userId);
     if (existing) {
       throw new Error(
@@ -260,7 +267,13 @@ export const subscriptionService = {
     const plan = await prisma.subscriptionPlan.findUnique({
       where: { code: FARMER_PLAN_CODE },
     });
-    if (!plan) throw new Error("Plan not found");
+    if (!plan || !plan.isActive) {
+      throw new Error("Farmer Monthly plan is not available.");
+    }
+
+    if (params.amountGhs !== 50) {
+      throw new Error("Payment amount does not match Farmer Monthly price.");
+    }
 
     const startsAt = new Date();
     const endsAt = addOneCalendarMonthClamped(startsAt);

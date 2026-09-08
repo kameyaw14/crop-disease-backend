@@ -19,6 +19,7 @@ import { startAlertCron } from "./utils/cron.js";
 import communityRouter from "./routes/communityRoutes.js";
 import tipRouter from "./routes/tipRoutes.js";
 import subscriptionRouter from "./routes/subscriptionRoutes.js";
+import { subscriptionController } from "./controllers/subscriptionController.js";
 // import { testTtsController } from "./contollers/testController.js";
 
 checkRequiredEnv();
@@ -62,6 +63,13 @@ const corsOptions = {
 
 app.use(helmet());
 app.use(cors(corsOptions));
+
+app.post(
+  "/api/subscribe/webhook",
+  express.raw({ type: "application/json" }),
+  subscriptionController.webhook,
+);
+
 app.use(express.json());
 
 const httpServer = http.createServer(app);

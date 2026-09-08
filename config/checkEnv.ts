@@ -31,6 +31,8 @@ const requiredVars = [
   "MAX_IMAGE_SIZE_MB",
   "GHANANLP_API_KEY",
   "ARKESEL_API_KEY",
+  "PAYSTACK_SECRET_KEY",
+  "PAYSTACK_PUBLIC_KEY",
 ];
 
 export function checkRequiredEnv() {
